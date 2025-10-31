@@ -1295,4 +1295,104 @@ header {
     background: var(--hover-color);
 }
 
-/* أنم
+/* أنماط تعديل التعليق */
+.edit-comment-input {
+    width: 100%;
+    min-height: 80px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    resize: vertical;
+    font-size: 1rem;
+}
+
+.edit-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.edit-char-count {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+/* تحسينات للوضع الفاتح */
+:root[data-theme="light"] .auth-input,
+:root[data-theme="light"] .comment-input,
+:root[data-theme="light"] .search-input,
+:root[data-theme="light"] .reply-input,
+:root[data-theme="light"] .edit-comment-input {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    color: #333333;
+}
+
+:root[data-theme="light"] .auth-input:focus,
+:root[data-theme="light"] .comment-input:focus,
+:root[data-theme="light"] .search-input:focus,
+:root[data-theme="light"] .reply-input:focus,
+:root[data-theme="light"] .edit-comment-input:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+/* تحسينات الاستجابة للشاشات الصغيرة جداً */
+@media (max-width: 480px) {
+    .manga-detail {
+        flex-direction: column;
+        padding: 15px;
+        gap: 20px;
+    }
+    
+    .manga-detail-thumbnail {
+        flex: 0 0 auto;
+    }
+    
+    .manga-detail-title {
+        font-size: 1.6rem;
+    }
+    
+    .chapter-title {
+        font-size: 1.5rem;
+    }
+    
+    .auth-modal-content {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .comment-actions {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .comment-action {
+        font-size: 0.8rem;
+    }
+    
+    .chapter-navigation {
+        flex-direction: column;
+    }
+    
+    .manga-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 15px;
+    }
+    
+    .manga-thumbnail {
+        height: 200px;
+    }
+    
+    .drawer {
+        width: 280px;
+    }
+}
