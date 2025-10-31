@@ -1,4 +1,4 @@
-// إدارة قاعدة البيانات
+// إدارة قاعدة البيانات (تحديث)
 class DatabaseManager {
     constructor() {
         this.database = firebase.database();
@@ -57,6 +57,45 @@ class DatabaseManager {
             
             return { success: true };
         } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+    
+    // إضافة إشعار للمستخدم
+    async addNotification(userId, notification) {
+        try {
+            const notificationId = Date.now().toString();
+            const notificationRef = this.database.ref(`notifications/${userId}/${notificationId}`);
+            
+            await notificationRef.set({
+                id: notificationId,
+                title: notification.title,
+                message: notification.message,
+                type: notification.type || 'info',
+                link: notification.link || null,
+                read: false,
+                timestamp: Date.now()
+            });
+            
+            return { success: true, notificationId: notificationId };
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+    
+    // إشعار عند الرد على تعليق
+    async notifyCommentReply(commentAuthorId, replyData, chapterLink) {
+        try {
+            const notification = {
+                title: 'رد جديد على تعليقك',
+                message: `قام ${replyData.userDisplayName} بالرد على تعليقك`,
+                type: 'comment',
+                link: chapterLink
+            };
+            
+            return await this.addNotification(commentAuthorId, notification);
+        } catch (error) {
+            console.error('Error sending comment reply notification:', error);
             return { success: false, error: error.message };
         }
     }
