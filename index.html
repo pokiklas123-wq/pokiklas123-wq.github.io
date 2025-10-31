@@ -1,26 +1,23 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-
-
-<script>
-    // معالجة إعادة التوجيه من 404.html
-    if (sessionStorage.redirect) {
-        const redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect !== location.pathname) {
-            history.replaceState(null, null, redirect);
+    <!-- معالجة إعادة التوجيه من 404.html -->
+    <script>
+        if (sessionStorage.redirect) {
+            const redirect = sessionStorage.redirect;
+            delete sessionStorage.redirect;
+            if (redirect !== location.pathname) {
+                history.replaceState(null, null, redirect);
+            }
         }
-    }
-</script>
-
-
+    </script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مانجا - manus | موقع متكامل للمانجا العربية</title>
     <meta name="description" content="موقع مانجا متكامل لعرض وقراءة المانجا العربية بأفضل تجربة مستخدم">
     <meta name="keywords" content="مانجا, مانغا, قصص مصورة, مانجا عربية, قراءة مانجا">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     
     <!-- الروابط -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -63,6 +60,17 @@
             </button>
         </div>
         
+        <!-- قسم التنقل -->
+        <div class="drawer-section">
+            <h3>التنقل</h3>
+            <ul class="categories-list">
+                <li id="drawerHomeLink">
+                    <i class="fas fa-home"></i> الرئيسية
+                </li>
+            </ul>
+        </div>
+        
+        <!-- قسم الحساب -->
         <div class="drawer-section">
             <h3>الحساب</h3>
             <div id="userSection">
@@ -70,13 +78,19 @@
             </div>
         </div>
 
+        <!-- قسم الإشعارات -->
         <div class="drawer-section">
-            <h3>الإشعارات</h3>
+            <h3>الإشعارات 
+                <button class="btn refresh-notifications" id="refreshNotifications">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </h3>
             <div id="notificationsList">
                 <p class="no-notifications">لا توجد إشعارات</p>
             </div>
         </div>
 
+        <!-- قسم المظهر -->
         <div class="drawer-section">
             <h3>المظهر</h3>
             <div class="theme-switcher">
@@ -86,6 +100,7 @@
             </div>
         </div>
 
+        <!-- قسم التصنيفات -->
         <div class="drawer-section">
             <h3>التصنيفات</h3>
             <ul class="categories-list">
@@ -98,7 +113,18 @@
                 <li data-sort="oldest">
                     <i class="fas fa-history"></i> الأقدم
                 </li>
+                <li data-sort="rating">
+                    <i class="fas fa-star"></i> الأعلى تقييماً
+                </li>
             </ul>
+        </div>
+
+        <!-- قسم الإعدادات -->
+        <div class="drawer-section">
+            <h3>الإعدادات</h3>
+            <button class="btn clear-cache-btn" id="clearCacheBtn">
+                <i class="fas fa-broom"></i> مسح الذاكرة المؤقتة
+            </button>
         </div>
     </div>
 
@@ -127,8 +153,8 @@
                 <p>جاري تحميل التفاصيل...</p>
             </div>
             <div id="mangaDetailContent" class="manga-detail-content">
-    <!-- سيتم ملؤه ديناميكياً من manga.js -->
-</div>
+                <!-- سيتم ملؤه ديناميكياً من manga.js -->
+            </div>
         </div>
 
         <!-- صفحة عرض الفصل -->
@@ -142,8 +168,8 @@
                     <p>جاري تحميل الفصل...</p>
                 </div>
                 <div id="chapterContent" class="chapter-content">
-    <!-- سيتم ملؤه ديناميكياً من manga.js -->
-</div>
+                    <!-- سيتم ملؤه ديناميكياً من manga.js -->
+                </div>
             </div>
         </div>
     </div>
@@ -168,20 +194,19 @@
         </div>
     </div>
 
-<!-- السكريبتات -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <!-- السكريبتات -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 
-<script src="js/firebase-config.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/manga.js"></script>
-<script src="js/comments.js"></script>
-<script src="js/ratings.js"></script>
-<script src="js/navigation.js"></script>
-
-    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/manga.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/ratings.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/navigation.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
