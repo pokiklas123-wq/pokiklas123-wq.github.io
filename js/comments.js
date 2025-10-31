@@ -1,16 +1,47 @@
 class CommentsManager {
     constructor() {
         this.currentChapterId = null;
+        this.currentMangaId = null;
+        this.comments = {};
+        this.setupEventListeners();
     }
 
     setupEventListeners() {
-        // سيتم إعدادها عند تحميل الصفحة
+        // استخدام event delegation لمنع التكرار
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'submitComment' || e.target.closest('#submitComment')) {
+                this.submitComment();
+            }
+            
+            if (e.target.classList.contains('like-btn') || e.target.closest('.like-btn')) {
+                const commentId = e.target.closest('.like-btn').dataset.commentId;
+                if (commentId) this.likeComment(commentId);
+            }
+            
+            if (e.target.classList.contains('edit-comment') || e.target.closest('.edit-comment')) {
+                const commentId = e.target.closest('.edit-comment').dataset.commentId;
+                if (commentId) this.editComment(commentId);
+            }
+            
+            if (e.target.classList.contains('delete-comment') || e.target.closest('.delete-comment')) {
+                const commentId = e.target.closest('.delete-comment').dataset.commentId;
+                if (commentId) this.deleteComment(commentId);
+            }
+            
+            if (e.target.classList.contains('reply-comment') || e.target.closest('.reply-comment')) {
+                const commentId = e.target.closest('.reply-comment').dataset.commentId;
+                if (commentId) this.showReplyForm(commentId);
+            }
+            
+            if (e.target.id === 'submitReply' || e.target.closest('#submitReply')) {
+                this.submitReply();
+            }
+        });
     }
 
     async submitComment() {
-        const commentText = document.getElementById('commentInput').value.trim();
-        const mangaId = mangaManager.getCurrentMangaId();
-        const chapterId = this.currentChapterId;
+        const commentInput = document.getElementById('commentInput');
+        const commentText = commentInput.value.trim();
         
         if (!commentText) {
             ui.showAuthMessage('يرجى كتابة تعليق قبل الإرسال', 'error');
@@ -28,40 +59,56 @@ class CommentsManager {
                 user: authManager.getCurrentUser().displayName || authManager.getCurrentUser().email.split('@')[0],
                 text: commentText,
                 likes: 0,
+                likedBy: {},
                 timestamp: Date.now(),
-                userId: authManager.getCurrentUser().uid
+                userId: authManager.getCurrentUser().uid,
+                replies: {}
             };
 
-            // إضافة التعليق إلى قاعدة البيانات
-            const commentRef = database.ref(`manga_list/${mangaId}/chapters/${chapterId}/comments`).push();
+            const commentRef = database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments`).push();
             await commentRef.set(commentData);
             
-            document.getElementById('commentInput').value = '';
+            commentInput.value = '';
             ui.showAuthMessage('تم إرسال التعليق بنجاح', 'success');
             
             // إعادة تحميل التعليقات
-            const snapshot = await database.ref(`manga_list/${mangaId}/chapters/${chapterId}/comments`).once('value');
-            const commentsData = snapshot.val();
-            this.loadComments(mangaId, chapterId, commentsData);
+            await this.loadComments(this.currentMangaId, this.currentChapterId);
             
         } catch (error) {
             ui.showAuthMessage('حدث خطأ في إرسال التعليق: ' + error.message, 'error');
         }
     }
 
-    loadComments(mangaId, chapterId, commentsData) {
+    async loadComments(mangaId, chapterId, commentsData = null) {
+        this.currentMangaId = mangaId;
         this.currentChapterId = chapterId;
+
+        try {
+            if (!commentsData) {
+                const snapshot = await database.ref(`manga_list/${mangaId}/chapters/${chapterId}/comments`).once('value');
+                commentsData = snapshot.val();
+            }
+
+            this.comments = commentsData || {};
+            this.displayComments();
+            
+        } catch (error) {
+            console.error('Error loading comments:', error);
+        }
+    }
+
+    displayComments() {
         const commentsList = document.getElementById('commentsList');
         commentsList.innerHTML = '';
 
-        if (!commentsData || Object.keys(commentsData).length === 0) {
+        if (!this.comments || Object.keys(this.comments).length === 0) {
             commentsList.innerHTML = '<p class="no-comments">لا توجد تعليقات بعد. كن أول من يعلق!</p>';
             return;
         }
 
         // تحويل التعليقات إلى مصفوفة وترتيبها
-        const commentsArray = Object.keys(commentsData).map(key => {
-            return { id: key, ...commentsData[key] };
+        const commentsArray = Object.keys(this.comments).map(key => {
+            return { id: key, ...this.comments[key] };
         });
 
         commentsArray.sort((a, b) => b.timestamp - a.timestamp);
@@ -82,19 +129,60 @@ class CommentsManager {
             </div>
             <div class="comment-text">${comment.text}</div>
             <div class="comment-actions">
-                <button class="comment-action like-btn" data-comment-id="${commentId}">
-                    <i class="fas fa-heart"></i> <span class="like-count">${comment.likes || 0}</span>
+                <button class="comment-action like-btn ${this.hasUserLiked(comment) ? 'liked' : ''}" 
+                        data-comment-id="${commentId}">
+                    <i class="fas fa-heart"></i> 
+                    <span class="like-count">${comment.likes || 0}</span>
                 </button>
+                <button class="comment-action reply-comment" data-comment-id="${commentId}">
+                    <i class="fas fa-reply"></i> رد
+                </button>
+                ${this.canEditComment(comment) ? `
+                    <button class="comment-action edit-comment" data-comment-id="${commentId}">
+                        <i class="fas fa-edit"></i> تعديل
+                    </button>
+                    <button class="comment-action delete-comment" data-comment-id="${commentId}">
+                        <i class="fas fa-trash"></i> حذف
+                    </button>
+                ` : ''}
+            </div>
+            <div class="comment-replies" id="replies-${commentId}">
+                ${this.renderReplies(comment.replies)}
+            </div>
+            <div class="reply-form" id="reply-form-${commentId}" style="display: none;">
+                <textarea class="reply-input" placeholder="اكتب ردك..."></textarea>
+                <button class="btn submit-reply" data-comment-id="${commentId}">إرسال الرد</button>
+                <button class="btn cancel-reply">إلغاء</button>
             </div>
         `;
 
-        // إضافة حدث الإعجاب
-        const likeBtn = element.querySelector('.like-btn');
-        likeBtn.addEventListener('click', () => {
-            this.likeComment(commentId);
-        });
-
         return element;
+    }
+
+    renderReplies(replies) {
+        if (!replies || Object.keys(replies).length === 0) return '';
+        
+        const repliesArray = Object.keys(replies).map(key => ({ id: key, ...replies[key] }));
+        repliesArray.sort((a, b) => a.timestamp - b.timestamp);
+        
+        return repliesArray.map(reply => `
+            <div class="reply">
+                <div class="reply-header">
+                    <span class="reply-user">${reply.user}</span>
+                    <span class="reply-time">${this.formatTime(reply.timestamp)}</span>
+                </div>
+                <div class="reply-text">${reply.text}</div>
+            </div>
+        `).join('');
+    }
+
+    hasUserLiked(comment) {
+        if (!authManager.getCurrentUser() || !comment.likedBy) return false;
+        return comment.likedBy[authManager.getCurrentUser().uid];
+    }
+
+    canEditComment(comment) {
+        return authManager.getCurrentUser() && comment.userId === authManager.getCurrentUser().uid;
     }
 
     async likeComment(commentId) {
@@ -103,24 +191,107 @@ class CommentsManager {
             return;
         }
 
-        const mangaId = mangaManager.getCurrentMangaId();
-        const commentRef = database.ref(`manga_list/${mangaId}/chapters/${this.currentChapterId}/comments/${commentId}`);
+        const commentRef = database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}`);
         
         try {
             const snapshot = await commentRef.once('value');
             const comment = snapshot.val();
-            const newLikes = (comment.likes || 0) + 1;
-            
-            await commentRef.update({ likes: newLikes });
+            const userId = authManager.getCurrentUser().uid;
+            const likedBy = comment.likedBy || {};
+            let newLikes = comment.likes || 0;
+
+            if (likedBy[userId]) {
+                // إزالة الإعجاب
+                newLikes--;
+                delete likedBy[userId];
+            } else {
+                // إضافة الإعجاب
+                newLikes++;
+                likedBy[userId] = true;
+                
+                // إرسال إشعار للمستخدم
+                this.sendLikeNotification(comment.userId, commentId);
+            }
+
+            await commentRef.update({ 
+                likes: newLikes,
+                likedBy: likedBy
+            });
             
             // تحديث الواجهة
-            const likeCount = document.querySelector(`[data-comment-id="${commentId}"] .like-count`);
-            if (likeCount) {
-                likeCount.textContent = newLikes;
-            }
+            await this.loadComments(this.currentMangaId, this.currentChapterId);
             
         } catch (error) {
             console.error('Error liking comment:', error);
+        }
+    }
+
+    async editComment(commentId) {
+        const comment = this.comments[commentId];
+        const newText = prompt('عدل تعليقك:', comment.text);
+        
+        if (newText && newText !== comment.text) {
+            try {
+                await database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}`).update({
+                    text: newText,
+                    edited: true,
+                    editTimestamp: Date.now()
+                });
+                
+                await this.loadComments(this.currentMangaId, this.currentChapterId);
+                ui.showAuthMessage('تم تعديل التعليق بنجاح', 'success');
+            } catch (error) {
+                ui.showAuthMessage('خطأ في تعديل التعليق', 'error');
+            }
+        }
+    }
+
+    async deleteComment(commentId) {
+        if (confirm('هل أنت متأكد من حذف هذا التعليق؟')) {
+            try {
+                await database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}`).remove();
+                await this.loadComments(this.currentMangaId, this.currentChapterId);
+                ui.showAuthMessage('تم حذف التعليق بنجاح', 'success');
+            } catch (error) {
+                ui.showAuthMessage('خطأ في حذف التعليق', 'error');
+            }
+        }
+    }
+
+    showReplyForm(commentId) {
+        // إخفاء جميع نماذج الردود الأخرى
+        document.querySelectorAll('.reply-form').forEach(form => {
+            form.style.display = 'none';
+        });
+        
+        const replyForm = document.getElementById(`reply-form-${commentId}`);
+        if (replyForm) {
+            replyForm.style.display = 'block';
+        }
+    }
+
+    async submitReply() {
+        // سيتم تنفيذ نظام الردود لاحقاً
+        ui.showAuthMessage('نظام الردود قيد التطوير', 'info');
+    }
+
+    async sendLikeNotification(targetUserId, commentId) {
+        if (targetUserId === authManager.getCurrentUser().uid) return;
+        
+        try {
+            const notificationRef = database.ref(`notifications/${targetUserId}`).push();
+            await notificationRef.set({
+                type: 'like',
+                fromUser: authManager.getCurrentUser().displayName || authManager.getCurrentUser().email,
+                fromUserId: authManager.getCurrentUser().uid,
+                commentId: commentId,
+                mangaId: this.currentMangaId,
+                chapterId: this.currentChapterId,
+                timestamp: Date.now(),
+                read: false
+            });
+        } catch (error) {
+            console.error('Error sending notification:', error);
         }
     }
 
