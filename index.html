@@ -1,641 +1,1033 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <!-- معالجة إعادة التوجيه من 404.html -->
-    <script>
-        if (sessionStorage.redirect) {
-            const redirect = sessionStorage.redirect;
-            delete sessionStorage.redirect;
-            if (redirect !== location.pathname) {
-                history.replaceState(null, null, redirect);
-            }
-        }
-    </script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مانجا - manus | موقع متكامل للمانجا العربية</title>
-    <meta name="description" content="موقع مانجا متكامل لعرض وقراءة المانجا العربية بأفضل تجربة مستخدم">
-    <meta name="keywords" content="مانجا, مانغا, قصص مصورة, مانجا عربية, قراءة مانجا">
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-    
-    <!-- الروابط -->
+    <title>موقع المانجا</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/components.css">
-    <link rel="stylesheet" href="styles/responsive.css">
-    
-    <!-- أنماط إضافية -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <style>
-        /* شاشة التحميل الأولية */
-        #splashScreen {
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --text-color: #333;
+            --bg-color: #fff;
+            --card-bg: #f8f9fa;
+            --border-radius: 8px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #5fa8ff;
+            --secondary-color: #34495e;
+            --accent-color: #ff6b6b;
+            --light-color: #2c3e50;
+            --dark-color: #ecf0f1;
+            --text-color: #ecf0f1;
+            --bg-color: #1a1a2e;
+            --card-bg: #16213e;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="blue"] {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --light-color: #ecf0f1;
+            --dark-color: #2c3e50;
+            --text-color: #333;
+            --bg-color: #f5f9ff;
+            --card-bg: #e8f4ff;
+            --shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+            min-height: 100vh;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+
+        .search-container {
+            flex-grow: 1;
+            max-width: 500px;
+            margin: 0 1rem;
+            position: relative;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-result-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .search-result-item img {
+            width: 40px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Drawer Styles */
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 300px;
+            height: 100%;
+            background-color: var(--card-bg);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            z-index: 1000;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .drawer.open {
+            right: 0;
+        }
+
+        .drawer-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--bg-color);
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .drawer-overlay.open {
+            display: block;
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .drawer-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+
+        .drawer-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background-color: var(--bg-color);
+            border-radius: var(--border-radius);
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-details {
+            flex-grow: 1;
+        }
+
+        .user-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-email {
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .drawer-menu {
+            list-style: none;
+            margin-bottom: 2rem;
+        }
+
+        .drawer-menu-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .drawer-menu-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            color: var(--text-color);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .drawer-menu-link:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .drawer-menu-link i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .theme-option {
+            flex: 1;
+            padding: 0.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .theme-option.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            border: 1px solid var(--primary-color);
+            background-color: transparent;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .filter-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .manga-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .manga-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        .manga-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .manga-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .manga-thumbnail {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+        }
+
+        .manga-info {
+            padding: 1rem;
+        }
+
+        .manga-title {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .manga-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: #666;
+        }
+
+        .rating {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .rating i {
+            color: #ffc107;
+        }
+
+        .new-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .card-badges {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .chapter-badge {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 2rem 1rem;
+            margin-top: 2rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-1 { margin-top: 0.5rem; }
+        .mt-2 { margin-top: 1rem; }
+        .mt-3 { margin-top: 1.5rem; }
+        .mb-1 { margin-bottom: 0.5rem; }
+        .mb-2 { margin-bottom: 1rem; }
+        .mb-3 { margin-bottom: 1.5rem; }
+
+        /* Loading Spinner */
+        .loading {
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
-            flex-direction: column;
-            gap: 20px;
+            padding: 2rem;
         }
-        
-        .splash-logo {
-            font-size: 3rem;
-            color: var(--accent-color);
-        }
-        
-        .splash-text {
-            font-size: 1.5rem;
-            color: var(--text-color);
-            font-weight: 600;
-        }
-        
-        .splash-loading {
+
+        .spinner {
             width: 40px;
             height: 40px;
-            border: 3px solid var(--border-color);
-            border-top: 3px solid var(--accent-color);
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary-color);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
-        /* شارة الإشعارات */
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            background: #ff4757;
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 0.7rem;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
-        /* تحسينات التنقل باللوحة المفاتيح */
-        .keyboard-navigation .btn:focus,
-        .keyboard-navigation .manga-card:focus,
-        .keyboard-navigation .chapter-item:focus {
-            outline: 2px solid var(--accent-color);
-            outline-offset: 2px;
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
         }
-        
-        /* تحسينات الأداء */
-        .manga-page {
-            content-visibility: auto;
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
         }
     </style>
 </head>
 <body>
-    <!-- شاشة التحميل -->
-    <div id="splashScreen">
-        <div class="splash-logo">
-            <i class="fas fa-book-open"></i>
-        </div>
-        <div class="splash-text">مانجا - manus</div>
-        <div class="splash-loading"></div>
-    </div>
-
-    <!-- الهيدر -->
+    <!-- Header -->
     <header>
-        <button class="btn menu-btn" id="menuBtn">
+        <button id="drawerToggle" class="btn btn-outline">
             <i class="fas fa-bars"></i>
         </button>
-        <div class="logo">
-            <i class="fas fa-book-open"></i>
-            <h1>مانجا - manus</h1>
+        <a href="#" class="logo">مانجا أونلاين</a>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="ابحث عن مانجا...">
+            <div class="search-results"></div>
         </div>
-        <div class="nav-buttons">
-            <button class="btn search-btn" id="searchBtn">
-                <i class="fas fa-search"></i>
+        <div class="header-actions">
+            <button id="themeToggle" class="btn btn-outline">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="notificationsBtn" class="btn btn-outline">
+                <i class="fas fa-bell"></i>
+            </button>
+            <button id="authBtn" class="btn">
+                <i class="fas fa-user"></i>
+                <span>تسجيل الدخول</span>
             </button>
         </div>
     </header>
 
-    <!-- شريط البحث -->
-    <div class="search-container" id="searchContainer">
-        <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن مانجا...">
-        <button class="search-close" id="closeSearch">
-            <i class="fas fa-times"></i>
+    <!-- Drawer -->
+    <div class="drawer">
+        <div class="drawer-header">
+            <h2 class="drawer-title">القائمة</h2>
+            <button class="drawer-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="userInfo" class="user-info hidden">
+            <img src="" alt="صورة المستخدم" class="user-avatar">
+            <div class="user-details">
+                <div class="user-name"></div>
+                <div class="user-email"></div>
+            </div>
+        </div>
+        
+        <ul class="drawer-menu">
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link">
+                    <i class="fas fa-home"></i>
+                    <span>الصفحة الرئيسية</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link">
+                    <i class="fas fa-fire"></i>
+                    <span>الأكثر مشاهدة</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link">
+                    <i class="fas fa-star"></i>
+                    <span>الأعلى تقييماً</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link">
+                    <i class="fas fa-history"></i>
+                    <span>الأحدث</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link" id="notificationsDrawerBtn">
+                    <i class="fas fa-bell"></i>
+                    <span>الإشعارات</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="theme-selector">
+            <div class="theme-option active" data-theme="light">فاتح</div>
+            <div class="theme-option" data-theme="dark">مظلم</div>
+            <div class="theme-option" data-theme="blue">أزرق</div>
+        </div>
+        
+        <button id="logoutBtn" class="btn btn-outline hidden">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>تسجيل الخروج</span>
         </button>
     </div>
+    <div class="drawer-overlay"></div>
 
-    <!-- القائمة الجانبية -->
-    <div class="overlay" id="overlay"></div>
-    <div class="drawer" id="drawer">
-        <div class="drawer-header">
-            <h2>القائمة</h2>
-            <button class="drawer-close" id="closeDrawer">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <!-- قسم التنقل -->
-        <div class="drawer-section">
-            <h3>التنقل</h3>
-            <ul class="categories-list">
-                <li id="drawerHomeLink">
-                    <i class="fas fa-home"></i> الرئيسية
-                </li>
-                <li id="notificationsLink">
-                    <i class="fas fa-bell"></i> الإشعارات
-                    <span class="notification-badge" id="drawerNotificationBadge"></span>
-                </li>
-            </ul>
-        </div>
-        
-        <!-- قسم الحساب -->
-        <div class="drawer-section">
-            <h3>الحساب</h3>
-            <div id="userSection">
-                <button class="btn drawer-login-btn" id="drawerLoginBtn">
-                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
-                </button>
-            </div>
-        </div>
-
-        <!-- قسم الإشعارات -->
-        <div class="drawer-section">
-            <h3>الإشعارات 
-                <button class="btn refresh-notifications" id="refreshNotifications">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-            </h3>
-            <div id="notificationsList">
-                <p class="no-notifications">لا توجد إشعارات</p>
-            </div>
-        </div>
-
-        <!-- قسم المظهر -->
-        <div class="drawer-section">
-            <h3>المظهر</h3>
-            <div class="theme-switcher">
-                <button class="theme-btn active" data-theme="dark">الداكن</button>
-                <button class="theme-btn" data-theme="light">الفاتح</button>
-                <button class="theme-btn" data-theme="colored">الملون</button>
-            </div>
-        </div>
-
-        <!-- قسم التصنيفات -->
-        <div class="drawer-section">
-            <h3>التصنيفات</h3>
-            <ul class="categories-list">
-                <li data-sort="newest">
-                    <i class="fas fa-clock"></i> الأحدث
-                </li>
-                <li data-sort="popular">
-                    <i class="fas fa-fire"></i> الشائع
-                </li>
-                <li data-sort="oldest">
-                    <i class="fas fa-history"></i> الأقدم
-                </li>
-                <li data-sort="rating">
-                    <i class="fas fa-star"></i> الأعلى تقييماً
-                </li>
-            </ul>
-        </div>
-
-        <!-- قسم الإعدادات -->
-        <div class="drawer-section">
-            <h3>الإعدادات</h3>
-            <button class="btn clear-cache-btn" id="clearCacheBtn">
-                <i class="fas fa-broom"></i> مسح الذاكرة المؤقتة
-            </button>
-            <button class="btn share-drawer-btn" id="shareDrawerBtn">
-                <i class="fas fa-share"></i> مشاركة التطبيق
-            </button>
-        </div>
-    </div>
-
-    <!-- المحتوى الرئيسي -->
+    <!-- Main Content -->
     <div class="container">
-        <!-- الصفحة الرئيسية -->
-        <div id="homePage" class="page active">
-            <h2 class="page-title">أحدث المانجا</h2>
-            <div id="loadingHome" class="loading">
-                <div class="loading-spinner"></div>
-                <p>جاري تحميل المانجا...</p>
-            </div>
-            <div id="mangaGrid" class="manga-grid"></div>
-            <div id="noMangaMessage" class="status-message status-info">
-                لا توجد مانجا متاحة حالياً.
-            </div>
+        <div class="filters">
+            <button class="filter-btn active" data-filter="latest">الأحدث</button>
+            <button class="filter-btn" data-filter="popular">الأكثر مشاهدة</button>
+            <button class="filter-btn" data-filter="rating">الأعلى تقييماً</button>
+            <button class="filter-btn" data-filter="oldest">الأقدم</button>
         </div>
-
-        <!-- صفحة تفاصيل المانجا -->
-        <div id="mangaDetailPage" class="page">
-            <button class="btn back-btn" id="backToHome">
-                <i class="fas fa-arrow-right"></i> العودة للرئيسية
-            </button>
-            <div id="loadingDetail" class="loading">
-                <div class="loading-spinner"></div>
-                <p>جاري تحميل التفاصيل...</p>
-            </div>
-            <div id="mangaDetailContent" class="manga-detail-content">
-                <!-- سيتم ملؤه ديناميكياً من manga.js -->
-            </div>
-        </div>
-
-        <!-- صفحة عرض الفصل -->
-        <div id="chapterPage" class="page">
-            <button class="btn back-btn" id="backToManga">
-                <i class="fas fa-arrow-right"></i> العودة للمانجا
-            </button>
-            <div class="chapter-container">
-                <div id="loadingChapter" class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>جاري تحميل الفصل...</p>
-                </div>
-                <div id="chapterContent" class="chapter-content">
-                    <!-- سيتم ملؤه ديناميكياً من manga.js -->
-                </div>
-            </div>
-        </div>
-
-        <!-- صفحة الإشعارات -->
-        <div id="notificationsPage" class="page">
-            <div class="page-header">
-                <button class="btn back-btn" id="backFromNotifications">
-                    <i class="fas fa-arrow-right"></i> العودة
-                </button>
-                <h2 class="page-title">الإشعارات</h2>
-            </div>
-            <div class="notifications-page-content">
-                <div class="notifications-tabs">
-                    <button class="tab-btn active" data-tab="user">إشعارات المستخدم</button>
-                    <button class="tab-btn" data-tab="admin" id="adminNotificationsTab" style="display: none;">
-                        إشعارات النظام
-                    </button>
-                </div>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="user-notifications">
-                        <div class="notifications-actions">
-                            <button class="btn mark-all-read-btn" id="markUserNotificationsRead">
-                                <i class="fas fa-check-double"></i> وضع الكل كمقروء
-                            </button>
-                            <button class="btn clear-all-btn" id="clearUserNotifications">
-                                <i class="fas fa-trash"></i> مسح الكل
-                            </button>
-                        </div>
-                        <div class="notifications-list" id="userNotificationsList"></div>
-                    </div>
-                    <div class="tab-pane" id="admin-notifications">
-                        <div class="notifications-actions">
-                            <button class="btn mark-all-read-btn" id="markAdminNotificationsRead">
-                                <i class="fas fa-check-double"></i> وضع الكل كمقروء
-                            </button>
-                            <button class="btn clear-all-btn" id="clearAdminNotifications">
-                                <i class="fas fa-trash"></i> مسح الكل
-                            </button>
-                        </div>
-                        <div class="notifications-list" id="adminNotificationsList"></div>
-                    </div>
-                </div>
+        
+        <div class="manga-grid" id="mangaGrid">
+            <!-- سيتم ملء هذا القسم بالبيانات من Firebase -->
+            <div class="loading">
+                <div class="spinner"></div>
             </div>
         </div>
     </div>
 
-    <!-- نافذة تسجيل الدخول -->
-    <div class="auth-modal" id="authModal">
-        <div class="auth-modal-content">
-            <button class="close-modal" id="closeAuthModal">
-                <i class="fas fa-times"></i>
-            </button>
-            <h2>تسجيل الدخول</h2>
-            <div class="auth-form">
-                <input type="text" class="auth-input" id="displayName" placeholder="اسم المستخدم (للتسجيل فقط)">
-                <input type="email" class="auth-input" id="loginEmail" placeholder="البريد الإلكتروني">
-                <input type="password" class="auth-input" id="loginPassword" placeholder="كلمة المرور">
-                <div class="auth-buttons">
-                    <button class="btn auth-login-btn" id="loginSubmit">تسجيل الدخول</button>
-                    <button class="btn auth-signup-btn" id="signupSubmit">إنشاء حساب</button>
-                </div>
-                <div class="auth-options">
-                    <button class="btn-link" id="forgotPasswordBtn">نسيت كلمة المرور؟</button>
-                </div>
-                <div id="authMessage" class="auth-message"></div>
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>مانجا أونلاين</h3>
+                <p>أفضل موقع لقراءة المانجا العربية. استمتع بأفضل القصص المصورة من مختلف الأنواع.</p>
+            </div>
+            <div class="footer-section">
+                <h3>روابط سريعة</h3>
+                <ul class="footer-links">
+                    <li><a href="#">الصفحة الرئيسية</a></li>
+                    <li><a href="#">المانجا الجديدة</a></li>
+                    <li><a href="#">الأكثر مشاهدة</a></li>
+                    <li><a href="#">الأعلى تقييماً</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>الدعم</h3>
+                <ul class="footer-links">
+                    <li><a href="#">اتصل بنا</a></li>
+                    <li><a href="#">الأسئلة الشائعة</a></li>
+                    <li><a href="#">سياسة الخصوصية</a></li>
+                    <li><a href="#">شروط الاستخدام</a></li>
+                </ul>
             </div>
         </div>
-    </div>
-
-    <!-- نافذة إعادة تعيين كلمة المرور -->
-    <div class="auth-modal" id="resetPasswordModal">
-        <div class="auth-modal-content">
-            <button class="close-modal" id="closeResetModal">
-                <i class="fas fa-times"></i>
-            </button>
-            <h2>إعادة تعيين كلمة المرور</h2>
-            <div class="auth-form">
-                <input type="email" class="auth-input" id="resetEmail" placeholder="البريد الإلكتروني">
-                <div class="auth-buttons">
-                    <button class="btn auth-reset-btn" id="resetSubmit">إرسال رابط التعيين</button>
-                    <button class="btn btn-secondary" id="cancelReset">إلغاء</button>
-                </div>
-                <div id="resetMessage" class="auth-message"></div>
-            </div>
+        <div class="copyright">
+            &copy; 2023 مانجا أونلاين. جميع الحقوق محفوظة.
         </div>
-    </div>
+    </footer>
 
-    <!-- السكريبتات -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
-
-    <script src="js/firebase-config.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/manga.js"></script>
-    <script src="js/comments.js"></script>
-    <script src="js/ratings.js"></script>
-    <script src="js/notifications.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/app.js"></script>
-
-    <!-- التهيئة النهائية -->
     <script>
-        // إخفاء شاشة التحميل بعد تحميل كل شيء
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                const splashScreen = document.getElementById('splashScreen');
-                if (splashScreen) {
-                    splashScreen.style.opacity = '0';
-                    splashScreen.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => {
-                        splashScreen.style.display = 'none';
-                    }, 500);
+        // تهيئة Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfcjTc-bfiRocYeBSmUrxid6WEVBYvVTg",
+            authDomain: "pgfxtool-pro.firebaseapp.com",
+            databaseURL: "https://pgfxtool-pro-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "pgfxtool-pro",
+            storageBucket: "pgfxtool-pro.appspot.com",
+            messagingSenderId: "1096122383871",
+            appId: "1:1096122383871:android:82a42721ccff8294d33bca"
+        };
+        
+        // تهيئة Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        // مراجع لقاعدة البيانات والمصادقة
+        const database = firebase.database();
+        const auth = firebase.auth();
+        
+        // حالة التطبيق
+        let currentUser = null;
+        let mangaList = [];
+        let currentFilter = 'latest';
+        
+        // عناصر DOM
+        const drawer = document.querySelector('.drawer');
+        const drawerOverlay = document.querySelector('.drawer-overlay');
+        const drawerToggle = document.getElementById('drawerToggle');
+        const drawerClose = document.querySelector('.drawer-close');
+        const themeToggle = document.getElementById('themeToggle');
+        const notificationsBtn = document.getElementById('notificationsBtn');
+        const authBtn = document.getElementById('authBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.querySelector('.user-name');
+        const userEmail = document.querySelector('.user-email');
+        const userAvatar = document.querySelector('.user-avatar');
+        const mangaGrid = document.getElementById('mangaGrid');
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const searchInput = document.querySelector('.search-input');
+        const searchResults = document.querySelector('.search-results');
+        const themeOptions = document.querySelectorAll('.theme-option');
+        
+        // فتح وإغلاق الدراور
+        drawerToggle.addEventListener('click', () => {
+            drawer.classList.add('open');
+            drawerOverlay.classList.add('open');
+        });
+        
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerOverlay.addEventListener('click', closeDrawer);
+        
+        function closeDrawer() {
+            drawer.classList.remove('open');
+            drawerOverlay.classList.remove('open');
+        }
+        
+        // تبديل الوضع الليلي/النهاري
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // تحديث الأيقونة
+            const icon = themeToggle.querySelector('i');
+            icon.className = newTheme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        });
+        
+        // اختيار السمة من الدراور
+        themeOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                themeOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                
+                const theme = option.getAttribute('data-theme');
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                
+                // تحديث الأيقونة في الهيدر
+                const icon = themeToggle.querySelector('i');
+                if (theme === 'dark') {
+                    icon.className = 'fas fa-sun';
+                } else if (theme === 'blue') {
+                    icon.className = 'fas fa-palette';
+                } else {
+                    icon.className = 'fas fa-moon';
                 }
-            }, 1000);
+            });
         });
-
-        // إضافة زر الإشعارات في الدراور
-        document.getElementById('notificationsLink')?.addEventListener('click', function() {
-            ui.showNotificationsPage();
-            ui.toggleDrawer(false);
+        
+        // تحميل السمة المحفوظة
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            
+            // تحديث الأيقونة والأزرار
+            const icon = themeToggle.querySelector('i');
+            if (savedTheme === 'dark') {
+                icon.className = 'fas fa-sun';
+            } else if (savedTheme === 'blue') {
+                icon.className = 'fas fa-palette';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+            
+            themeOptions.forEach(option => {
+                if (option.getAttribute('data-theme') === savedTheme) {
+                    option.classList.add('active');
+                } else {
+                    option.classList.remove('active');
+                }
+            });
+        }
+        
+        // تصفية المانجا
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                currentFilter = btn.getAttribute('data-filter');
+                displayManga(mangaList);
+            });
         });
-
-        // إضافة زر نسيت كلمة المرور
-        document.getElementById('forgotPasswordBtn')?.addEventListener('click', function() {
-            ui.toggleAuthModal(false);
-            document.getElementById('resetPasswordModal').classList.add('active');
-        });
-
-        // إغلاق نافذة إعادة التعيين
-        document.getElementById('closeResetModal')?.addEventListener('click', function() {
-            document.getElementById('resetPasswordModal').classList.remove('active');
-        });
-
-        document.getElementById('cancelReset')?.addEventListener('click', function() {
-            document.getElementById('resetPasswordModal').classList.remove('active');
-        });
-
-        // إرسال طلب إعادة تعيين كلمة المرور
-        document.getElementById('resetSubmit')?.addEventListener('click', function() {
-            const email = document.getElementById('resetEmail').value;
-            if (!email) {
-                document.getElementById('resetMessage').textContent = 'يرجى إدخال البريد الإلكتروني';
-                document.getElementById('resetMessage').className = 'auth-message error';
-                document.getElementById('resetMessage').style.display = 'block';
+        
+        // البحث عن المانجا
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            
+            if (query.length === 0) {
+                searchResults.style.display = 'none';
                 return;
             }
-
-            authManager.resetPassword(email).then(success => {
-                if (success) {
-                    document.getElementById('resetPasswordModal').classList.remove('active');
-                }
-            });
+            
+            const results = mangaList.filter(manga => 
+                manga.name.toLowerCase().includes(query)
+            );
+            
+            displaySearchResults(results);
         });
-
-        // التحقق من صلاحيات الأدمن وتحديث الواجهة
-        auth.onAuthStateChanged(async (user) => {
+        
+        function displaySearchResults(results) {
+            searchResults.innerHTML = '';
+            
+            if (results.length === 0) {
+                searchResults.style.display = 'none';
+                return;
+            }
+            
+            results.slice(0, 5).forEach(manga => {
+                const item = document.createElement('div');
+                item.className = 'search-result-item';
+                
+                item.innerHTML = `
+                    <img src="${manga.thumbnail}" alt="${manga.name}">
+                    <div>
+                        <div>${manga.name}</div>
+                        <div class="manga-meta">
+                            <span>${manga.views} مشاهدة</span>
+                            <span class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>${manga.rating || 0}</span>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                
+                item.addEventListener('click', () => {
+                    window.location.href = `manga.html?id=${manga.id}`;
+                });
+                
+                searchResults.appendChild(item);
+            });
+            
+            searchResults.style.display = 'block';
+        }
+        
+        // إغلاق نتائج البحث عند النقر خارجها
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = 'none';
+            }
+        });
+        
+        // تحميل بيانات المانجا من Firebase
+        function loadMangaData() {
+            mangaGrid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+            
+            database.ref('manga_list').once('value')
+                .then(snapshot => {
+                    const data = snapshot.val();
+                    mangaList = [];
+                    
+                    if (data) {
+                        Object.keys(data).forEach(key => {
+                            const manga = data[key];
+                            manga.id = key;
+                            mangaList.push(manga);
+                        });
+                    }
+                    
+                    displayManga(mangaList);
+                })
+                .catch(error => {
+                    console.error('Error loading manga data:', error);
+                    mangaGrid.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>حدث خطأ في تحميل البيانات</p>
+                            <button class="btn mt-2" onclick="loadMangaData()">إعادة المحاولة</button>
+                        </div>
+                    `;
+                });
+        }
+        
+        // عرض المانجا في الشبكة
+        function displayManga(mangaArray) {
+            // تطبيق التصفية
+            let filteredManga = [...mangaArray];
+            
+            switch (currentFilter) {
+                case 'latest':
+                    // ترتيب حسب الأحدث (افتراضيًا حسب الترتيب في قاعدة البيانات)
+                    break;
+                case 'popular':
+                    filteredManga.sort((a, b) => (b.views || 0) - (a.views || 0));
+                    break;
+                case 'rating':
+                    filteredManga.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+                    break;
+                case 'oldest':
+                    // ترتيب حسب الأقدم (عكس الأحدث)
+                    filteredManga.reverse();
+                    break;
+            }
+            
+            // عرض المانجا
+            mangaGrid.innerHTML = '';
+            
+            if (filteredManga.length === 0) {
+                mangaGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-book-open"></i>
+                        <p>لا توجد مانجا متاحة</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredManga.forEach(manga => {
+                const card = document.createElement('div');
+                card.className = 'manga-card';
+                
+                // الحصول على آخر فصل (أعلى رقم)
+                let latestChapter = null;
+                if (manga.chapters) {
+                    const chapterNumbers = Object.keys(manga.chapters).map(key => {
+                        const num = parseInt(key.replace('chapter_', ''));
+                        return isNaN(num) ? 0 : num;
+                    });
+                    
+                    if (chapterNumbers.length > 0) {
+                        const maxChapter = Math.max(...chapterNumbers);
+                        latestChapter = `الفصل ${maxChapter}`;
+                    }
+                }
+                
+                card.innerHTML = `
+                    <div style="position: relative;">
+                        <img src="${manga.thumbnail}" alt="${manga.name}" class="manga-thumbnail">
+                        ${latestChapter ? `<div class="chapter-badge">${latestChapter}</div>` : ''}
+                    </div>
+                    <div class="manga-info">
+                        <div class="manga-title">${manga.name}</div>
+                        <div class="manga-meta">
+                            <span>${manga.views || 0} مشاهدة</span>
+                            <span class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>${manga.rating || 0}</span>
+                            </span>
+                        </div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    window.location.href = `manga.html?id=${manga.id}`;
+                });
+                
+                mangaGrid.appendChild(card);
+            });
+        }
+        
+        // إدارة حالة المستخدم
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            
             if (user) {
-                const isAdmin = await authManager.isAdmin();
-                const adminTab = document.getElementById('adminNotificationsTab');
-                if (adminTab) {
-                    adminTab.style.display = isAdmin ? 'block' : 'none';
-                }
+                // المستخدم مسجل الدخول
+                authBtn.classList.add('hidden');
+                logoutBtn.classList.remove('hidden');
+                userInfo.classList.remove('hidden');
+                
+                // تحميل بيانات المستخدم
+                database.ref('users/' + user.uid).once('value')
+                    .then(snapshot => {
+                        const userData = snapshot.val();
+                        
+                        if (userData) {
+                            userName.textContent = userData.displayName || user.displayName || 'مستخدم';
+                            userEmail.textContent = userData.email || user.email;
+                            userAvatar.src = userData.profile?.avatar || 
+                                `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || user.displayName || 'مستخدم')}&background=4ECDC4&color=fff&size=150`;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading user data:', error);
+                    });
+            } else {
+                // المستخدم غير مسجل الدخول
+                authBtn.classList.remove('hidden');
+                logoutBtn.classList.add('hidden');
+                userInfo.classList.add('hidden');
             }
         });
-
-        // إضافة أزرار التحكم في الإشعارات
-        document.addEventListener('click', function(e) {
-            if (e.target.id === 'markUserNotificationsRead' || e.target.closest('#markUserNotificationsRead')) {
-                notificationsManager.markAllAsRead('user');
-            }
-            
-            if (e.target.id === 'clearUserNotifications' || e.target.closest('#clearUserNotifications')) {
-                notificationsManager.clearAllNotifications('user');
-            }
-            
-            if (e.target.id === 'markAdminNotificationsRead' || e.target.closest('#markAdminNotificationsRead')) {
-                notificationsManager.markAllAsRead('admin');
-            }
-            
-            if (e.target.id === 'clearAdminNotifications' || e.target.closest('#clearAdminNotifications')) {
-                notificationsManager.clearAllNotifications('admin');
-            }
+        
+        // تسجيل الدخول/التسجيل
+        authBtn.addEventListener('click', () => {
+            window.location.href = 'auth.html';
         });
-
-        // تحسين أداء الصور
-        document.addEventListener('DOMContentLoaded', function() {
-            const images = document.querySelectorAll('img');
-            images.forEach(img => {
-                img.addEventListener('load', function() {
-                    this.style.opacity = '1';
+        
+        // تسجيل الخروج
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut()
+                .then(() => {
+                    closeDrawer();
+                })
+                .catch(error => {
+                    console.error('Error signing out:', error);
                 });
-                img.addEventListener('error', function() {
-                    this.style.opacity = '1';
-                    console.warn('Failed to load image:', this.src);
-                });
-                img.style.opacity = '0';
-                img.style.transition = 'opacity 0.3s ease';
-            });
         });
-
-        // إدارة حالة الاتصال
-        window.addEventListener('online', function() {
-            console.log('Application is online');
-            // إعادة تحميل البيانات عند عودة الاتصال
-            setTimeout(() => {
-                if (window.mangaManager) {
-                    mangaManager.loadMangaList();
-                }
-                if (window.notificationsManager && authManager.getCurrentUser()) {
-                    notificationsManager.loadNotifications();
-                }
-            }, 1000);
-        });
-
-        window.addEventListener('offline', function() {
-            console.log('Application is offline');
-            ui.showAlert('أنت غير متصل بالإنترنت', 'warning', 5000);
-        });
-
-        // تحسين تجربة الهواتف
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                console.log('ServiceWorker registration successful');
-            }).catch(function(err) {
-                console.log('ServiceWorker registration failed: ', err);
-            });
-        }
-
-        // منع التكبير على iOS
-        document.addEventListener('touchmove', function(e) {
-            if (e.scale !== 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // تحسين الأداء على الهواتف
-        if ('connection' in navigator) {
-            const connection = navigator.connection;
-            if (connection.saveData) {
-                // تفعيل وضع توفير البيانات
-                document.documentElement.classList.add('save-data');
-            }
-        }
-
-        // إضافة تحليل الاستخدام (بدون بيانات شخصية)
-        window.addEventListener('pagehide', function() {
-            if (window.app) {
-                const stats = app.getAppStats();
-                console.log('App session stats:', stats);
+        
+        // الانتقال إلى صفحة الإشعارات
+        notificationsBtn.addEventListener('click', () => {
+            if (currentUser) {
+                window.location.href = 'notifications.html';
+            } else {
+                window.location.href = 'auth.html';
             }
         });
-
-        // تحسين الذاكرة
-        window.addEventListener('beforeunload', function() {
-            // تنظيف الذاكرة قبل مغادرة الصفحة
-            if (window.gc) {
-                window.gc();
+        
+        document.getElementById('notificationsDrawerBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentUser) {
+                window.location.href = 'notifications.html';
+            } else {
+                window.location.href = 'auth.html';
             }
+            closeDrawer();
         });
-
-        // إضافة تحسينات إضافية للشاشات الصغيرة
-        function handleResize() {
-            const isMobile = window.innerWidth <= 768;
-            document.body.classList.toggle('mobile-view', isMobile);
-            
-            // إخفاء القائمة الجانبية تلقائياً على الهواتف
-            if (isMobile && document.getElementById('drawer').classList.contains('open')) {
-                setTimeout(() => {
-                    ui.toggleDrawer(false);
-                }, 3000);
-            }
-        }
-
-        window.addEventListener('resize', handleResize);
-        handleResize();
-
-        // تحسينات إضافية للأداء
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(() => {
-                // تحميل العناصر غير الحرجة عند توفر الوقت
-                const lazyElements = document.querySelectorAll('[data-lazy]');
-                lazyElements.forEach(el => {
-                    el.src = el.dataset.lazy;
-                    el.removeAttribute('data-lazy');
-                });
-            });
-        }
-
-        // إضافة تحسينات للوحة المفاتيح
-        document.addEventListener('keydown', function(e) {
-            // اختصارات لوحة المفاتيح
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
-                    case 'k':
-                        e.preventDefault();
-                        ui.toggleSearch();
-                        break;
-                    case 'm':
-                        e.preventDefault();
-                        ui.toggleDrawer(true);
-                        break;
-                    case 'ArrowRight':
-                        e.preventDefault();
-                        navigationManager.goBack();
-                        break;
-                }
-            }
-            
-            // التنقل بين الصفحات
-            if (e.key === 'Escape') {
-                ui.toggleDrawer(false);
-                ui.toggleAuthModal(false);
-                ui.hideSearch();
-            }
-        });
-
-        // تحسينات إضافية لإمكانية الوصول
-        document.addEventListener('keyup', function(e) {
-            if (e.key === 'Tab') {
-                document.body.classList.add('keyboard-navigation');
-            }
-        });
-
-        document.addEventListener('mousedown', function() {
-            document.body.classList.remove('keyboard-navigation');
-        });
-
-        // إضافة تحسينات للشاشات التي تدعم Hover
-        if (window.matchMedia('(hover: hover)').matches) {
-            document.body.classList.add('has-hover');
-        }
-
-        // تحسينات للأجهزة التي تدعم اللمس
-        if ('ontouchstart' in window) {
-            document.body.classList.add('touch-device');
-            
-            // تحسين استجابة اللمس
-            document.addEventListener('touchstart', function() {}, { passive: true });
-        }
-
-        // إضافة تحليلات أداء
-        if ('performance' in window) {
-            const perfObserver = new PerformanceObserver((list) => {
-                list.getEntries().forEach((entry) => {
-                    console.log(`${entry.name}: ${entry.duration}ms`);
-                });
-            });
-
-            perfObserver.observe({ entryTypes: ['measure', 'navigation'] });
-        }
-
-        // تحسينات نهائية بعد تحميل كل شيء
-        window.addEventListener('load', function() {
-            // إخفاء شاشة التحميل
-            const splashScreen = document.getElementById('splashScreen');
-            if (splashScreen) {
-                splashScreen.style.display = 'none';
-            }
-
-            // تفعيل تحسينات الأداء
-            if (window.app) {
-                app.optimizePerformance();
-            }
-
-            // تحديث حالة التطبيق
-            console.log('App fully loaded and optimized');
-            
-            // إرسال إشعار تحميل ناجح
-            if (window.notificationsManager && authManager.getCurrentUser()) {
-                setTimeout(() => {
-                    notificationsManager.createAdminNotification(
-                        'التطبيق جاهز',
-                        'تم تحميل التطبيق بنجاح وجميع الميزات متاحة الآن',
-                        window.location.href
-                    );
-                }, 2000);
-            }
+        
+        // تحميل البيانات عند بدء التشغيل
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMangaData();
         });
     </script>
 </body>
