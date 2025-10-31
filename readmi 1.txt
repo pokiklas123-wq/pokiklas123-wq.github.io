@@ -1,0 +1,21 @@
+project/
+├── index.html
+├── manga.html
+├── chapter.html
+├── notifications.html
+├── auth.html
+├── css/
+│   ├── style.css
+│   └── responsive.css
+├── js/
+│   ├── firebase-config.js
+│   ├── auth.js
+│   ├── db.js
+│   ├── app.js
+│   ├── manga.js
+│   ├── chapter.js
+│   ├── notifications.js
+│   └── utils.js
+└── assets/
+    ├── images/
+    └── icons/
