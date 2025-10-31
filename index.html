@@ -3,9 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>موقع المانجا</title>
+    <title>مانجا أونلاين</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* إضافة أنماط للتحميل والأخطاء */
+        .error-state {
+            text-align: center;
+            padding: 2rem;
+            color: #e74c3c;
+        }
+        .error-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -13,7 +25,7 @@
         <button id="drawerToggle" class="btn btn-outline">
             <i class="fas fa-bars"></i>
         </button>
-        <a href="#" class="logo">مانجا أونلاين</a>
+        <a href="index.html" class="logo">مانجا أونلاين</a>
         <div class="search-container">
             <input type="text" class="search-input" placeholder="ابحث عن مانجا...">
             <div class="search-results"></div>
@@ -44,32 +56,32 @@
         <div id="userInfo" class="user-info hidden">
             <img src="" alt="صورة المستخدم" class="user-avatar">
             <div class="user-details">
-                <div class="user-name"></div>
-                <div class="user-email"></div>
+                <div class="user-name">مستخدم</div>
+                <div class="user-email">user@example.com</div>
             </div>
         </div>
         
         <ul class="drawer-menu">
             <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link">
+                <a href="index.html" class="drawer-menu-link">
                     <i class="fas fa-home"></i>
                     <span>الصفحة الرئيسية</span>
                 </a>
             </li>
             <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link">
+                <a href="#" class="drawer-menu-link" data-filter="popular">
                     <i class="fas fa-fire"></i>
                     <span>الأكثر مشاهدة</span>
                 </a>
             </li>
             <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link">
+                <a href="#" class="drawer-menu-link" data-filter="rating">
                     <i class="fas fa-star"></i>
                     <span>الأعلى تقييماً</span>
                 </a>
             </li>
             <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link">
+                <a href="#" class="drawer-menu-link" data-filter="latest">
                     <i class="fas fa-history"></i>
                     <span>الأحدث</span>
                 </a>
@@ -105,9 +117,9 @@
         </div>
         
         <div class="manga-grid" id="mangaGrid">
-            <!-- سيتم ملء هذا القسم بالبيانات من Firebase -->
             <div class="loading">
                 <div class="spinner"></div>
+                <p>جاري تحميل المانجا...</p>
             </div>
         </div>
     </div>
@@ -122,7 +134,7 @@
             <div class="footer-section">
                 <h3>روابط سريعة</h3>
                 <ul class="footer-links">
-                    <li><a href="#">الصفحة الرئيسية</a></li>
+                    <li><a href="index.html">الصفحة الرئيسية</a></li>
                     <li><a href="#">المانجا الجديدة</a></li>
                     <li><a href="#">الأكثر مشاهدة</a></li>
                     <li><a href="#">الأعلى تقييماً</a></li>
@@ -143,13 +155,31 @@
         </div>
     </footer>
 
-    <script src="js/firebase-config.js"></script>
+    <!-- تحميل Firebase أولاً -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <!-- ثم ملف التكوين -->
+    <script src="js/firebase-config.js"></script>
+    
+    <!-- ثم الملفات المساعدة -->
     <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/db.js"></script>
+    
+    <!-- وأخيراً التطبيق الرئيسي -->
     <script src="js/app.js"></script>
+    
+    <script>
+        // كود بسيط للتحقق من أن الصفحة تعمل
+        console.log('Page loaded successfully');
+        
+        // التحقق من وجود العناصر الأساسية
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM fully loaded');
+            console.log('Manga grid:', document.getElementById('mangaGrid'));
+            console.log('Auth button:', document.getElementById('authBtn'));
+            console.log('Drawer toggle:', document.getElementById('drawerToggle'));
+        });
+    </script>
 </body>
 </html>
