@@ -1,20 +1,20 @@
 class NavigationManager {
     constructor() {
+        this.history = [];
+        this.currentState = null;
         this.setupEventListeners();
+        this.setupBrowserBackButton();
     }
 
     setupEventListeners() {
         // العودة للصفحة الرئيسية
         document.getElementById('backToHome').addEventListener('click', () => {
-            app.saveState('homePage');
-            ui.navigateToPage('homePage');
+            this.goBack();
         });
 
         // العودة لصفحة تفاصيل المانجا
         document.getElementById('backToManga').addEventListener('click', () => {
-            const mangaId = mangaManager.getCurrentMangaId();
-            app.saveState('mangaDetailPage', mangaId);
-            ui.navigateToPage('mangaDetailPage');
+            this.goBack();
         });
 
         // التنقل بين التصنيفات
@@ -25,6 +25,174 @@ class NavigationManager {
                 ui.toggleDrawer(false);
             });
         });
+    }
+
+    setupBrowserBackButton() {
+        // التعامل مع زر الرجوع في المتصفح
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.page) {
+                this.handleBrowserBack(event.state);
+            } else if (this.history.length > 1) {
+                this.goBack();
+            } else {
+                this.showExitConfirmation();
+            }
+        });
+
+        // منع الخروج المباشر
+        this.preventAccidentalExit();
+    }
+
+    preventAccidentalExit() {
+        window.addEventListener('beforeunload', (event) => {
+            if (this.history.length > 1) {
+                event.preventDefault();
+                event.returnValue = 'هل تريد حقاً مغادرة التطبيق؟ قد تفقد التقدم غير المحفوظ.';
+                return event.returnValue;
+            }
+        });
+    }
+
+    showExitConfirmation() {
+        if (confirm('هل تريد مغادرة التطبيق؟')) {
+            window.close();
+        } else {
+            // إعادة إضافة الحالة الحالية للتاريخ
+            if (this.currentState) {
+                window.history.pushState(this.currentState, '', window.location.href);
+            }
+        }
+    }
+
+    navigateTo(pageId, data = {}) {
+        const state = {
+            page: pageId,
+            data: data,
+            timestamp: Date.now()
+        };
+
+        // إضافة للحالة الحالية
+        this.currentState = state;
+        this.history.push(state);
+
+        // تحديث عنوان URL وإضافة حالة جديدة للتاريخ
+        const url = this.generateURL(state);
+        window.history.pushState(state, '', url);
+
+        // حفظ الحالة في localStorage
+        this.saveState();
+
+        // التنقل للصفحة المطلوبة
+        ui.navigateToPage(pageId);
+
+        console.log('التنقل إلى:', pageId, 'التاريخ:', this.history.length);
+    }
+
+    generateURL(state) {
+        const baseURL = window.location.origin + window.location.pathname;
+        
+        switch (state.page) {
+            case 'mangaDetailPage':
+                return `${baseURL}?manga=${state.data.mangaId}`;
+            case 'chapterPage':
+                return `${baseURL}?manga=${state.data.mangaId}&chapter=${state.data.chapterId}`;
+            default:
+                return baseURL;
+        }
+    }
+
+    goBack() {
+        if (this.history.length > 1) {
+            // إزالة الحالة الحالية
+            this.history.pop();
+            const previousState = this.history[this.history.length - 1];
+            
+            // تحديث الحالة الحالية
+            this.currentState = previousState;
+            
+            // تحديث الـ URL
+            window.history.back();
+            
+            // استعادة الحالة
+            this.restoreState(previousState);
+            
+            console.log('العودة إلى:', previousState.page, 'التاريخ المتبقي:', this.history.length);
+        } else {
+            this.showExitConfirmation();
+        }
+    }
+
+    handleBrowserBack(state) {
+        // تحديث الحالة الحالية
+        this.currentState = state;
+        
+        // تحديث الـ history الداخلي
+        if (this.history.length > 0 && this.history[this.history.length - 1].timestamp !== state.timestamp) {
+            this.history = this.history.filter(item => item.timestamp <= state.timestamp);
+        }
+        
+        // استعادة الحالة
+        this.restoreState(state);
+    }
+
+    restoreState(state) {
+        if (!state) return;
+
+        switch (state.page) {
+            case 'homePage':
+                ui.navigateToPage('homePage');
+                break;
+                
+            case 'mangaDetailPage':
+                if (state.data.mangaId && mangaManager.mangaData[state.data.mangaId]) {
+                    const manga = mangaManager.mangaData[state.data.mangaId];
+                    mangaManager.showMangaDetail(state.data.mangaId, manga, true);
+                } else {
+                    ui.navigateToPage('homePage');
+                }
+                break;
+                
+            case 'chapterPage':
+                if (state.data.mangaId && state.data.chapterId && 
+                    mangaManager.mangaData[state.data.mangaId] && 
+                    mangaManager.mangaData[state.data.mangaId].chapters[state.data.chapterId]) {
+                    
+                    const manga = mangaManager.mangaData[state.data.mangaId];
+                    const chapter = manga.chapters[state.data.chapterId];
+                    mangaManager.showChapter(state.data.mangaId, state.data.chapterId, chapter, true);
+                } else {
+                    ui.navigateToPage('homePage');
+                }
+                break;
+                
+            default:
+                ui.navigateToPage('homePage');
+        }
+    }
+
+    saveState() {
+        const state = {
+            history: this.history,
+            currentState: this.currentState
+        };
+        localStorage.setItem('navigationState', JSON.stringify(state));
+    }
+
+    loadState() {
+        const savedState = localStorage.getItem('navigationState');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            this.history = state.history || [];
+            this.currentState = state.currentState;
+            
+            // استعادة الحالة الأخيرة إذا كانت موجودة
+            if (this.currentState) {
+                this.restoreState(this.currentState);
+            }
+        } else {
+            // الحالة الافتراضية - الصفحة الرئيسية
+            this.navigateTo('homePage');
+        }
     }
 
     sortManga(sortType) {
@@ -49,6 +217,16 @@ class NavigationManager {
 
             mangaManager.displaySortedManga(sortedManga);
         }
+    }
+
+    // دالة مساعدة للحصول على الحالة الحالية
+    getCurrentState() {
+        return this.currentState;
+    }
+
+    // دالة مساعدة لمعرفة إذا كان يمكن العودة للخلف
+    canGoBack() {
+        return this.history.length > 1;
     }
 }
 

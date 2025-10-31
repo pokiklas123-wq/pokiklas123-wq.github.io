@@ -235,6 +235,14 @@ class UI {
         
         // إخفاء البحث
         this.hideSearch();
+        
+        // إخفاء الدراور إذا كان مفتوحاً
+        this.toggleDrawer(false);
+        
+        // التمرير للأعلى
+        window.scrollTo(0, 0);
+        
+        console.log('تم التنقل إلى:', pageId);
     }
 }
 

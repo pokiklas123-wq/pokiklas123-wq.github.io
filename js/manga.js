@@ -47,6 +47,16 @@ class MangaManager {
         });
     }
 
+    displaySortedManga(sortedManga) {
+        const mangaGrid = document.getElementById('mangaGrid');
+        mangaGrid.innerHTML = '';
+
+        sortedManga.forEach(manga => {
+            const mangaCard = this.createMangaCard(manga.id, manga);
+            mangaGrid.appendChild(mangaCard);
+        });
+    }
+
     createMangaCard(mangaId, manga) {
         const card = document.createElement('div');
         card.className = 'manga-card';
@@ -109,8 +119,12 @@ class MangaManager {
         return starsHTML;
     }
 
-    async showMangaDetail(mangaId, manga) {
+    async showMangaDetail(mangaId, manga, fromNavigation = false) {
         this.currentMangaId = mangaId;
+        
+        if (!fromNavigation) {
+            navigationManager.navigateTo('mangaDetailPage', { mangaId: mangaId });
+        }
         
         ui.showLoading('loadingDetail');
         ui.hideElement('mangaDetailContent');
@@ -278,7 +292,14 @@ class MangaManager {
         return item;
     }
 
-    async showChapter(mangaId, chapterId, chapter) {
+    async showChapter(mangaId, chapterId, chapter, fromNavigation = false) {
+        if (!fromNavigation) {
+            navigationManager.navigateTo('chapterPage', { 
+                mangaId: mangaId, 
+                chapterId: chapterId 
+            });
+        }
+        
         ui.showLoading('loadingChapter');
         ui.hideElement('chapterContent');
 

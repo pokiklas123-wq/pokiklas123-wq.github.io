@@ -50,6 +50,7 @@ class AuthManager {
             // تحميل بيانات المستخدم
             setTimeout(() => {
                 mangaManager.loadMangaList();
+                ratingsManager.loadUserRatings();
             }, 1000);
             
         } catch (error) {
@@ -106,6 +107,7 @@ class AuthManager {
             if (user) {
                 // تحميل البيانات بعد تسجيل الدخول
                 mangaManager.loadMangaList();
+                ratingsManager.loadUserRatings();
             }
         });
     }
@@ -143,7 +145,7 @@ class AuthManager {
             await auth.signOut();
             this.currentUser = null;
             this.updateUI();
-            ui.navigateToPage('homePage');
+            navigationManager.navigateTo('homePage');
             mangaManager.loadMangaList();
         } catch (error) {
             console.error('Error logging out:', error);

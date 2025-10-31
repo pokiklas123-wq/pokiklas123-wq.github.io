@@ -33,8 +33,13 @@ class CommentsManager {
                 if (commentId) this.showReplyForm(commentId);
             }
             
-            if (e.target.id === 'submitReply' || e.target.closest('#submitReply')) {
-                this.submitReply();
+            if (e.target.classList.contains('submit-reply') || e.target.closest('.submit-reply')) {
+                const commentId = e.target.closest('.submit-reply').dataset.commentId;
+                if (commentId) this.submitReply(commentId);
+            }
+            
+            if (e.target.classList.contains('cancel-reply') || e.target.closest('.cancel-reply')) {
+                this.hideAllReplyForms();
             }
         });
     }
@@ -53,6 +58,11 @@ class CommentsManager {
             ui.toggleAuthModal(true);
             return;
         }
+
+        // منع الإرسال المزدوج
+        const submitBtn = document.getElementById('submitComment');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'جاري الإرسال...';
 
         try {
             const commentData = {
@@ -76,6 +86,9 @@ class CommentsManager {
             
         } catch (error) {
             ui.showAuthMessage('حدث خطأ في إرسال التعليق: ' + error.message, 'error');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'إرسال التعليق';
         }
     }
 
@@ -99,6 +112,8 @@ class CommentsManager {
 
     displayComments() {
         const commentsList = document.getElementById('commentsList');
+        if (!commentsList) return;
+        
         commentsList.innerHTML = '';
 
         if (!this.comments || Object.keys(this.comments).length === 0) {
@@ -151,8 +166,10 @@ class CommentsManager {
             </div>
             <div class="reply-form" id="reply-form-${commentId}" style="display: none;">
                 <textarea class="reply-input" placeholder="اكتب ردك..."></textarea>
-                <button class="btn submit-reply" data-comment-id="${commentId}">إرسال الرد</button>
-                <button class="btn cancel-reply">إلغاء</button>
+                <div class="reply-buttons">
+                    <button class="btn submit-reply" data-comment-id="${commentId}">إرسال الرد</button>
+                    <button class="btn cancel-reply">إلغاء</button>
+                </div>
             </div>
         `;
 
@@ -260,9 +277,7 @@ class CommentsManager {
 
     showReplyForm(commentId) {
         // إخفاء جميع نماذج الردود الأخرى
-        document.querySelectorAll('.reply-form').forEach(form => {
-            form.style.display = 'none';
-        });
+        this.hideAllReplyForms();
         
         const replyForm = document.getElementById(`reply-form-${commentId}`);
         if (replyForm) {
@@ -270,9 +285,49 @@ class CommentsManager {
         }
     }
 
-    async submitReply() {
-        // سيتم تنفيذ نظام الردود لاحقاً
-        ui.showAuthMessage('نظام الردود قيد التطوير', 'info');
+    hideAllReplyForms() {
+        document.querySelectorAll('.reply-form').forEach(form => {
+            form.style.display = 'none';
+        });
+    }
+
+    async submitReply(commentId) {
+        const replyForm = document.getElementById(`reply-form-${commentId}`);
+        const replyInput = replyForm.querySelector('.reply-input');
+        const replyText = replyInput.value.trim();
+        
+        if (!replyText) {
+            ui.showAuthMessage('يرجى كتابة رد قبل الإرسال', 'error');
+            return;
+        }
+        
+        if (!authManager.getCurrentUser()) {
+            ui.showAuthMessage('يجب تسجيل الدخول لإضافة رد', 'error');
+            ui.toggleAuthModal(true);
+            return;
+        }
+
+        try {
+            const replyData = {
+                user: authManager.getCurrentUser().displayName || authManager.getCurrentUser().email.split('@')[0],
+                text: replyText,
+                timestamp: Date.now(),
+                userId: authManager.getCurrentUser().uid
+            };
+
+            const replyRef = database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}/replies`).push();
+            await replyRef.set(replyData);
+            
+            replyInput.value = '';
+            this.hideAllReplyForms();
+            ui.showAuthMessage('تم إرسال الرد بنجاح', 'success');
+            
+            // إعادة تحميل التعليقات
+            await this.loadComments(this.currentMangaId, this.currentChapterId);
+            
+        } catch (error) {
+            ui.showAuthMessage('حدث خطأ في إرسال الرد: ' + error.message, 'error');
+        }
     }
 
     async sendLikeNotification(targetUserId, commentId) {

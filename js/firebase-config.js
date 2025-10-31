@@ -10,6 +10,12 @@ const firebaseConfig = {
 };
 
 // تهيئة Firebase
-firebase.initializeApp(firebaseConfig);
+try {
+    firebase.initializeApp(firebaseConfig);
+    console.log('Firebase initialized successfully');
+} catch (error) {
+    console.error('Firebase initialization error:', error);
+}
+
 const database = firebase.database();
 const auth = firebase.auth();
