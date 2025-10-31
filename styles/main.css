@@ -136,6 +136,12 @@ body {
     box-shadow: 0 6px 16px rgba(26, 115, 232, 0.4);
 }
 
+.highlight-comment {
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 0 10px var(--accent-color);
+    transition: all 0.5s ease-in-out;
+}
+
 .btn-secondary {
     background: transparent;
     border: 2px solid var(--accent-color);
