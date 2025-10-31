@@ -2,6 +2,14 @@ class MangaManager {
     constructor() {
         this.currentMangaId = null;
         this.mangaData = {};
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        // البحث في الوقت الحقيقي
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            this.filterManga(e.target.value);
+        });
     }
 
     async loadMangaList() {
@@ -65,6 +73,18 @@ class MangaManager {
         });
 
         return card;
+    }
+
+    filterManga(searchTerm) {
+        const mangaCards = document.querySelectorAll('.manga-card');
+        mangaCards.forEach(card => {
+            const title = card.querySelector('.manga-title').textContent.toLowerCase();
+            if (title.includes(searchTerm.toLowerCase()) || searchTerm === '') {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
     }
 
     generateStars(rating) {
@@ -136,11 +156,7 @@ class MangaManager {
                     <div class="rating-section">
                         <h3>قيم المانجا</h3>
                         <div class="rating-stars">
-                            <i class="far fa-star rating-star" data-rating="1"></i>
-                            <i class="far fa-star rating-star" data-rating="2"></i>
-                            <i class="far fa-star rating-star" data-rating="3"></i>
-                            <i class="far fa-star rating-star" data-rating="4"></i>
-                            <i class="far fa-star rating-star" data-rating="5"></i>
+                            ${this.generateRatingStars(mangaId)}
                         </div>
                     </div>
 
@@ -157,30 +173,61 @@ class MangaManager {
         `;
     }
 
+    generateRatingStars(mangaId) {
+        let starsHTML = '';
+        for (let i = 1; i <= 5; i++) {
+            starsHTML += `<i class="far fa-star rating-star" data-rating="${i}"></i>`;
+        }
+        return starsHTML;
+    }
+
     setupRatingSystem(mangaId) {
         const stars = document.querySelectorAll('.rating-star');
+        
+        // إضافة تأثير التمرير
         stars.forEach(star => {
-            star.addEventListener('click', () => {
+            star.addEventListener('mouseover', (e) => {
+                const rating = parseInt(e.target.dataset.rating);
+                this.highlightStars(rating);
+            });
+
+            star.addEventListener('mouseout', () => {
+                const userRating = ratingsManager.getUserRating(mangaId);
+                this.highlightStars(userRating);
+            });
+
+            star.addEventListener('click', (e) => {
                 if (!authManager.getCurrentUser()) {
                     ui.showAuthMessage('يجب تسجيل الدخول لتقييم المانجا', 'error');
                     ui.toggleAuthModal(true);
                     return;
                 }
 
-                const rating = parseInt(star.dataset.rating);
+                const rating = parseInt(e.target.dataset.rating);
                 ratingsManager.rateManga(mangaId, rating);
-                
-                // تحديث النجوم
-                stars.forEach((s, index) => {
-                    if (index < rating) {
-                        s.classList.remove('far');
-                        s.classList.add('fas', 'active');
-                    } else {
-                        s.classList.remove('fas', 'active');
-                        s.classList.add('far');
-                    }
-                });
+                this.highlightStars(rating);
             });
+        });
+
+        // عرض تقييم المستخدم الحالي إذا كان موجوداً
+        const userRating = ratingsManager.getUserRating(mangaId);
+        if (userRating > 0) {
+            this.highlightStars(userRating);
+        }
+    }
+
+    highlightStars(rating) {
+        const stars = document.querySelectorAll('.rating-star');
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.add('active');
+                star.classList.remove('far');
+                star.classList.add('fas');
+            } else {
+                star.classList.remove('active');
+                star.classList.remove('fas');
+                star.classList.add('far');
+            }
         });
     }
 
@@ -199,7 +246,11 @@ class MangaManager {
         });
 
         // ترتيب الفصول تنازلياً (الأحدث أولاً)
-        chaptersArray.sort((a, b) => b.id.localeCompare(a.id));
+        chaptersArray.sort((a, b) => {
+            const numA = parseInt(a.chapter_name.replace(/[^0-9]/g, '')) || 0;
+            const numB = parseInt(b.chapter_name.replace(/[^0-9]/g, '')) || 0;
+            return numB - numA;
+        });
 
         chaptersArray.forEach(chapter => {
             const chapterItem = this.createChapterItem(mangaId, chapter.id, chapter);
@@ -212,7 +263,12 @@ class MangaManager {
         item.className = 'chapter-item';
         item.innerHTML = `
             <span>${chapter.chapter_name}</span>
-            <i class="fas fa-arrow-left"></i>
+            <div>
+                <span class="chapter-likes">
+                    <i class="fas fa-heart"></i> ${chapter.chapter_like || 0}
+                </span>
+                <i class="fas fa-arrow-left"></i>
+            </div>
         `;
 
         item.addEventListener('click', () => {
@@ -236,11 +292,6 @@ class MangaManager {
         // تحميل التعليقات
         commentsManager.loadComments(mangaId, chapterId, chapter.comments);
 
-        // إعداد حدث إرسال التعليق
-        document.getElementById('submitComment').addEventListener('click', () => {
-            commentsManager.submitComment();
-        });
-
         ui.hideLoading('loadingChapter');
         ui.showElement('chapterContent');
         ui.navigateToPage('chapterPage');
@@ -251,6 +302,7 @@ class MangaManager {
             <div class="chapter-header">
                 <h1 class="chapter-title">${chapter.chapter_name}</h1>
                 <p class="chapter-subtitle">${chapter.chapter_title || ''}</p>
+                <p class="chapter-description">${chapter.description || ''}</p>
             </div>
             
             <div class="manga-pages" id="mangaPages"></div>

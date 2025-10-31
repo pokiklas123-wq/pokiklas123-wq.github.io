@@ -4,12 +4,18 @@ class App {
         this.init();
     }
 
-    init() {
-        // تهيئة جميع المكونات
-        this.setupEventListeners();
-        
-        // تحميل البيانات الأولية
-        this.loadInitialData();
+    async init() {
+        try {
+            // تهيئة جميع المكونات
+            this.setupEventListeners();
+            
+            // تحميل البيانات الأولية
+            await this.loadInitialData();
+            
+            console.log('التطبيق بدأ بنجاح');
+        } catch (error) {
+            console.error('خطأ في بدء التطبيق:', error);
+        }
     }
 
     setupEventListeners() {
@@ -19,15 +25,28 @@ class App {
                 commentsManager.submitComment();
             }
         });
+
+        // إعداد الأزرار الأساسية
+        document.getElementById('backToHome').addEventListener('click', () => {
+            ui.navigateToPage('homePage');
+        });
+
+        document.getElementById('backToManga').addEventListener('click', () => {
+            ui.navigateToPage('mangaDetailPage');
+        });
     }
 
     async loadInitialData() {
-        // تحميل قائمة المانجا
-        await mangaManager.loadMangaList();
-        
-        // تحميل تقييمات المستخدم إذا كان مسجلاً
-        if (authManager.getCurrentUser()) {
-            await ratingsManager.loadUserRatings();
+        try {
+            // تحميل قائمة المانجا
+            await mangaManager.loadMangaList();
+            
+            // تحميل تقييمات المستخدم إذا كان مسجلاً
+            if (authManager.getCurrentUser()) {
+                await ratingsManager.loadUserRatings();
+            }
+        } catch (error) {
+            console.error('خطأ في تحميل البيانات الأولية:', error);
         }
     }
 }

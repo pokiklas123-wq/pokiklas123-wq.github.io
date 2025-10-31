@@ -4,7 +4,11 @@ class RatingsManager {
     }
 
     async rateManga(mangaId, rating) {
-        if (!authManager.getCurrentUser()) return;
+        if (!authManager.getCurrentUser()) {
+            ui.showAuthMessage('يجب تسجيل الدخول لتقييم المانجا', 'error');
+            ui.toggleAuthModal(true);
+            return;
+        }
 
         try {
             // حفظ تقييم المستخدم
