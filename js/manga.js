@@ -1,20 +1,18 @@
-// js/manga.js - الملف المصحح
-
+// js/manga.js
 class MangaPage {
     constructor() {
         this.mangaId = this.getMangaIdFromURL();
         this.mangaData = null;
         this.currentUserRating = 0;
         
-        this.init();
+        if (this.mangaId) {
+            this.init();
+        } else {
+            this.showError('معرف المانجا غير موجود في الرابط');
+        }
     }
     
     init() {
-        if (!this.mangaId) {
-            this.showError('معرف المانجا غير موجود في الرابط');
-            return;
-        }
-        
         this.initializeFirebase();
         this.setupEventListeners();
         this.loadMangaData();
@@ -39,7 +37,6 @@ class MangaPage {
     }
     
     setupEventListeners() {
-        // الدراور
         const drawerToggle = document.getElementById('drawerToggle');
         const drawerClose = document.querySelector('.drawer-close');
         const drawerOverlay = document.querySelector('.drawer-overlay');
@@ -48,7 +45,6 @@ class MangaPage {
         if (drawerClose) drawerClose.addEventListener('click', () => this.closeDrawer());
         if (drawerOverlay) drawerOverlay.addEventListener('click', () => this.closeDrawer());
         
-        // السمات
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
             themeToggle.addEventListener('click', () => this.toggleTheme());
@@ -76,12 +72,11 @@ class MangaPage {
             this.mangaData.id = this.mangaId;
             this.displayMangaData();
             
-            // زيادة المشاهدات
             await this.incrementViews();
             
         } catch (error) {
             console.error('Error loading manga:', error);
-            this.showError('حدث خطأ في تحميل بيانات المانجا: ' + error.message);
+            this.showError('حدث خطأ في تحميل بيانات المانجا');
         }
     }
     
@@ -111,9 +106,9 @@ class MangaPage {
                 <div class="manga-poster">
                     <img src="${this.mangaData.thumbnail}" alt="${this.mangaData.name}">
                 </div>
-                <div class="manga-info">
-                    <h1 class="manga-title">${this.mangaData.name}</h1>
-                    <div class="manga-meta">
+                <div class="manga-info-large">
+                    <h1 class="manga-title-large">${this.mangaData.name}</h1>
+                    <div class="manga-meta-large">
                         <div class="meta-item">
                             <i class="fas fa-eye"></i>
                             <span>${this.mangaData.views || 0} مشاهدة</span>
@@ -126,6 +121,9 @@ class MangaPage {
                             <i class="fas fa-list"></i>
                             <span>${Object.keys(this.mangaData.chapters || {}).length} فصل</span>
                         </div>
+                    </div>
+                    <div class="manga-description">
+                        <p>استمتع بقراءة ${this.mangaData.name} بأفضل جودة. يمكنك قراءة جميع الفصول مجاناً.</p>
                     </div>
                 </div>
             </div>
@@ -191,18 +189,11 @@ class MangaPage {
     }
     
     changeTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
+        Utils.saveTheme(theme);
         
         const icon = document.querySelector('#themeToggle i');
         if (icon) {
-            if (theme === 'dark') {
-                icon.className = 'fas fa-sun';
-            } else if (theme === 'blue') {
-                icon.className = 'fas fa-palette';
-            } else {
-                icon.className = 'fas fa-moon';
-            }
+            icon.className = `fas ${Utils.getThemeIcon(theme)}`;
         }
         
         const themeOptions = document.querySelectorAll('.theme-option');
@@ -229,7 +220,6 @@ class MangaPage {
     }
 }
 
-// تهيئة صفحة المانجا
 let mangaPage;
 
 document.addEventListener('DOMContentLoaded', () => {

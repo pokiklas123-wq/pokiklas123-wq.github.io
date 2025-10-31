@@ -1,4 +1,4 @@
-// js/firebase-config.js - الملف الصحيح
+// js/firebase-config.js
 const firebaseConfig = {
     apiKey: "AIzaSyBfcjTc-bfiRocYeBSmUrxid6WEVBYvVTg",
     authDomain: "pgfxtool-pro.firebaseapp.com",
@@ -9,11 +9,11 @@ const firebaseConfig = {
     appId: "1:1096122383871:android:82a42721ccff8294d33bca"
 };
 
-// تهيئة Firebase فوراً
+// التهيئة التلقائية
 try {
-    if (!firebase.apps.length) {
+    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
 } catch (error) {
-    console.error('Error initializing Firebase:', error);
+    console.error('Firebase initialization error:', error);
 }

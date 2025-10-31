@@ -1,5 +1,4 @@
-// js/auth-page.js - الملف المصحح
-
+// js/auth-page.js
 class AuthPage {
     constructor() {
         this.currentTab = 'login';
@@ -25,11 +24,11 @@ class AuthPage {
             this.db = firebase.database();
         } catch (error) {
             console.error('Firebase init error:', error);
+            this.showFormMessage('خطأ في تهيئة النظام', 'error');
         }
     }
     
     setupEventListeners() {
-        // التبويبات
         document.querySelectorAll('.auth-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 const tabName = e.target.getAttribute('data-tab');
@@ -37,7 +36,6 @@ class AuthPage {
             });
         });
         
-        // النماذج
         document.getElementById('loginForm')?.addEventListener('submit', (e) => {
             e.preventDefault();
             this.handleLogin();
@@ -53,7 +51,6 @@ class AuthPage {
             this.handleResetPassword();
         });
         
-        // الروابط
         document.getElementById('forgotPasswordLink')?.addEventListener('click', (e) => {
             e.preventDefault();
             this.showResetPasswordForm();
@@ -70,20 +67,15 @@ class AuthPage {
     switchTab(tabName) {
         this.currentTab = tabName;
         
-        // تحديث التبويبات
         document.querySelectorAll('.auth-tab').forEach(tab => {
             tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
         });
         
-        // تحديث النماذج
         document.querySelectorAll('.auth-form').forEach(form => {
             form.classList.toggle('active', form.id === `${tabName}Form`);
         });
         
-        // تحديث العناوين
         this.updateAuthHeader(tabName);
-        
-        // مسح الرسائل
         this.clearFormMessage();
     }
     
@@ -124,7 +116,6 @@ class AuthPage {
         try {
             const result = await this.auth.signInWithEmailAndPassword(email, password);
             
-            // تحديث lastLogin
             await this.db.ref('users/' + result.user.uid).update({
                 lastLogin: Date.now()
             });
@@ -133,7 +124,7 @@ class AuthPage {
             
             setTimeout(() => {
                 window.location.href = 'index.html';
-            }, 2000);
+            }, 1500);
             
         } catch (error) {
             this.showFormMessage(this.getAuthErrorMessage(error), 'error');
@@ -156,12 +147,10 @@ class AuthPage {
         try {
             const result = await this.auth.createUserWithEmailAndPassword(email, password);
             
-            // تحديث الملف الشخصي
             await result.user.updateProfile({
                 displayName: name
             });
             
-            // حفظ بيانات المستخدم
             const userData = {
                 displayName: name,
                 email: email,
@@ -189,7 +178,7 @@ class AuthPage {
             
             setTimeout(() => {
                 window.location.href = 'index.html';
-            }, 2000);
+            }, 1500);
             
         } catch (error) {
             this.showFormMessage(this.getAuthErrorMessage(error), 'error');
@@ -245,6 +234,11 @@ class AuthPage {
             return false;
         }
         
+        if (name.length < 2) {
+            this.showFormMessage('الاسم يجب أن يكون على الأقل حرفين', 'error');
+            return false;
+        }
+        
         if (!Utils.validateEmail(email)) {
             this.showFormMessage('يرجى إدخال بريد إلكتروني صحيح', 'error');
             return false;
@@ -263,6 +257,10 @@ class AuthPage {
         return true;
     }
     
+    validateEmail(email) {
+        return Utils.validateEmail(email);
+    }
+    
     getAuthErrorMessage(error) {
         const errorMessages = {
             'auth/invalid-email': 'البريد الإلكتروني غير صحيح',
@@ -271,7 +269,8 @@ class AuthPage {
             'auth/wrong-password': 'كلمة السر غير صحيحة',
             'auth/email-already-in-use': 'هذا البريد الإلكتروني مستخدم بالفعل',
             'auth/weak-password': 'كلمة السر ضعيفة جداً',
-            'auth/network-request-failed': 'خطأ في الاتصال بالإنترنت'
+            'auth/network-request-failed': 'خطأ في الاتصال بالإنترنت',
+            'auth/too-many-requests': 'محاولات تسجيل دخول كثيرة جداً، يرجى المحاولة لاحقاً'
         };
         
         return errorMessages[error.code] || error.message || 'حدث خطأ غير متوقع';
@@ -303,6 +302,7 @@ class AuthPage {
     clearFormMessage() {
         const formMessage = document.getElementById('formMessage');
         formMessage.className = 'form-message';
+        formMessage.style.display = 'none';
     }
     
     checkAuthState() {

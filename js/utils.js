@@ -1,4 +1,4 @@
-// js/utils.js - الملف المصحح
+// js/utils.js
 class Utils {
     static formatTimestamp(timestamp) {
         if (!timestamp) return '';
@@ -31,37 +31,20 @@ class Utils {
     static showMessage(message, type = 'info') {
         // إزالة أي رسائل سابقة
         const existingMessages = document.querySelectorAll('.message');
-        existingMessages.forEach(msg => msg.remove());
+        existingMessages.forEach(msg => {
+            msg.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (msg.parentNode) {
+                    msg.parentNode.removeChild(msg);
+                }
+            }, 300);
+        });
         
         // إنشاء عنصر الرسالة
         const messageEl = document.createElement('div');
         messageEl.className = `message message-${type}`;
         messageEl.textContent = message;
-        
-        // إضافة الأنماط
-        messageEl.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            color: white;
-            z-index: 10000;
-            max-width: 400px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            animation: slideIn 0.3s ease;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        `;
-        
-        if (type === 'success') {
-            messageEl.style.backgroundColor = '#27ae60';
-        } else if (type === 'error') {
-            messageEl.style.backgroundColor = '#e74c3c';
-        } else if (type === 'warning') {
-            messageEl.style.backgroundColor = '#f39c12';
-        } else {
-            messageEl.style.backgroundColor = '#3498db';
-        }
+        messageEl.style.backgroundColor = this.getMessageColor(type);
         
         // إضافة الرسالة إلى الصفحة
         document.body.appendChild(messageEl);
@@ -78,24 +61,17 @@ class Utils {
             }
         }, 5000);
         
-        // إضافة أنيميشن للرسالة
-        if (!document.querySelector('#message-styles')) {
-            const style = document.createElement('style');
-            style.id = 'message-styles';
-            style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(100%); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOut {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(100%); opacity: 0; }
-                }
-            `;
-            document.head.appendChild(style);
-        }
-        
         return messageEl;
+    }
+    
+    static getMessageColor(type) {
+        const colors = {
+            'success': '#27ae60',
+            'error': '#e74c3c',
+            'warning': '#f39c12',
+            'info': '#3498db'
+        };
+        return colors[type] || colors.info;
     }
     
     static validateEmail(email) {
@@ -105,12 +81,17 @@ class Utils {
     }
     
     static requireAuth(redirectTo = 'auth.html') {
-        const user = firebase.auth().currentUser;
-        if (!user) {
+        try {
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                window.location.href = redirectTo;
+                return false;
+            }
+            return true;
+        } catch (error) {
             window.location.href = redirectTo;
             return false;
         }
-        return true;
     }
     
     static loadTheme() {
@@ -133,15 +114,43 @@ class Utils {
         }
     }
     
-    static debug(message, data = null) {
-        if (console && console.log) {
-            console.log(`[DEBUG] ${message}`, data || '');
-        }
+    static getThemeIcon(theme) {
+        const icons = {
+            'light': 'fa-moon',
+            'dark': 'fa-sun',
+            'blue': 'fa-palette'
+        };
+        return icons[theme] || icons.light;
     }
     
-    static handleImageError(img) {
-        console.warn('Image failed to load:', img.src);
-        img.style.opacity = '0.5';
-        img.style.background = '#f0f0f0';
+    static async sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    static debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+    
+    static sanitizeInput(input) {
+        const div = document.createElement('div');
+        div.textContent = input;
+        return div.innerHTML;
+    }
+    
+    static formatNumber(num) {
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + 'M';
+        } else if (num >= 1000) {
+            return (num / 1000).toFixed(1) + 'K';
+        }
+        return num.toString();
     }
 }

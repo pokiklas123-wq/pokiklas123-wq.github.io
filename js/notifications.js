@@ -1,4 +1,4 @@
-// إدارة صفحة الإشعارات
+// js/notifications.js
 class NotificationsPage {
     constructor() {
         this.notifications = [];
@@ -15,56 +15,41 @@ class NotificationsPage {
             return;
         }
         
+        this.initializeFirebase();
         this.setupEventListeners();
         this.loadNotifications();
         Utils.loadTheme();
     }
     
+    initializeFirebase() {
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            this.db = firebase.database();
+        } catch (error) {
+            console.error('Firebase init error:', error);
+        }
+    }
+    
     setupEventListeners() {
-        // فتح وإغلاق الدراور
         const drawerToggle = document.getElementById('drawerToggle');
         const drawerClose = document.querySelector('.drawer-close');
         const drawerOverlay = document.querySelector('.drawer-overlay');
         
-        if (drawerToggle) {
-            drawerToggle.addEventListener('click', () => this.openDrawer());
-        }
+        if (drawerToggle) drawerToggle.addEventListener('click', () => this.openDrawer());
+        if (drawerClose) drawerClose.addEventListener('click', () => this.closeDrawer());
+        if (drawerOverlay) drawerOverlay.addEventListener('click', () => this.closeDrawer());
         
-        if (drawerClose) {
-            drawerClose.addEventListener('click', () => this.closeDrawer());
-        }
-        
-        if (drawerOverlay) {
-            drawerOverlay.addEventListener('click', () => this.closeDrawer());
-        }
-        
-        // تعيين الكل كمقروء
         const markAllReadBtn = document.getElementById('markAllRead');
         if (markAllReadBtn) {
             markAllReadBtn.addEventListener('click', () => this.markAllAsRead());
         }
     }
     
-    openDrawer() {
-        const drawer = document.querySelector('.drawer');
-        const drawerOverlay = document.querySelector('.drawer-overlay');
-        
-        drawer.classList.add('open');
-        drawerOverlay.classList.add('open');
-    }
-    
-    closeDrawer() {
-        const drawer = document.querySelector('.drawer');
-        const drawerOverlay = document.querySelector('.drawer-overlay');
-        
-        drawer.classList.remove('open');
-        drawerOverlay.classList.remove('open');
-    }
-    
     async loadNotifications() {
         try {
-            const notificationsRef = firebase.database().ref(`notifications/${this.currentUser.uid}`);
-            const snapshot = await notificationsRef.once('value');
+            const snapshot = await this.db.ref(`notifications/${this.currentUser.uid}`).once('value');
             const notificationsData = snapshot.val();
             
             this.notifications = [];
@@ -76,7 +61,6 @@ class NotificationsPage {
                     this.notifications.push(notification);
                 });
                 
-                // ترتيب الإشعارات من الأحدث إلى الأقدم
                 this.notifications.sort((a, b) => b.timestamp - a.timestamp);
             }
             
@@ -134,12 +118,10 @@ class NotificationsPage {
             </div>
         `).join('');
         
-        // إضافة event listeners للإشعارات
         this.setupNotificationInteractions();
     }
     
     setupNotificationInteractions() {
-        // تعيين كمقروء
         document.querySelectorAll('.mark-read-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -148,7 +130,6 @@ class NotificationsPage {
             });
         });
         
-        // عرض الإشعار
         document.querySelectorAll('.view-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -157,7 +138,6 @@ class NotificationsPage {
             });
         });
         
-        // حذف الإشعار
         document.querySelectorAll('.delete-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -166,7 +146,6 @@ class NotificationsPage {
             });
         });
         
-        // النقر على الإشعار
         document.querySelectorAll('.notification-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 if (!e.target.classList.contains('action-btn')) {
@@ -179,21 +158,15 @@ class NotificationsPage {
     
     async markAsRead(notificationId) {
         try {
-            const notificationRef = firebase.database().ref(`notifications/${this.currentUser.uid}/${notificationId}`);
-            await notificationRef.update({
+            await this.db.ref(`notifications/${this.currentUser.uid}/${notificationId}`).update({
                 read: true
             });
             
-            // تحديث الواجهة
             const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
             if (notificationItem) {
                 notificationItem.classList.remove('unread');
-                
-                // إزالة زر تعيين كمقروء
                 const markReadBtn = notificationItem.querySelector('.mark-read-btn');
-                if (markReadBtn) {
-                    markReadBtn.remove();
-                }
+                if (markReadBtn) markReadBtn.remove();
             }
             
             Utils.showMessage('تم تعيين الإشعار كمقروء', 'success');
@@ -215,9 +188,7 @@ class NotificationsPage {
             });
             
             if (Object.keys(updates).length > 0) {
-                await firebase.database().ref().update(updates);
-                
-                // تحديث الواجهة
+                await this.db.ref().update(updates);
                 this.loadNotifications();
                 Utils.showMessage('تم تعيين جميع الإشعارات كمقروء', 'success');
             } else {
@@ -230,20 +201,12 @@ class NotificationsPage {
     }
     
     async deleteNotification(notificationId) {
-        if (!confirm('هل أنت متأكد من حذف هذا الإشعار؟')) {
-            return;
-        }
+        if (!confirm('هل أنت متأكد من حذف هذا الإشعار؟')) return;
         
         try {
-            const notificationRef = firebase.database().ref(`notifications/${this.currentUser.uid}/${notificationId}`);
-            await notificationRef.remove();
-            
-            // إزالة من القائمة
+            await this.db.ref(`notifications/${this.currentUser.uid}/${notificationId}`).remove();
             this.notifications = this.notifications.filter(n => n.id !== notificationId);
-            
-            // تحديث الواجهة
             this.displayNotifications();
-            
             Utils.showMessage('تم حذف الإشعار بنجاح', 'success');
             
         } catch (error) {
@@ -255,8 +218,6 @@ class NotificationsPage {
         const notification = this.notifications.find(n => n.id === notificationId);
         if (notification && notification.link) {
             window.location.href = notification.link;
-            
-            // تعيين كمقروء إذا لم يكن
             if (!notification.read) {
                 this.markAsRead(notificationId);
             }
@@ -265,13 +226,9 @@ class NotificationsPage {
     
     handleNotificationClick(notificationId) {
         const notification = this.notifications.find(n => n.id === notificationId);
-        
-        // تعيين كمقروء إذا لم يكن
         if (!notification.read) {
             this.markAsRead(notificationId);
         }
-        
-        // الانتقال إلى الرابط إذا كان موجوداً
         if (notification.link) {
             window.location.href = notification.link;
         }
@@ -303,9 +260,22 @@ class NotificationsPage {
             `;
         }
     }
+    
+    openDrawer() {
+        const drawer = document.querySelector('.drawer');
+        const drawerOverlay = document.querySelector('.drawer-overlay');
+        if (drawer) drawer.classList.add('open');
+        if (drawerOverlay) drawerOverlay.classList.add('open');
+    }
+    
+    closeDrawer() {
+        const drawer = document.querySelector('.drawer');
+        const drawerOverlay = document.querySelector('.drawer-overlay');
+        if (drawer) drawer.classList.remove('open');
+        if (drawerOverlay) drawerOverlay.classList.remove('open');
+    }
 }
 
-// تهيئة صفحة الإشعارات
 let notificationsPage;
 
 document.addEventListener('DOMContentLoaded', () => {
