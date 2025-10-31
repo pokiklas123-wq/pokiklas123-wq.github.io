@@ -24,86 +24,8 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
     <link rel="stylesheet" href="styles/responsive.css">
-    
-    <!-- أنماط إضافية -->
-    <style>
-        /* شاشة التحميل الأولية */
-        #splashScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .splash-logo {
-            font-size: 3rem;
-            color: var(--accent-color);
-        }
-        
-        .splash-text {
-            font-size: 1.5rem;
-            color: var(--text-color);
-            font-weight: 600;
-        }
-        
-        .splash-loading {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--border-color);
-            border-top: 3px solid var(--accent-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        /* شارة الإشعارات */
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            background: #ff4757;
-            color: white;
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 0.7rem;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-        }
-        
-        /* تحسينات التنقل باللوحة المفاتيح */
-        .keyboard-navigation .btn:focus,
-        .keyboard-navigation .manga-card:focus,
-        .keyboard-navigation .chapter-item:focus {
-            outline: 2px solid var(--accent-color);
-            outline-offset: 2px;
-        }
-        
-        /* تحسينات الأداء */
-        .manga-page {
-            content-visibility: auto;
-        }
-    </style>
 </head>
 <body>
-    <!-- شاشة التحميل -->
-    <div id="splashScreen">
-        <div class="splash-logo">
-            <i class="fas fa-book-open"></i>
-        </div>
-        <div class="splash-text">مانجا - manus</div>
-        <div class="splash-loading"></div>
-    </div>
-
     <!-- الهيدر -->
     <header>
         <button class="btn menu-btn" id="menuBtn">
@@ -145,10 +67,6 @@
                 <li id="drawerHomeLink">
                     <i class="fas fa-home"></i> الرئيسية
                 </li>
-                <li id="notificationsLink">
-                    <i class="fas fa-bell"></i> الإشعارات
-                    <span class="notification-badge" id="drawerNotificationBadge"></span>
-                </li>
             </ul>
         </div>
         
@@ -156,9 +74,7 @@
         <div class="drawer-section">
             <h3>الحساب</h3>
             <div id="userSection">
-                <button class="btn drawer-login-btn" id="drawerLoginBtn">
-                    <i class="fas fa-sign-in-alt"></i> تسجيل الدخول
-                </button>
+                <button class="btn drawer-login-btn" id="drawerLoginBtn">تسجيل الدخول</button>
             </div>
         </div>
 
@@ -209,9 +125,6 @@
             <button class="btn clear-cache-btn" id="clearCacheBtn">
                 <i class="fas fa-broom"></i> مسح الذاكرة المؤقتة
             </button>
-            <button class="btn share-drawer-btn" id="shareDrawerBtn">
-                <i class="fas fa-share"></i> مشاركة التطبيق
-            </button>
         </div>
     </div>
 
@@ -259,48 +172,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- صفحة الإشعارات -->
-        <div id="notificationsPage" class="page">
-            <div class="page-header">
-                <button class="btn back-btn" id="backFromNotifications">
-                    <i class="fas fa-arrow-right"></i> العودة
-                </button>
-                <h2 class="page-title">الإشعارات</h2>
-            </div>
-            <div class="notifications-page-content">
-                <div class="notifications-tabs">
-                    <button class="tab-btn active" data-tab="user">إشعارات المستخدم</button>
-                    <button class="tab-btn" data-tab="admin" id="adminNotificationsTab" style="display: none;">
-                        إشعارات النظام
-                    </button>
-                </div>
-                <div class="tab-content">
-                    <div class="tab-pane active" id="user-notifications">
-                        <div class="notifications-actions">
-                            <button class="btn mark-all-read-btn" id="markUserNotificationsRead">
-                                <i class="fas fa-check-double"></i> وضع الكل كمقروء
-                            </button>
-                            <button class="btn clear-all-btn" id="clearUserNotifications">
-                                <i class="fas fa-trash"></i> مسح الكل
-                            </button>
-                        </div>
-                        <div class="notifications-list" id="userNotificationsList"></div>
-                    </div>
-                    <div class="tab-pane" id="admin-notifications">
-                        <div class="notifications-actions">
-                            <button class="btn mark-all-read-btn" id="markAdminNotificationsRead">
-                                <i class="fas fa-check-double"></i> وضع الكل كمقروء
-                            </button>
-                            <button class="btn clear-all-btn" id="clearAdminNotifications">
-                                <i class="fas fa-trash"></i> مسح الكل
-                            </button>
-                        </div>
-                        <div class="notifications-list" id="adminNotificationsList"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- نافذة تسجيل الدخول -->
@@ -311,35 +182,14 @@
             </button>
             <h2>تسجيل الدخول</h2>
             <div class="auth-form">
-                <input type="text" class="auth-input" id="displayName" placeholder="اسم المستخدم (للتسجيل فقط)">
+                <input type="text" class="auth-input" id="displayName" placeholder="اسم المستخدم (إجباري)">
                 <input type="email" class="auth-input" id="loginEmail" placeholder="البريد الإلكتروني">
                 <input type="password" class="auth-input" id="loginPassword" placeholder="كلمة المرور">
                 <div class="auth-buttons">
                     <button class="btn auth-login-btn" id="loginSubmit">تسجيل الدخول</button>
                     <button class="btn auth-signup-btn" id="signupSubmit">إنشاء حساب</button>
                 </div>
-                <div class="auth-options">
-                    <button class="btn-link" id="forgotPasswordBtn">نسيت كلمة المرور؟</button>
-                </div>
                 <div id="authMessage" class="auth-message"></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- نافذة إعادة تعيين كلمة المرور -->
-    <div class="auth-modal" id="resetPasswordModal">
-        <div class="auth-modal-content">
-            <button class="close-modal" id="closeResetModal">
-                <i class="fas fa-times"></i>
-            </button>
-            <h2>إعادة تعيين كلمة المرور</h2>
-            <div class="auth-form">
-                <input type="email" class="auth-input" id="resetEmail" placeholder="البريد الإلكتروني">
-                <div class="auth-buttons">
-                    <button class="btn auth-reset-btn" id="resetSubmit">إرسال رابط التعيين</button>
-                    <button class="btn btn-secondary" id="cancelReset">إلغاء</button>
-                </div>
-                <div id="resetMessage" class="auth-message"></div>
             </div>
         </div>
     </div>
@@ -358,285 +208,5 @@
     <script src="js/notifications.js"></script>
     <script src="js/navigation.js"></script>
     <script src="js/app.js"></script>
-
-    <!-- التهيئة النهائية -->
-    <script>
-        // إخفاء شاشة التحميل بعد تحميل كل شيء
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                const splashScreen = document.getElementById('splashScreen');
-                if (splashScreen) {
-                    splashScreen.style.opacity = '0';
-                    splashScreen.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => {
-                        splashScreen.style.display = 'none';
-                    }, 500);
-                }
-            }, 1000);
-        });
-
-        // إضافة زر الإشعارات في الدراور
-        document.getElementById('notificationsLink')?.addEventListener('click', function() {
-            ui.showNotificationsPage();
-            ui.toggleDrawer(false);
-        });
-
-        // إضافة زر نسيت كلمة المرور
-        document.getElementById('forgotPasswordBtn')?.addEventListener('click', function() {
-            ui.toggleAuthModal(false);
-            document.getElementById('resetPasswordModal').classList.add('active');
-        });
-
-        // إغلاق نافذة إعادة التعيين
-        document.getElementById('closeResetModal')?.addEventListener('click', function() {
-            document.getElementById('resetPasswordModal').classList.remove('active');
-        });
-
-        document.getElementById('cancelReset')?.addEventListener('click', function() {
-            document.getElementById('resetPasswordModal').classList.remove('active');
-        });
-
-        // إرسال طلب إعادة تعيين كلمة المرور
-        document.getElementById('resetSubmit')?.addEventListener('click', function() {
-            const email = document.getElementById('resetEmail').value;
-            if (!email) {
-                document.getElementById('resetMessage').textContent = 'يرجى إدخال البريد الإلكتروني';
-                document.getElementById('resetMessage').className = 'auth-message error';
-                document.getElementById('resetMessage').style.display = 'block';
-                return;
-            }
-
-            authManager.resetPassword(email).then(success => {
-                if (success) {
-                    document.getElementById('resetPasswordModal').classList.remove('active');
-                }
-            });
-        });
-
-        // التحقق من صلاحيات الأدمن وتحديث الواجهة
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const isAdmin = await authManager.isAdmin();
-                const adminTab = document.getElementById('adminNotificationsTab');
-                if (adminTab) {
-                    adminTab.style.display = isAdmin ? 'block' : 'none';
-                }
-            }
-        });
-
-        // إضافة أزرار التحكم في الإشعارات
-        document.addEventListener('click', function(e) {
-            if (e.target.id === 'markUserNotificationsRead' || e.target.closest('#markUserNotificationsRead')) {
-                notificationsManager.markAllAsRead('user');
-            }
-            
-            if (e.target.id === 'clearUserNotifications' || e.target.closest('#clearUserNotifications')) {
-                notificationsManager.clearAllNotifications('user');
-            }
-            
-            if (e.target.id === 'markAdminNotificationsRead' || e.target.closest('#markAdminNotificationsRead')) {
-                notificationsManager.markAllAsRead('admin');
-            }
-            
-            if (e.target.id === 'clearAdminNotifications' || e.target.closest('#clearAdminNotifications')) {
-                notificationsManager.clearAllNotifications('admin');
-            }
-        });
-
-        // تحسين أداء الصور
-        document.addEventListener('DOMContentLoaded', function() {
-            const images = document.querySelectorAll('img');
-            images.forEach(img => {
-                img.addEventListener('load', function() {
-                    this.style.opacity = '1';
-                });
-                img.addEventListener('error', function() {
-                    this.style.opacity = '1';
-                    console.warn('Failed to load image:', this.src);
-                });
-                img.style.opacity = '0';
-                img.style.transition = 'opacity 0.3s ease';
-            });
-        });
-
-        // إدارة حالة الاتصال
-        window.addEventListener('online', function() {
-            console.log('Application is online');
-            // إعادة تحميل البيانات عند عودة الاتصال
-            setTimeout(() => {
-                if (window.mangaManager) {
-                    mangaManager.loadMangaList();
-                }
-                if (window.notificationsManager && authManager.getCurrentUser()) {
-                    notificationsManager.loadNotifications();
-                }
-            }, 1000);
-        });
-
-        window.addEventListener('offline', function() {
-            console.log('Application is offline');
-            ui.showAlert('أنت غير متصل بالإنترنت', 'warning', 5000);
-        });
-
-        // تحسين تجربة الهواتف
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js').then(function(registration) {
-                console.log('ServiceWorker registration successful');
-            }).catch(function(err) {
-                console.log('ServiceWorker registration failed: ', err);
-            });
-        }
-
-        // منع التكبير على iOS
-        document.addEventListener('touchmove', function(e) {
-            if (e.scale !== 1) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        // تحسين الأداء على الهواتف
-        if ('connection' in navigator) {
-            const connection = navigator.connection;
-            if (connection.saveData) {
-                // تفعيل وضع توفير البيانات
-                document.documentElement.classList.add('save-data');
-            }
-        }
-
-        // إضافة تحليل الاستخدام (بدون بيانات شخصية)
-        window.addEventListener('pagehide', function() {
-            if (window.app) {
-                const stats = app.getAppStats();
-                console.log('App session stats:', stats);
-            }
-        });
-
-        // تحسين الذاكرة
-        window.addEventListener('beforeunload', function() {
-            // تنظيف الذاكرة قبل مغادرة الصفحة
-            if (window.gc) {
-                window.gc();
-            }
-        });
-
-        // إضافة تحسينات إضافية للشاشات الصغيرة
-        function handleResize() {
-            const isMobile = window.innerWidth <= 768;
-            document.body.classList.toggle('mobile-view', isMobile);
-            
-            // إخفاء القائمة الجانبية تلقائياً على الهواتف
-            if (isMobile && document.getElementById('drawer').classList.contains('open')) {
-                setTimeout(() => {
-                    ui.toggleDrawer(false);
-                }, 3000);
-            }
-        }
-
-        window.addEventListener('resize', handleResize);
-        handleResize();
-
-        // تحسينات إضافية للأداء
-        if ('requestIdleCallback' in window) {
-            requestIdleCallback(() => {
-                // تحميل العناصر غير الحرجة عند توفر الوقت
-                const lazyElements = document.querySelectorAll('[data-lazy]');
-                lazyElements.forEach(el => {
-                    el.src = el.dataset.lazy;
-                    el.removeAttribute('data-lazy');
-                });
-            });
-        }
-
-        // إضافة تحسينات للوحة المفاتيح
-        document.addEventListener('keydown', function(e) {
-            // اختصارات لوحة المفاتيح
-            if (e.ctrlKey || e.metaKey) {
-                switch(e.key) {
-                    case 'k':
-                        e.preventDefault();
-                        ui.toggleSearch();
-                        break;
-                    case 'm':
-                        e.preventDefault();
-                        ui.toggleDrawer(true);
-                        break;
-                    case 'ArrowRight':
-                        e.preventDefault();
-                        navigationManager.goBack();
-                        break;
-                }
-            }
-            
-            // التنقل بين الصفحات
-            if (e.key === 'Escape') {
-                ui.toggleDrawer(false);
-                ui.toggleAuthModal(false);
-                ui.hideSearch();
-            }
-        });
-
-        // تحسينات إضافية لإمكانية الوصول
-        document.addEventListener('keyup', function(e) {
-            if (e.key === 'Tab') {
-                document.body.classList.add('keyboard-navigation');
-            }
-        });
-
-        document.addEventListener('mousedown', function() {
-            document.body.classList.remove('keyboard-navigation');
-        });
-
-        // إضافة تحسينات للشاشات التي تدعم Hover
-        if (window.matchMedia('(hover: hover)').matches) {
-            document.body.classList.add('has-hover');
-        }
-
-        // تحسينات للأجهزة التي تدعم اللمس
-        if ('ontouchstart' in window) {
-            document.body.classList.add('touch-device');
-            
-            // تحسين استجابة اللمس
-            document.addEventListener('touchstart', function() {}, { passive: true });
-        }
-
-        // إضافة تحليلات أداء
-        if ('performance' in window) {
-            const perfObserver = new PerformanceObserver((list) => {
-                list.getEntries().forEach((entry) => {
-                    console.log(`${entry.name}: ${entry.duration}ms`);
-                });
-            });
-
-            perfObserver.observe({ entryTypes: ['measure', 'navigation'] });
-        }
-
-        // تحسينات نهائية بعد تحميل كل شيء
-        window.addEventListener('load', function() {
-            // إخفاء شاشة التحميل
-            const splashScreen = document.getElementById('splashScreen');
-            if (splashScreen) {
-                splashScreen.style.display = 'none';
-            }
-
-            // تفعيل تحسينات الأداء
-            if (window.app) {
-                app.optimizePerformance();
-            }
-
-            // تحديث حالة التطبيق
-            console.log('App fully loaded and optimized');
-            
-            // إرسال إشعار تحميل ناجح
-            if (window.notificationsManager && authManager.getCurrentUser()) {
-                setTimeout(() => {
-                    notificationsManager.createAdminNotification(
-                        'التطبيق جاهز',
-                        'تم تحميل التطبيق بنجاح وجميع الميزات متاحة الآن',
-                        window.location.href
-                    );
-                }, 2000);
-            }
-        });
-    </script>
 </body>
 </html>
