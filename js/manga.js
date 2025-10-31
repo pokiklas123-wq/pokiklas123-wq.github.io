@@ -21,11 +21,11 @@ class MangaManager {
         }
 
         document.getElementById('backToHome')?.addEventListener('click', () => {
-            this.goBack();
+            navigationManager.goBack();
         });
 
         document.getElementById('backToManga')?.addEventListener('click', () => {
-            this.goBack();
+            navigationManager.goBack();
         });
     }
 
@@ -42,10 +42,6 @@ class MangaManager {
                 this.displayMangaList(this.mangaData);
                 ui.hideLoading('loadingHome');
                 ui.showElement('mangaGrid');
-                
-                setTimeout(() => {
-                    this.handleInitialNavigation();
-                }, 500);
             } else {
                 ui.hideLoading('loadingHome');
                 ui.showElement('noMangaMessage');
@@ -54,24 +50,6 @@ class MangaManager {
             console.error('Error loading manga:', error);
             ui.hideLoading('loadingHome');
             ui.showElement('noMangaMessage');
-        }
-    }
-
-    handleInitialNavigation() {
-        const hash = window.location.hash;
-        if (hash) {
-            const path = hash.replace('#', '');
-            const parts = path.split('/');
-            
-            if (parts[0] === 'manga' && parts[1]) {
-                const mangaId = parts[1];
-                if (parts[2] === 'chapter' && parts[3]) {
-                    const chapterId = parts[3];
-                    this.loadChapterFromURL(mangaId, chapterId);
-                } else {
-                    this.loadMangaFromURL(mangaId);
-                }
-            }
         }
     }
 
@@ -216,10 +194,9 @@ class MangaManager {
 
             ui.hideLoading('loadingDetail');
             ui.showElement('mangaDetailContent');
-            ui.navigateToPage('mangaDetailPage');
             
-            // تحديث الـ URL
-            window.history.pushState({}, '', `#manga/${mangaId}`);
+            // استخدام navigation manager للتنقل
+            navigationManager.navigateTo('mangaDetailPage', { mangaId: mangaId });
             
         } catch (error) {
             console.error('Error showing manga detail:', error);
@@ -423,10 +400,9 @@ class MangaManager {
 
             ui.hideLoading('loadingChapter');
             ui.showElement('chapterContent');
-            ui.navigateToPage('chapterPage');
             
-            // تحديث الـ URL
-            window.history.pushState({}, '', `#manga/${mangaId}/chapter/${chapterId}`);
+            // استخدام navigation manager للتنقل
+            navigationManager.navigateTo('chapterPage', { mangaId: mangaId, chapterId: chapterId });
             
         } catch (error) {
             console.error('Error showing chapter:', error);
@@ -445,26 +421,21 @@ class MangaManager {
                     ${chapter.chapter_title ? `<p class="chapter-subtitle">${chapter.chapter_title}</p>` : ''}
                     ${chapter.description ? `<p class="chapter-description">${chapter.description}</p>` : ''}
                 </div>
-                <div class="chapter-actions">
-                    <button class="btn like-chapter-btn" data-manga-id="${mangaId}" data-chapter-id="${chapterId}">
-                        <i class="fas fa-heart"></i>
-                        <span class="like-count">${chapter.chapter_like || 0}</span>
-                    </button>
-                    <button class="btn share-btn">
-                        <i class="fas fa-share"></i> مشاركة
-                    </button>
-                </div>
-            </div>
-            
-            <div class="chapter-navigation">
-                <button class="btn prev-chapter" id="prevChapter">الفصل السابق</button>
-                <button class="btn next-chapter" id="nextChapter">الفصل التالي</button>
             </div>
             
             <div class="manga-pages" id="mangaPages"></div>
+
+            <div class="chapter-navigation">
+                <button class="btn prev-chapter" id="prevChapter">
+                    <i class="fas fa-arrow-right"></i> الفصل السابق
+                </button>
+                <button class="btn next-chapter" id="nextChapter">
+                    الفصل التالي <i class="fas fa-arrow-left"></i>
+                </button>
+            </div>
             
             <div class="comments-section">
-                <h3>التعليقات (${this.getCommentsCount(chapter)})</h3>
+                <h3>التعليقات</h3>
                 <div class="comment-form">
                     <textarea class="comment-input" id="commentInput" placeholder="اكتب تعليقك هنا..."></textarea>
                     <button class="btn submit-comment-btn" id="submitComment">إرسال التعليق</button>
@@ -472,11 +443,6 @@ class MangaManager {
                 <div class="comments-list" id="commentsList"></div>
             </div>
         `;
-    }
-
-    getCommentsCount(chapter) {
-        if (!chapter.comments) return 0;
-        return Object.keys(chapter.comments).length;
     }
 
     async displayChapterPages(chapter) {
@@ -499,12 +465,7 @@ class MangaManager {
                     this.src = 'https://via.placeholder.com/800x1200/1a1a1a/ffffff?text=Error+Loading+Page';
                 };
                 
-                const pageNumber = document.createElement('div');
-                pageNumber.className = 'page-number';
-                pageNumber.textContent = `صفحة ${index + 1}`;
-                
                 pageContainer.appendChild(pageImg);
-                pageContainer.appendChild(pageNumber);
                 mangaPages.appendChild(pageContainer);
             });
         } else {
@@ -526,33 +487,12 @@ class MangaManager {
         }
     }
 
-    async loadMangaFromURL(mangaId) {
-        if (this.mangaData[mangaId]) {
-            const manga = this.mangaData[mangaId];
-            this.showMangaDetail(mangaId, manga);
-        }
+    getCurrentMangaId() {
+        return this.currentMangaId;
     }
 
-    async loadChapterFromURL(mangaId, chapterId) {
-        if (this.mangaData[mangaId] && this.mangaData[mangaId].chapters && this.mangaData[mangaId].chapters[chapterId]) {
-            const manga = this.mangaData[mangaId];
-            const chapter = manga.chapters[chapterId];
-            this.showChapter(mangaId, chapterId, chapter);
-        }
-    }
-
-    goBack() {
-        const currentPage = document.querySelector('.page.active').id;
-        
-        if (currentPage === 'chapterPage') {
-            ui.navigateToPage('mangaDetailPage');
-            window.history.pushState({}, '', `#manga/${this.currentMangaId}`);
-        } else if (currentPage === 'mangaDetailPage') {
-            ui.navigateToPage('homePage');
-            window.history.pushState({}, '', '#');
-        } else {
-            ui.navigateToPage('homePage');
-        }
+    getCurrentChapterId() {
+        return this.currentChapterId;
     }
 
     // دالة للبحث المتقدم
@@ -592,14 +532,6 @@ class MangaManager {
         }
 
         this.displaySortedManga(filteredManga);
-    }
-
-    getCurrentMangaId() {
-        return this.currentMangaId;
-    }
-
-    getCurrentChapterId() {
-        return this.currentChapterId;
     }
 }
 
