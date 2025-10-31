@@ -26,7 +26,6 @@
 
 
 
-<script>
 
 
 
@@ -184,6 +183,17 @@
 <script src="js/ratings.js"></script>
 <script src="js/navigation.js"></script>
 
+<script>
+    // معالجة إعادة التوجيه من 404.html
+    if (sessionStorage.redirect) {
+        const redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect !== location.pathname) {
+            history.replaceState(null, null, redirect);
+        }
+    }
+</script>
+    
     
     <script src="js/app.js"></script>
 </body>
