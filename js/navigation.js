@@ -30,9 +30,7 @@ class NavigationManager {
     setupBrowserBackButton() {
         // التعامل مع زر الرجوع في المتصفح
         window.addEventListener('popstate', (event) => {
-            if (event.state && event.state.page) {
-                this.handleBrowserBack(event.state);
-            } else if (this.history.length > 1) {
+            if (this.history.length > 1) {
                 this.goBack();
             } else {
                 this.showExitConfirmation();
@@ -122,19 +120,6 @@ class NavigationManager {
         }
     }
 
-    handleBrowserBack(state) {
-        // تحديث الحالة الحالية
-        this.currentState = state;
-        
-        // تحديث الـ history الداخلي
-        if (this.history.length > 0 && this.history[this.history.length - 1].timestamp !== state.timestamp) {
-            this.history = this.history.filter(item => item.timestamp <= state.timestamp);
-        }
-        
-        // استعادة الحالة
-        this.restoreState(state);
-    }
-
     restoreState(state) {
         if (!state) return;
 
@@ -148,7 +133,7 @@ class NavigationManager {
                     const manga = mangaManager.mangaData[state.data.mangaId];
                     mangaManager.showMangaDetail(state.data.mangaId, manga, true);
                 } else {
-                    ui.navigateToPage('homePage');
+                    this.navigateTo('homePage');
                 }
                 break;
                 
@@ -161,12 +146,12 @@ class NavigationManager {
                     const chapter = manga.chapters[state.data.chapterId];
                     mangaManager.showChapter(state.data.mangaId, state.data.chapterId, chapter, true);
                 } else {
-                    ui.navigateToPage('homePage');
+                    this.navigateTo('homePage');
                 }
                 break;
                 
             default:
-                ui.navigateToPage('homePage');
+                this.navigateTo('homePage');
         }
     }
 

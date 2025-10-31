@@ -43,9 +43,11 @@ class UI {
         });
 
         // تسجيل الدخول من الدراور
-        document.getElementById('drawerLoginBtn')?.addEventListener('click', () => {
-            this.toggleAuthModal(true);
-            this.toggleDrawer(false);
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'drawerLoginBtn' || e.target.closest('#drawerLoginBtn')) {
+                this.toggleAuthModal(true);
+                this.toggleDrawer(false);
+            }
         });
 
         // إغلاق نافذة التسجيل
@@ -134,9 +136,11 @@ class UI {
         if (show) {
             drawer.classList.add('open');
             overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
         } else {
             drawer.classList.remove('open');
             overlay.classList.remove('active');
+            document.body.style.overflow = '';
         }
     }
 
@@ -162,8 +166,10 @@ class UI {
         const authModal = document.getElementById('authModal');
         if (show) {
             authModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
         } else {
             authModal.classList.remove('active');
+            document.body.style.overflow = '';
             this.clearAuthForm();
         }
     }
@@ -182,6 +188,11 @@ class UI {
             authMessage.textContent = message;
             authMessage.className = 'auth-message ' + type;
             authMessage.style.display = 'block';
+            
+            // إخفاء الرسالة بعد 5 ثواني
+            setTimeout(() => {
+                this.hideAuthMessage();
+            }, 5000);
         }
     }
 

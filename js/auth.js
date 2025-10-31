@@ -28,6 +28,13 @@ class AuthManager {
         document.getElementById('signupSubmit').addEventListener('click', () => {
             this.handleSignup();
         });
+
+        // إغلاق النافذة عند النقر خارجها
+        document.getElementById('authModal').addEventListener('click', (e) => {
+            if (e.target.id === 'authModal') {
+                ui.toggleAuthModal(false);
+            }
+        });
     }
 
     async handleLogin() {

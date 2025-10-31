@@ -2,11 +2,6 @@ class RatingsManager {
     constructor() {
         this.userRatings = {};
         this.userLikes = {};
-        this.init();
-    }
-    
-    init() {
-        this.loadUserRatings();
     }
 
     async rateManga(mangaId, rating) {

@@ -41,6 +41,11 @@ class CommentsManager {
             if (e.target.classList.contains('cancel-reply') || e.target.closest('.cancel-reply')) {
                 this.hideAllReplyForms();
             }
+            
+            if (e.target.classList.contains('toggle-replies') || e.target.closest('.toggle-replies')) {
+                const commentId = e.target.closest('.toggle-replies').dataset.commentId;
+                if (commentId) this.toggleReplies(commentId);
+            }
         });
     }
 
@@ -92,21 +97,21 @@ class CommentsManager {
         }
     }
 
-    async loadComments(mangaId, chapterId, commentsData = null) {
+    async loadComments(mangaId, chapterId) {
         this.currentMangaId = mangaId;
         this.currentChapterId = chapterId;
 
         try {
-            if (!commentsData) {
-                const snapshot = await database.ref(`manga_list/${mangaId}/chapters/${chapterId}/comments`).once('value');
-                commentsData = snapshot.val();
-            }
+            const snapshot = await database.ref(`manga_list/${mangaId}/chapters/${chapterId}/comments`).once('value');
+            const commentsData = snapshot.val();
 
             this.comments = commentsData || {};
             this.displayComments();
             
         } catch (error) {
             console.error('Error loading comments:', error);
+            this.comments = {};
+            this.displayComments();
         }
     }
 
@@ -135,6 +140,7 @@ class CommentsManager {
     }
 
     createCommentElement(commentId, comment) {
+        const hasReplies = comment.replies && Object.keys(comment.replies).length > 0;
         const element = document.createElement('div');
         element.className = 'comment';
         element.innerHTML = `
@@ -152,6 +158,11 @@ class CommentsManager {
                 <button class="comment-action reply-comment" data-comment-id="${commentId}">
                     <i class="fas fa-reply"></i> رد
                 </button>
+                ${hasReplies ? `
+                    <button class="comment-action toggle-replies" data-comment-id="${commentId}">
+                        <i class="fas fa-comments"></i> الردود
+                    </button>
+                ` : ''}
                 ${this.canEditComment(comment) ? `
                     <button class="comment-action edit-comment" data-comment-id="${commentId}">
                         <i class="fas fa-edit"></i> تعديل
@@ -161,9 +172,11 @@ class CommentsManager {
                     </button>
                 ` : ''}
             </div>
-            <div class="comment-replies" id="replies-${commentId}">
-                ${this.renderReplies(comment.replies)}
-            </div>
+            ${hasReplies ? `
+                <div class="comment-replies" id="replies-${commentId}" style="display: none;">
+                    ${this.renderReplies(comment.replies)}
+                </div>
+            ` : ''}
             <div class="reply-form" id="reply-form-${commentId}" style="display: none;">
                 <textarea class="reply-input" placeholder="اكتب ردك..."></textarea>
                 <div class="reply-buttons">
@@ -289,6 +302,13 @@ class CommentsManager {
         document.querySelectorAll('.reply-form').forEach(form => {
             form.style.display = 'none';
         });
+    }
+    
+    toggleReplies(commentId) {
+        const repliesContainer = document.getElementById(`replies-${commentId}`);
+        if (repliesContainer) {
+            repliesContainer.style.display = repliesContainer.style.display === 'none' ? 'block' : 'none';
+        }
     }
 
     async submitReply(commentId) {

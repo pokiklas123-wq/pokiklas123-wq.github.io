@@ -62,7 +62,7 @@ class MangaManager {
         card.className = 'manga-card';
         card.innerHTML = `
             <img src="${manga.thumbnail || 'https://via.placeholder.com/300x400/1a1a1a/1a73e8?text=صورة+المانجا'}" 
-                 alt="${manga.name}" class="manga-thumbnail">
+                 alt="${manga.name}" class="manga-thumbnail" loading="lazy">
             <div class="manga-info">
                 <h3 class="manga-title">${manga.name}</h3>
                 <div class="manga-rating">
@@ -149,7 +149,7 @@ class MangaManager {
             <div class="manga-detail">
                 <div class="manga-detail-thumbnail">
                     <img src="${manga.thumbnail || 'https://via.placeholder.com/320x450/1a1a1a/ffffff?text=صورة+المانجا'}" 
-                         alt="${manga.name}" id="detailThumbnail">
+                         alt="${manga.name}" id="detailThumbnail" loading="lazy">
                 </div>
                 <div class="manga-detail-info">
                     <h1 class="manga-detail-title" id="detailTitle">${manga.name}</h1>
@@ -311,7 +311,7 @@ class MangaManager {
         await this.displayChapterPages(chapter);
 
         // تحميل التعليقات
-        commentsManager.loadComments(mangaId, chapterId, chapter.comments);
+        await commentsManager.loadComments(mangaId, chapterId);
 
         ui.hideLoading('loadingChapter');
         ui.showElement('chapterContent');
@@ -343,13 +343,16 @@ class MangaManager {
         const mangaPages = document.getElementById('mangaPages');
         mangaPages.innerHTML = '';
 
-        if (chapter.images && Array.isArray(chapter.images)) {
+        if (chapter.images && Array.isArray(chapter.images) && chapter.images.length > 0) {
             chapter.images.forEach((imageUrl, index) => {
                 const pageImg = document.createElement('img');
                 pageImg.src = imageUrl;
                 pageImg.alt = `صفحة ${index + 1}`;
                 pageImg.className = 'manga-page';
                 pageImg.loading = 'lazy';
+                pageImg.onerror = function() {
+                    this.src = 'https://via.placeholder.com/800x1200/1a1a1a/ffffff?text=صفحة+غير+متاحة';
+                };
                 mangaPages.appendChild(pageImg);
             });
         } else {
