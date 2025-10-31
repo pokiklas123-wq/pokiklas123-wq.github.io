@@ -3,16 +3,16 @@
 <head>
 
 
-<script>
-    // معالجة إعادة التوجيه من 404.html
-    if (sessionStorage.redirect) {
-        const redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect !== location.pathname) {
-            history.replaceState(null, null, redirect);
-        }
-    }
-</script>
+	<script>
+	    // معالجة إعادة التوجيه من 404.html (تم تعطيلها لأننا نستخدم history.pushState الآن)
+	    // if (sessionStorage.redirect) {
+	    //     const redirect = sessionStorage.redirect;
+	    //     delete sessionStorage.redirect;
+	    //     if (redirect !== location.pathname) {
+	    //         history.replaceState(null, null, redirect);
+	    //     }
+	    // }
+	</script>
 
 
 
@@ -64,15 +64,6 @@
         </div>
         
         <div class="drawer-section">
-            <h3>التنقل</h3>
-            <ul class="categories-list">
-                <li data-action="home" id="drawerHomeLink">
-                    <i class="fas fa-home"></i> الصفحة الرئيسية
-                </li>
-            </ul>
-        </div>
-
-        <div class="drawer-section">
             <h3>الحساب</h3>
             <div id="userSection">
                 <button class="btn drawer-login-btn" id="drawerLoginBtn">تسجيل الدخول</button>
@@ -96,8 +87,11 @@
         </div>
 
         <div class="drawer-section">
-            <h3>التصنيفات</h3>
+            <h3>التنقل</h3>
             <ul class="categories-list">
+                <li data-action="home" id="drawerHomeLink">
+                    <i class="fas fa-home"></i> الرئيسية
+                </li>
                 <li data-sort="newest">
                     <i class="fas fa-clock"></i> الأحدث
                 </li>
