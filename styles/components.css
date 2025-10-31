@@ -1,30 +1,125 @@
-.chapter-likes {
-    color: #ff4757;
-    margin-left: 15px;
+/* الإشعارات */
+.notification {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.notification:hover {
+    background-color: var(--hover-color);
+}
+
+.notification.unread {
+    background-color: rgba(26, 115, 232, 0.1);
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-content p {
+    margin: 0;
     font-size: 0.9rem;
 }
 
-.chapter-subtitle {
-    font-size: 1.2rem;
+.notification-time {
+    font-size: 0.8rem;
+    color: #aaa;
+}
+
+.notification-action {
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+}
+
+/* الردود */
+.reply {
+    margin: 10px 0;
+    padding: 10px;
+    background: var(--hover-color);
+    border-radius: 8px;
+    border-right: 3px solid var(--accent-color);
+}
+
+.reply-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.reply-user {
+    font-weight: 600;
     color: var(--accent-light);
-    margin-bottom: 10px;
 }
 
-.chapter-description {
-    font-size: 1rem;
+.reply-time {
+    font-size: 0.8rem;
     color: #aaa;
-    line-height: 1.6;
 }
 
-.no-pages {
-    text-align: center;
+.reply-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.reply-form {
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--card-bg);
+    border-radius: 8px;
+}
+
+.reply-input {
+    width: 100%;
+    min-height: 60px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    resize: vertical;
+}
+
+.submit-reply, .cancel-reply {
+    margin-top: 8px;
+    margin-left: 8px;
+}
+
+/* أزرار التعليقات */
+.comment-action.liked {
+    color: #ff4757;
+}
+
+.edit-comment, .delete-comment {
+    margin-right: 10px;
+}
+
+/* حالة التحميل */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 40px;
-    color: #aaa;
-    font-size: 1.1rem;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.no-chapters {
-    text-align: center;
-    padding: 20px;
-    color: #aaa;
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
