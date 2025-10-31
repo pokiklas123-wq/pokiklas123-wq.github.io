@@ -42,17 +42,16 @@ class UI {
             this.hideSearch();
         });
 
-        // تسجيل الدخول من الدراور
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'drawerLoginBtn' || e.target.closest('#drawerLoginBtn')) {
-                this.toggleAuthModal(true);
-                this.toggleDrawer(false);
-            }
-        });
-
         // إغلاق نافذة التسجيل
         document.getElementById('closeAuthModal').addEventListener('click', () => {
             this.toggleAuthModal(false);
+        });
+
+        // منع إرسال النموذج عند الضغط على إنتر
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && e.target.closest('.auth-form')) {
+                e.preventDefault();
+            }
         });
     }
 
@@ -136,11 +135,9 @@ class UI {
         if (show) {
             drawer.classList.add('open');
             overlay.classList.add('active');
-            document.body.style.overflow = 'hidden';
         } else {
             drawer.classList.remove('open');
             overlay.classList.remove('active');
-            document.body.style.overflow = '';
         }
     }
 
@@ -166,19 +163,21 @@ class UI {
         const authModal = document.getElementById('authModal');
         if (show) {
             authModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
         } else {
             authModal.classList.remove('active');
-            document.body.style.overflow = '';
             this.clearAuthForm();
         }
     }
 
     clearAuthForm() {
-        document.getElementById('displayName').style.display = 'none';
-        document.getElementById('loginEmail').value = '';
-        document.getElementById('loginPassword').value = '';
-        document.getElementById('displayName').value = '';
+        const displayName = document.getElementById('displayName');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        
+        if (displayName) displayName.style.display = 'none';
+        if (loginEmail) loginEmail.value = '';
+        if (loginPassword) loginPassword.value = '';
+        if (displayName) displayName.value = '';
         this.hideAuthMessage();
     }
 
@@ -188,11 +187,6 @@ class UI {
             authMessage.textContent = message;
             authMessage.className = 'auth-message ' + type;
             authMessage.style.display = 'block';
-            
-            // إخفاء الرسالة بعد 5 ثواني
-            setTimeout(() => {
-                this.hideAuthMessage();
-            }, 5000);
         }
     }
 
@@ -244,16 +238,12 @@ class UI {
             targetPage.classList.add('active');
         }
         
-        // إخفاء البحث
+        // إخفاء البحث والدراور
         this.hideSearch();
-        
-        // إخفاء الدراور إذا كان مفتوحاً
         this.toggleDrawer(false);
         
         // التمرير للأعلى
         window.scrollTo(0, 0);
-        
-        console.log('تم التنقل إلى:', pageId);
     }
 }
 

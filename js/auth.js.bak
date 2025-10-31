@@ -10,6 +10,15 @@ class AuthManager {
     }
 
     setupEventListeners() {
+        // تبديل بين تسجيل الدخول وإنشاء حساب
+        document.getElementById('signupSubmit').addEventListener('click', () => {
+            document.getElementById('displayName').style.display = 'block';
+        });
+
+        document.getElementById('loginSubmit').addEventListener('click', () => {
+            document.getElementById('displayName').style.display = 'none';
+        });
+
         // معالجة تسجيل الدخول
         document.getElementById('loginSubmit').addEventListener('click', () => {
             this.handleLogin();
@@ -20,7 +29,7 @@ class AuthManager {
             this.handleSignup();
         });
 
-        // إغلاق النافذة عند الضغط خارجها
+        // إغلاق النافذة عند النقر خارجها
         document.getElementById('authModal').addEventListener('click', (e) => {
             if (e.target.id === 'authModal') {
                 ui.toggleAuthModal(false);
@@ -42,13 +51,14 @@ class AuthManager {
             const userCredential = await auth.signInWithEmailAndPassword(email, password);
             this.currentUser = userCredential.user;
             ui.showAuthMessage('تم تسجيل الدخول بنجاح', 'success');
+            ui.toggleAuthModal(false);
+            this.updateUI();
             
+            // تحميل بيانات المستخدم
             setTimeout(() => {
-                ui.toggleAuthModal(false);
-                this.updateUI();
                 mangaManager.loadMangaList();
                 ratingsManager.loadUserRatings();
-            }, 1500);
+            }, 1000);
             
         } catch (error) {
             ui.showAuthMessage('خطأ في تسجيل الدخول: ' + error.message, 'error');
@@ -88,13 +98,8 @@ class AuthManager {
 
             this.currentUser = userCredential.user;
             ui.showAuthMessage('تم إنشاء الحساب بنجاح', 'success');
-            
-            setTimeout(() => {
-                ui.toggleAuthModal(false);
-                this.updateUI();
-                mangaManager.loadMangaList();
-                ratingsManager.loadUserRatings();
-            }, 1500);
+            ui.toggleAuthModal(false);
+            this.updateUI();
             
         } catch (error) {
             ui.showAuthMessage('خطأ في إنشاء الحساب: ' + error.message, 'error');
@@ -107,6 +112,7 @@ class AuthManager {
             this.updateUI();
             
             if (user) {
+                // تحميل البيانات بعد تسجيل الدخول
                 mangaManager.loadMangaList();
                 ratingsManager.loadUserRatings();
             }
@@ -115,7 +121,7 @@ class AuthManager {
 
     updateUI() {
         const userSection = document.getElementById('userSection');
-        if (!userSection) return;
+        const drawerLoginBtn = document.getElementById('drawerLoginBtn');
         
         if (this.currentUser) {
             userSection.innerHTML = `
@@ -146,7 +152,7 @@ class AuthManager {
             await auth.signOut();
             this.currentUser = null;
             this.updateUI();
-            ui.navigateToPage('homePage');
+            navigationManager.navigateTo('homePage');
             mangaManager.loadMangaList();
         } catch (error) {
             console.error('Error logging out:', error);
