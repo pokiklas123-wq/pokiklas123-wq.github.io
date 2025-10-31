@@ -54,6 +54,22 @@ header {
     box-shadow: 0 6px 16px rgba(26, 115, 232, 0.4);
 }
 
+.btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.3);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn:disabled:hover {
+    transform: none !important;
+    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3) !important;
+}
+
 /* شريط البحث */
 .search-container {
     position: fixed;
@@ -75,6 +91,13 @@ header {
     background: var(--bg-color);
     color: var(--text-color);
     font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
 }
 
 .search-close {
@@ -144,6 +167,9 @@ header {
     font-size: 1.1rem;
     padding-right: 10px;
     border-right: 3px solid var(--accent-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .categories-list {
@@ -201,11 +227,36 @@ header {
     background: var(--error-color);
 }
 
+/* زر تحديث الإشعارات */
+.refresh-notifications {
+    background: transparent;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.refresh-notifications:hover {
+    background: var(--hover-color);
+    transform: rotate(180deg);
+}
+
+/* زر مسح الذاكرة */
+.clear-cache-btn {
+    width: 100%;
+    margin-top: 10px;
+    background: var(--error-color);
+}
+
 /* بطاقات المانجا */
 .manga-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 25px;
+    scroll-behavior: smooth;
 }
 
 .manga-card {
@@ -265,6 +316,30 @@ header {
     gap: 5px;
 }
 
+.manga-status {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.manga-status.ongoing {
+    background: rgba(40, 167, 69, 0.2);
+    color: var(--success-color);
+}
+
+.manga-status.completed {
+    background: rgba(26, 115, 232, 0.2);
+    color: var(--accent-color);
+}
+
+.manga-status.hiatus {
+    background: rgba(255, 193, 7, 0.2);
+    color: var(--warning-color);
+}
+
 /* صفحة تفاصيل المانجا */
 .manga-detail-content {
     display: none;
@@ -305,6 +380,24 @@ header {
     gap: 25px;
     margin-bottom: 25px;
     flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.meta-label {
+    font-weight: 600;
+    color: var(--accent-light);
+    font-size: 0.9rem;
+}
+
+.meta-value {
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .manga-detail-description {
@@ -349,6 +442,7 @@ header {
     border-radius: 15px;
     padding: 25px;
     border: 1px solid var(--border-color);
+    scroll-behavior: smooth;
 }
 
 .chapters-list h3 {
@@ -376,10 +470,36 @@ header {
     transform: translateX(-5px);
 }
 
+.chapter-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.chapter-name {
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.chapter-subtitle {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.chapter-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: #aaa;
+    font-size: 0.9rem;
+}
+
 .chapter-likes {
     color: #ff4757;
-    margin-left: 15px;
-    font-size: 0.9rem;
+}
+
+.chapter-arrow {
+    color: var(--accent-color);
 }
 
 /* صفحة الفصل */
@@ -392,6 +512,10 @@ header {
     margin-bottom: 35px;
     padding-bottom: 20px;
     border-bottom: 2px solid var(--accent-color);
+}
+
+.chapter-title-section {
+    margin-bottom: 20px;
 }
 
 .chapter-title {
@@ -412,16 +536,53 @@ header {
     line-height: 1.6;
 }
 
+.chapter-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.like-chapter-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.like-chapter-btn.liked {
+    background: #ff4757;
+    color: white;
+}
+
+.chapter-navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
 .manga-pages {
     margin-bottom: 45px;
 }
 
+.page-container {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
 .manga-page {
-    width: 100%;
-    margin-bottom: 15px;
+    max-width: 100%;
+    height: auto;
     border-radius: 8px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
     border: 1px solid var(--border-color);
+}
+
+.page-number {
+    margin-top: 10px;
+    color: #aaa;
+    font-size: 0.9rem;
 }
 
 .no-pages {
@@ -469,6 +630,13 @@ header {
     resize: vertical;
     min-height: 100px;
     font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.comment-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
 }
 
 .comments-list {
@@ -476,11 +644,13 @@ header {
     border-radius: 12px;
     padding: 25px;
     border: 1px solid var(--border-color);
+    scroll-behavior: smooth;
 }
 
 .comment {
     padding: 18px 0;
     border-bottom: 1px solid var(--border-color);
+    position: relative;
 }
 
 .comment:last-child {
@@ -491,7 +661,30 @@ header {
     display: flex;
     justify-content: space-between;
     margin-bottom: 12px;
+    align-items: flex-start;
+}
+
+.user-info {
+    display: flex;
     align-items: center;
+    gap: 10px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-avatar.small {
+    width: 30px;
+    height: 30px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
 }
 
 .comment-user {
@@ -505,14 +698,68 @@ header {
     color: #aaa;
 }
 
+.comment-actions-menu {
+    position: relative;
+}
+
+.comment-menu-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.comment-menu-btn:hover {
+    background: var(--hover-color);
+}
+
+.comment-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 5px 0;
+    min-width: 120px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    display: none;
+    z-index: 1000;
+}
+
+.comment-menu.show {
+    display: block;
+}
+
+.menu-item {
+    width: 100%;
+    padding: 8px 12px;
+    background: none;
+    border: none;
+    color: var(--text-color);
+    text-align: right;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.menu-item:hover {
+    background: var(--hover-color);
+}
+
 .comment-text {
     line-height: 1.6;
     margin-bottom: 12px;
+    word-wrap: break-word;
 }
 
 .comment-actions {
     display: flex;
     gap: 20px;
+    flex-wrap: wrap;
 }
 
 .comment-action {
@@ -525,10 +772,13 @@ header {
     align-items: center;
     gap: 6px;
     transition: color 0.3s ease;
+    padding: 5px 10px;
+    border-radius: 4px;
 }
 
 .comment-action:hover {
     color: var(--accent-color);
+    background: var(--hover-color);
 }
 
 .comment-action.liked {
@@ -543,7 +793,7 @@ header {
 
 .reply {
     margin: 10px 0;
-    padding: 10px;
+    padding: 15px;
     background: var(--hover-color);
     border-radius: 8px;
     border-right: 3px solid var(--accent-color);
@@ -552,7 +802,8 @@ header {
 .reply-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    align-items: flex-start;
 }
 
 .reply-user {
@@ -568,37 +819,56 @@ header {
 .reply-text {
     font-size: 0.9rem;
     line-height: 1.4;
+    word-wrap: break-word;
 }
 
 .reply-form {
     margin-top: 10px;
-    padding: 10px;
+    padding: 15px;
     background: var(--card-bg);
     border-radius: 8px;
     border: 1px solid var(--border-color);
+    display: none;
 }
 
 .reply-input {
     width: 100%;
     min-height: 60px;
-    padding: 8px;
+    padding: 10px;
     border: 1px solid var(--border-color);
     border-radius: 6px;
     background: var(--bg-color);
     color: var(--text-color);
     resize: vertical;
     font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.reply-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+}
+
+.reply-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.char-count {
+    font-size: 0.8rem;
+    color: #aaa;
 }
 
 .reply-buttons {
     display: flex;
     gap: 10px;
-    margin-top: 10px;
 }
 
 .submit-reply, .cancel-reply {
-    flex: 1;
-    padding: 8px;
+    padding: 8px 15px;
     font-size: 0.9rem;
 }
 
@@ -652,6 +922,13 @@ header {
     background: var(--bg-color);
     color: var(--text-color);
     font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.auth-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
 }
 
 .auth-buttons {
@@ -673,6 +950,13 @@ header {
     color: var(--text-color);
     font-size: 1.3rem;
     cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.close-modal:hover {
+    background: var(--hover-color);
 }
 
 .auth-message {
@@ -702,32 +986,77 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px;
+    padding: 15px;
     border-bottom: 1px solid var(--border-color);
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    position: relative;
 }
 
 .notification:hover {
     background-color: var(--hover-color);
+    transform: translateX(-5px);
 }
 
 .notification.unread {
     background-color: rgba(26, 115, 232, 0.1);
+    border-right: 3px solid var(--accent-color);
+}
+
+.notification:last-child {
+    border-bottom: none;
 }
 
 .notification-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
     flex: 1;
 }
 
-.notification-content p {
-    margin: 0;
-    font-size: 0.9rem;
+.notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.notification-text {
+    flex: 1;
+}
+
+.notification-message {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--text-color);
+}
+
+.notification-preview {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin: 5px 0;
+    line-height: 1.3;
+    font-style: italic;
+    background: rgba(255,255,255,0.05);
+    padding: 8px 12px;
+    border-radius: 6px;
+    border-right: 2px solid var(--accent-color);
 }
 
 .notification-time {
     font-size: 0.8rem;
-    color: #aaa;
+    color: #888;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 5px;
 }
 
 .notification-action {
@@ -735,12 +1064,26 @@ header {
     border: none;
     color: var(--accent-color);
     cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.notification-action:hover {
+    background-color: rgba(26, 115, 232, 0.1);
 }
 
 .no-notifications {
     text-align: center;
     color: #aaa;
-    padding: 20px;
+    padding: 40px 20px;
+    font-style: italic;
+}
+
+.clear-all-notifications {
+    width: 100%;
+    margin-top: 15px;
+    background: var(--error-color);
 }
 
 /* زر الرجوع للهواتف */
@@ -833,6 +1176,9 @@ header {
     padding: 40px;
     flex-direction: column;
     gap: 15px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    margin: 20px 0;
 }
 
 .loading-spinner {
@@ -847,6 +1193,11 @@ header {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+.loading p {
+    color: var(--accent-light);
+    font-weight: 600;
 }
 
 .status-message {
@@ -883,94 +1234,65 @@ header {
     font-size: 1.1rem;
 }
 
-
-/* تحسين مظهر الإشعارات */
-.notification-content {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    flex: 1;
-}
-
-.notification-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--accent-color);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1rem;
-    flex-shrink: 0;
-}
-
-.notification-text {
-    flex: 1;
-}
-
-.notification-message {
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: var(--text-color);
-}
-
-.notification-preview {
-    font-size: 0.85rem;
-    color: #aaa;
-    margin: 5px 0;
-    line-height: 1.3;
-    font-style: italic;
-    background: rgba(255,255,255,0.05);
-    padding: 8px 12px;
-    border-radius: 6px;
-    border-right: 2px solid var(--accent-color);
-}
-
-.notification-time {
-    font-size: 0.8rem;
+.no-comments-subtitle {
+    font-size: 0.9rem;
+    margin-top: 10px;
     color: #888;
 }
 
-.notification.unread {
-    background: rgba(26, 115, 232, 0.1);
-    border-right: 3px solid var(--accent-color);
-}
-
-.notification {
+/* أنماط التنبيهات */
+.notification-toast {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--accent-color);
+    border-radius: 12px;
     padding: 15px;
-    border-bottom: 1px solid var(--border-color);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    z-index: 10000;
+    max-width: 400px;
+    margin: 0 auto;
 }
 
-.notification:hover {
-    background-color: var(--hover-color);
-    transform: translateX(-5px);
+.toast-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
-.notification:last-child {
-    border-bottom: none;
+.toast-icon {
+    color: var(--accent-color);
+    font-size: 1.2rem;
 }
 
-.notification-action {
+.toast-text {
+    flex: 1;
+}
+
+.toast-title {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.toast-body {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.toast-close {
     background: none;
     border: none;
-    color: var(--accent-color);
+    color: var(--text-color);
     cursor: pointer;
-    padding: 8px;
+    padding: 5px;
     border-radius: 4px;
     transition: background-color 0.3s ease;
 }
 
-.notification-action:hover {
-    background-color: rgba(26, 115, 232, 0.1);
+.toast-close:hover {
+    background: var(--hover-color);
 }
 
-.no-notifications {
-    text-align: center;
-    color: #aaa;
-    padding: 40px 20px;
-    font-style: italic;
-}
+/* أنم
