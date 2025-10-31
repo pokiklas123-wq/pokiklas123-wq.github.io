@@ -199,12 +199,7 @@ class AuthPage {
         this.setButtonLoading(resetBtn, true);
         
         try {
-            // Fix: Add ActionCodeSettings to ensure the link works correctly
-            const actionCodeSettings = {
-                url: window.location.origin + '/auth.html?mode=resetPassword', // Redirect back to auth page after reset
-                handleCodeInApp: true
-            };
-            await this.auth.sendPasswordResetEmail(email, actionCodeSettings);
+            await this.auth.sendPasswordResetEmail(email);
             this.showFormMessage('تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني', 'success');
             
             setTimeout(() => {

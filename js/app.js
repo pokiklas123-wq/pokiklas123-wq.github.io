@@ -28,7 +28,7 @@ class MangaApp {
         await this.loadMangaData();
         this.setupAuth();
         Utils.loadTheme();
-        this.setupNotifications(); // New: Setup Notifications Manager
+        this.setupNotifications();
         this.isInitialized = true;
         console.log('✅ التطبيق جاهز للاستخدام');
     }
@@ -124,7 +124,6 @@ class MangaApp {
     }
     
     setupNotifications() {
-        // Initialize NotificationsManager globally
         window.notificationsManager = new NotificationsManager(this);
     }
 
@@ -185,11 +184,17 @@ class MangaApp {
         const userInfo = document.getElementById('userInfo');
         
         if (user) {
-            if (authBtn) authBtn.classList.add('hidden');
+            if (authBtn) {
+                authBtn.innerHTML = '<i class="fas fa-user"></i>';
+                authBtn.title = 'حسابي';
+            }
             if (logoutBtn) logoutBtn.classList.remove('hidden');
             if (userInfo) userInfo.classList.remove('hidden');
         } else {
-            if (authBtn) authBtn.classList.remove('hidden');
+            if (authBtn) {
+                authBtn.innerHTML = '<i class="fas fa-user"></i><span>تسجيل الدخول</span>';
+                authBtn.title = '';
+            }
             if (logoutBtn) logoutBtn.classList.add('hidden');
             if (userInfo) userInfo.classList.add('hidden');
         }
@@ -257,6 +262,7 @@ class MangaApp {
         
         switch (this.currentFilter) {
             case 'latest':
+                filteredManga.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                 break;
             case 'popular':
                 filteredManga.sort((a, b) => (b.views || 0) - (a.views || 0));
@@ -265,7 +271,7 @@ class MangaApp {
                 filteredManga.sort((a, b) => (b.rating || 0) - (a.rating || 0));
                 break;
             case 'oldest':
-                filteredManga = [...mangaArray].reverse();
+                filteredManga.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
                 break;
         }
         
@@ -297,23 +303,46 @@ class MangaApp {
             <div class="manga-thumbnail-container">
                 <img src="${manga.thumbnail}" alt="${manga.name}" class="manga-thumbnail"
                      onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgODAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiM0YTkwZTIiLz48dGV4dCB4PSI0MCIgeT0iNjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPk1hbmdhPC90ZXh0Pjwvc3ZnPg=='">
-                ${latestChapter ? `<div class="chapter-badge">${latestChapter}</div>` : ''}
+                ${latestChapter ? `<div class="chapter-badge">${latestChapter.display}</div>` : ''}
             </div>
             <div class="manga-info">
-                <div class="manga-title">${manga.name}</div>
-                <div class="manga-meta">
-                    <span>${manga.views || 0} مشاهدة</span>
-                    <span class="rating">
+                <h3 class="manga-title">${manga.name}</h3>
+                <div class="manga-stats">
+                    <div class="stat">
+                        <i class="fas fa-eye"></i>
+                        <span>${manga.views || 0}</span>
+                    </div>
+                    <div class="stat">
                         <i class="fas fa-star"></i>
-                        <span>${manga.rating || 0}</span>
-                    </span>
+                        <span>${manga.rating ? manga.rating.toFixed(1) : '0.0'}</span>
+                    </div>
                 </div>
+                ${latestChapter ? `
+                    <button class="read-latest-btn" data-manga="${manga.id}" data-chapter="${latestChapter.number}">
+                        <i class="fas fa-play"></i>
+                        اقرأ الفصل ${latestChapter.number}
+                    </button>
+                ` : ''}
             </div>
         `;
         
-        card.addEventListener('click', () => {
-            window.location.href = `manga.html?id=${manga.id}`;
+        // حدث الضغط على البطاقة للذهاب لصفحة المانجا
+        card.addEventListener('click', (e) => {
+            if (!e.target.closest('.read-latest-btn')) {
+                window.location.href = `manga.html?id=${manga.id}`;
+            }
         });
+        
+        // حدث الضغط على زر قراءة آخر فصل
+        const readBtn = card.querySelector('.read-latest-btn');
+        if (readBtn) {
+            readBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const mangaId = e.target.getAttribute('data-manga');
+                const chapterNum = e.target.getAttribute('data-chapter');
+                window.location.href = `chapter.html?manga=${mangaId}&chapter=${chapterNum}`;
+            });
+        }
         
         return card;
     }
@@ -327,7 +356,10 @@ class MangaApp {
         
         if (chapterNumbers.length > 0) {
             const maxChapter = Math.max(...chapterNumbers);
-            return `الفصل ${maxChapter}`;
+            return {
+                number: maxChapter,
+                display: `الفصل ${maxChapter}`
+            };
         }
         
         return null;

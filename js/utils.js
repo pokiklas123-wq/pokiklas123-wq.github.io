@@ -29,7 +29,6 @@ class Utils {
     }
     
     static showMessage(message, type = 'info') {
-        // إزالة أي رسائل سابقة
         const existingMessages = document.querySelectorAll('.message');
         existingMessages.forEach(msg => {
             msg.style.animation = 'slideOut 0.3s ease';
@@ -40,16 +39,13 @@ class Utils {
             }, 300);
         });
         
-        // إنشاء عنصر الرسالة
         const messageEl = document.createElement('div');
         messageEl.className = `message message-${type}`;
         messageEl.textContent = message;
         messageEl.style.backgroundColor = this.getMessageColor(type);
         
-        // إضافة الرسالة إلى الصفحة
         document.body.appendChild(messageEl);
         
-        // إزالة الرسالة بعد 5 ثوانٍ
         setTimeout(() => {
             if (messageEl.parentNode) {
                 messageEl.style.animation = 'slideOut 0.3s ease';
