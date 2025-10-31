@@ -32,7 +32,7 @@
 }
 
 [data-theme="blue"] {
-    /* Professional Dark Blue Theme */
+    /* Professional Dark Blue Theme with Blur Effect */
     --primary-color: #3498db;
     --secondary-color: #2c3e50;
     --accent-color: #e74c3c;
@@ -41,9 +41,10 @@
     --text-color: #ecf0f1;
     --text-secondary: #bdc3c7;
     --bg-color: #293a4a;
-    --card-bg: #34495e;
+    --card-bg: rgba(52, 73, 94, 0.85); /* Slightly transparent for blur effect */
     --border-color: #4a6278;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    --blur-effect: blur(10px);
 }
 
 /* Base styles for buttons and links to ensure they work in the drawer */
@@ -87,6 +88,9 @@
     background: var(--card-bg);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
+    /* Blur effect for blue theme */
+    backdrop-filter: var(--blur-effect, none);
+    -webkit-backdrop-filter: var(--blur-effect, none);
 }
 
 .comments-section h2 {
@@ -253,6 +257,9 @@
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: var(--shadow);
+    /* Blur effect for blue theme */
+    backdrop-filter: var(--blur-effect, none);
+    -webkit-backdrop-filter: var(--blur-effect, none);
 }
 
 .notification-item {
@@ -497,6 +504,9 @@ header {
     z-index: 1000;
     overflow-y: auto;
     padding: 1rem;
+    /* Blur effect for blue theme */
+    backdrop-filter: var(--blur-effect, none);
+    -webkit-backdrop-filter: var(--blur-effect, none);
 }
 
 .drawer.open {
