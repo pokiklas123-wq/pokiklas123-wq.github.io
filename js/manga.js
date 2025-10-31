@@ -330,7 +330,7 @@ class MangaManager {
         return item;
     }
 
-    async showChapter(mangaId, chapterId, chapter, commentId = null) {
+    async showChapter(mangaId, chapterId, chapter) {
         ui.showLoading('loadingChapter');
         ui.hideElement('chapterContent');
 
@@ -339,20 +339,15 @@ class MangaManager {
             chapterContent.innerHTML = this.createChapterHTML(chapter);
 
             await this.displayChapterPages(chapter);
-            await commentsManager.loadComments(mangaId, chapterId);
+
+            commentsManager.loadComments(mangaId, chapterId, chapter.comments);
 
             ui.hideLoading('loadingChapter');
             ui.showElement('chapterContent');
-            
             navigationManager.navigateTo('chapterPage', { 
                 mangaId: mangaId, 
-                chapterId: chapterId,
-                commentId: commentId
+                chapterId: chapterId 
             });
-            
-            if (commentId) {
-                this.scrollToComment(commentId);
-            }
             
         } catch (error) {
             console.error('Error showing chapter:', error);
@@ -407,20 +402,6 @@ class MangaManager {
 
     getCurrentMangaId() {
         return this.currentMangaId;
-    }
-    
-    scrollToComment(commentId) {
-        const commentElement = document.getElementById(`comment-${commentId}`);
-        if (commentElement) {
-            commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            
-            // تمييز التعليق مؤقتاً
-            commentElement.style.transition = 'background-color 0.5s ease';
-            commentElement.style.backgroundColor = 'rgba(255, 255, 0, 0.2)';
-            setTimeout(() => {
-                commentElement.style.backgroundColor = '';
-            }, 3000);
-        }
     }
 }
 

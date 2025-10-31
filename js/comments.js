@@ -91,12 +91,6 @@ class CommentsManager {
             commentInput.value = '';
             ui.showAuthMessage('تم إرسال التعليق بنجاح', 'success');
             
-            // لا تقم بتحميل التعليقات هنا، بل اعتمد على مراقب قاعدة البيانات (إذا كان موجوداً)
-            // أو أعد تحميلها في مكان واحد (مثل showChapter) بعد الانتهاء من الإرسال
-            // مؤقتاً، سنعتمد على أن loadComments سيتم استدعاؤها من مكان آخر أو نتركها لإعادة التحميل اليدوي
-            // ملاحظة: بما أننا نستخدم Firebase push()، فإن loadComments() هنا قد تسبب تكراراً إذا كان هناك مستمع آخر
-            // بما أننا لا نرى مستمعاً آخر، سنبقيها ولكن سنفترض أن المشكلة كانت في عدم منع الإرسال المزدوج بشكل صحيح
-            // الآن تم إضافة this.isSubmitting لمنع الإرسال المزدوج، وسنترك loadComments() هنا لضمان التحديث
             await this.loadComments(this.currentMangaId, this.currentChapterId);
             
         } catch (error) {
@@ -152,15 +146,14 @@ class CommentsManager {
 
     createCommentElement(commentId, comment) {
         const hasReplies = comment.replies && Object.keys(comment.replies).length > 0;
-	        const element = document.createElement('div');
-	        element.className = 'comment';
-	        element.id = `comment-${commentId}`; // إضافة ID لتمكين الانتقال إليه
-	        element.innerHTML = `
-	            <div class="comment-header">
-	                <span class="comment-user">${comment.user}</span>
-	                <span class="comment-time">${this.formatTime(comment.timestamp)} ${comment.edited ? '(معدل)' : ''}</span>
-	            </div>
-	            <div class="comment-text">${comment.text}</div>
+        const element = document.createElement('div');
+        element.className = 'comment';
+        element.innerHTML = `
+            <div class="comment-header">
+                <span class="comment-user">${comment.user}</span>
+                <span class="comment-time">${this.formatTime(comment.timestamp)}</span>
+            </div>
+            <div class="comment-text">${comment.text}</div>
             <div class="comment-actions">
                 <button class="comment-action like-btn ${this.hasUserLiked(comment) ? 'liked' : ''}" 
                         data-comment-id="${commentId}">
@@ -268,68 +261,23 @@ class CommentsManager {
     }
 
     async editComment(commentId) {
-	    async editComment(commentId) {
-	        const commentElement = document.getElementById(`comment-${commentId}`);
-	        const commentTextElement = commentElement.querySelector('.comment-text');
-	        const originalText = commentTextElement.textContent;
-	        
-	        // إنشاء حقل إدخال للتعديل
-	        const editInput = document.createElement('textarea');
-	        editInput.className = 'edit-comment-input';
-	        editInput.value = originalText;
-	        
-	        // إنشاء أزرار الحفظ والإلغاء
-	        const saveBtn = document.createElement('button');
-	        saveBtn.className = 'btn save-edit-btn';
-	        saveBtn.textContent = 'حفظ';
-	        
-	        const cancelBtn = document.createElement('button');
-	        cancelBtn.className = 'btn btn-secondary cancel-edit-btn';
-	        cancelBtn.textContent = 'إلغاء';
-	        
-	        const editControls = document.createElement('div');
-	        editControls.className = 'edit-controls';
-	        editControls.append(saveBtn, cancelBtn);
-	        
-	        // إخفاء النص الأصلي وعرض حقل الإدخال والأزرار
-	        commentTextElement.innerHTML = '';
-	        commentTextElement.append(editInput, editControls);
-	        
-	        // معالجة الحفظ
-	        saveBtn.addEventListener('click', async () => {
-	            const newText = editInput.value.trim();
-	            if (newText && newText !== originalText) {
-	                try {
-	                    await database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}`).update({
-	                        text: newText,
-	                        edited: true,
-	                        editTimestamp: Date.now()
-	                    });
-	                    
-	                    // استعادة العرض بعد الحفظ
-	                    commentTextElement.textContent = newText;
-	                    commentElement.querySelector('.comment-time').textContent = this.formatTime(Date.now()) + ' (معدل)';
-	                    
-	                    ui.showAuthMessage('تم تعديل التعليق بنجاح', 'success');
-	                } catch (error) {
-	                    ui.showAuthMessage('خطأ في تعديل التعليق', 'error');
-	                    // في حالة الخطأ، استعادة النص الأصلي
-	                    commentTextElement.textContent = originalText;
-	                }
-	            } else {
-	                // إذا لم يتغير النص، استعادة العرض الأصلي
-	                commentTextElement.textContent = originalText;
-	            }
-	            // إزالة أزرار التحكم
-	            editControls.remove();
-	        }, { once: true });
-	        
-	        // معالجة الإلغاء
-	        cancelBtn.addEventListener('click', () => {
-	            commentTextElement.textContent = originalText;
-	            editControls.remove();
-	        }, { once: true });
-	    }
+        const comment = this.comments[commentId];
+        const newText = prompt('عدل تعليقك:', comment.text);
+        
+        if (newText && newText !== comment.text) {
+            try {
+                await database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}`).update({
+                    text: newText,
+                    edited: true,
+                    editTimestamp: Date.now()
+                });
+                
+                await this.loadComments(this.currentMangaId, this.currentChapterId);
+                ui.showAuthMessage('تم تعديل التعليق بنجاح', 'success');
+            } catch (error) {
+                ui.showAuthMessage('خطأ في تعديل التعليق', 'error');
+            }
+        }
     }
 
     async deleteComment(commentId) {
