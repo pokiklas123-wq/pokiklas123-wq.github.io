@@ -27,15 +27,7 @@
 
 
 <script>
-    // معالجة إعادة التوجيه من 404.html
-    if (sessionStorage.redirect) {
-        const redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect !== location.pathname) {
-            history.replaceState(null, null, redirect);
-        }
-    }
-</script>
+
 
 
 
