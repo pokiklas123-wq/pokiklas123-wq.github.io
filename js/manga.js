@@ -24,7 +24,7 @@ class MangaManager {
             this.mangaData = snapshot.val();
 
             if (this.mangaData && Object.keys(this.mangaData).length > 0) {
-                this.displayMangaList(this.mangaData, 'newest'); // عرض المانجا بترتيب الأحدث افتراضياً
+                this.displayMangaList(this.mangaData);
                 ui.hideLoading('loadingHome');
                 ui.showElement('mangaGrid');
                 
@@ -46,16 +46,17 @@ class MangaManager {
         }
     }
 
-    displayMangaList(mangaData, sortType = 'newest') {
+    displayMangaList(mangaData) {
         const mangaGrid = document.getElementById('mangaGrid');
         if (!mangaGrid) return;
         
-        let sortedManga = Object.keys(mangaData).map(key => {
-            return { id: key, ...mangaData[key] };
-        });
+        mangaGrid.innerHTML = '';
 
-        const sortedList = this.sortMangaArray(sortedManga, sortType);
-        this.displaySortedManga(sortedList);
+        Object.keys(mangaData).forEach(mangaId => {
+            const manga = mangaData[mangaId];
+            const mangaCard = this.createMangaCard(mangaId, manga);
+            mangaGrid.appendChild(mangaCard);
+        });
     }
 
     displaySortedManga(sortedManga) {
@@ -73,38 +74,6 @@ class MangaManager {
             const mangaCard = this.createMangaCard(manga.id, manga);
             mangaGrid.appendChild(mangaCard);
         });
-    }
-
-    sortMangaArray(mangaArray, sortType) {
-        switch (sortType) {
-            case 'newest':
-                mangaArray.sort((a, b) => {
-                    const timeA = a.timestamp || a.createdAt || 0;
-                    const timeB = b.timestamp || b.createdAt || 0;
-                    return timeB - timeA;
-                });
-                break;
-            case 'popular':
-                mangaArray.sort((a, b) => (b.views || 0) - (a.views || 0));
-                break;
-            case 'oldest':
-                mangaArray.sort((a, b) => {
-                    const timeA = a.timestamp || a.createdAt || 0;
-                    const timeB = b.timestamp || b.createdAt || 0;
-                    return timeA - timeB;
-                });
-                break;
-            default:
-                // الترتيب الافتراضي (الأحدث)
-                mangaArray.sort((a, b) => {
-                    const timeA = a.timestamp || a.createdAt || 0;
-                    const timeB = b.timestamp || b.createdAt || 0;
-                    return timeB - timeA;
-                });
-                break;
-        }
-        return mangaArray;
-    }],path:
     }
 
     createMangaCard(mangaId, manga) {
@@ -360,8 +329,7 @@ class MangaManager {
 
         return item;
     }
-
-    async showChapter(mangaId, chapterId, chapter) {
+	    async showChapter(mangaId, chapterId, chapter, commentId = null) {commentId = null) {
         ui.showLoading('loadingChapter');
         ui.hideElement('chapterContent');
 
@@ -371,14 +339,25 @@ class MangaManager {
 
             await this.displayChapterPages(chapter);
 
-            commentsManager.loadComments(mangaId, chapterId, chapter.comments);
+	   	            await commentsManager.loadComments(mangaId, chapterId, chapter.comments););
 
             ui.hideLoading('loadingChapter');
-            ui.showElement('chapterContent');
-            navigationManager.navigateTo('chapterPage', { 
-                mangaId: mangaId, 
-                chapterId: chapterId 
-            });
+            ui.showElement('chapterContent'	            navigationManager.navigateTo('chapterPage', { 
+	                mangaId: mangaId, 
+	                chapterId: chapterId,
+	                commentId: commentId // تمرير commentId للحفاظ عليه في الـ URL
+	            });
+	            
+	            if (commentId) {
+	                // الانتقال إلى التعليق
+	                this.scrollToComment(commentId);
+	            }    commentId: commentId // تمرير commentId للحفاظ عليه في الـ URL
+	            });
+	            
+	            if (commentId) {
+	                // الانتقال إلى التعليق
+	                this.scrollToComment(commentId);
+	            }
             
         } catch (error) {
             console.error('Error showing chapter:', error);
@@ -431,9 +410,23 @@ class MangaManager {
         }
     }
 
-    getCurrentMangaId() {
-        return this.currentMangaId;
-    }
-}
+	    getCurrentMangaId() {
+	        return this.currentMangaId;
+	    }
+	    
+	    scrollToComment(commentId) {
+	        const commentElement = document.getElementById(`comment-${commentId}`);
+	        if (commentElement) {
+	            commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	            
+	            // تمييز التعليق مؤقتاً
+	            commentElement.style.transition = 'background-color 0.5s ease';
+	            commentElement.style.backgroundColor = 'rgba(255, 255, 0, 0.2)'; // لون تمييز خفيف
+	            setTimeout(() => {
+	                commentElement.style.backgroundColor = ''; // إزالة التمييز
+	            }, 3000);
+	        }
+	    }
+	}
 
 const mangaManager = new MangaManager();

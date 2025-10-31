@@ -127,29 +127,17 @@ class NotificationsManager {
             }
             
             const manga = mangaManager.mangaData[notification.mangaId];
-            if (manga) {
-                navigationManager.navigateTo('chapterPage', {
-                    mangaId: notification.mangaId,
-                    chapterId: notification.chapterId
-                });
-                
-	                // انتظر قليلاً لضمان تحميل الصفحة ثم اعرض الفصل
-	                setTimeout(async () => {
-	                    await mangaManager.showChapter(notification.mangaId, notification.chapterId, manga.chapters[notification.chapterId]);
-	                    
-	                    // التمرير إلى التعليق المحدد
-	                    if (notification.commentId) {
-	                        const commentElement = document.getElementById(`comment-${notification.commentId}`);
-	                        if (commentElement) {
-	                            commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-	                            commentElement.classList.add('highlight-comment');
-	                            setTimeout(() => {
-	                                commentElement.classList.remove('highlight-comment');
-	                            }, 5000);
-	                        }
-	                    }
-	                }, 500);
-            } else {
+	            if (manga) {
+	                // التنقل إلى صفحة الفصل مع تمرير commentId للانتقال إليه مباشرةً
+	                navigationManager.navigateTo('chapterPage', {
+	                    mangaId: notification.mangaId,
+	                    chapterId: notification.chapterId,
+	                    commentId: notification.commentId // تمرير commentId
+	                });
+	                
+	                // ملاحظة: لا نحتاج لاستدعاء showChapter يدوياً هنا، لأن navigateTo ستفعل ذلك
+	                // عبر loadStateFromURL و restoreState.
+	            } else {
                 console.warn('المانجا غير موجودة للإشعار:', notification.mangaId);
                 ui.showAuthMessage('المانجا غير متاحة حالياً', 'error');
             }
