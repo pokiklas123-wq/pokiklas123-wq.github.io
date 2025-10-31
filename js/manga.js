@@ -158,6 +158,10 @@ class MangaManager {
     async showMangaDetail(mangaId, manga) {
         this.currentMangaId = mangaId;
         
+        // في دالة showMangaDetail، تأكد من هذا السطر:
+navigationManager.navigateTo('mangaDetailPage', { mangaId: mangaId });
+
+
         ui.showLoading('loadingDetail');
         ui.hideElement('mangaDetailContent');
 
@@ -333,6 +337,16 @@ class MangaManager {
     async showChapter(mangaId, chapterId, chapter) {
         ui.showLoading('loadingChapter');
         ui.hideElement('chapterContent');
+        
+       
+
+// في دالة showChapter، تأكد من هذا السطر:  
+navigationManager.navigateTo('chapterPage', { 
+    mangaId: mangaId, 
+    chapterId: chapterId 
+});
+
+
 
         try {
             // بناء واجهة الفصل

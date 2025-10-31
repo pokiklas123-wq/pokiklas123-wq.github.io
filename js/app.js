@@ -1,4 +1,3 @@
-// التطبيق الرئيسي
 class App {
     constructor() {
         this.init();
@@ -6,13 +5,12 @@ class App {
 
     async init() {
         try {
-            // تهيئة جميع المكونات
             this.setupEventListeners();
             
-            // تحميل حالة التنقل من URL
+            // تحميل حالة التنقل من URL أولاً
             navigationManager.loadState();
             
-            // تحميل البيانات الأولية
+            // ثم تحميل البيانات
             await this.loadInitialData();
             
             console.log('التطبيق بدأ بنجاح');
@@ -22,14 +20,12 @@ class App {
     }
 
     setupEventListeners() {
-        // إعداد مستمعي الأحداث للتعليقات
         document.addEventListener('click', (e) => {
             if (e.target.id === 'submitComment' || e.target.closest('#submitComment')) {
                 commentsManager.submitComment();
             }
         });
 
-        // إعداد الأزرار الأساسية - استخدام نظام التنقل الجديد
         document.getElementById('backToHome').addEventListener('click', () => {
             navigationManager.goBack();
         });
@@ -38,12 +34,10 @@ class App {
             navigationManager.goBack();
         });
 
-        // إضافة زر رجوع افتراضي للهواتف
         this.setupMobileBackButton();
     }
 
     setupMobileBackButton() {
-        // إضافة زر رجوع للهواتف إذا لزم الأمر
         if (window.innerWidth <= 768) {
             this.createMobileBackButton();
         }
@@ -76,7 +70,6 @@ class App {
 
         document.body.appendChild(backButton);
 
-        // إظهار الزر فقط عندما يمكن العودة للخلف
         setInterval(() => {
             backButton.style.display = navigationManager.canGoBack() ? 'block' : 'none';
         }, 100);
@@ -84,10 +77,8 @@ class App {
 
     async loadInitialData() {
         try {
-            // تحميل قائمة المانجا
             await mangaManager.loadMangaList();
             
-            // تحميل تقييمات المستخدم إذا كان مسجلاً
             if (authManager.getCurrentUser()) {
                 await ratingsManager.loadUserRatings();
             }
@@ -97,7 +88,6 @@ class App {
     }
 }
 
-// بدء التطبيق عندما يتم تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
     new App();
 });
