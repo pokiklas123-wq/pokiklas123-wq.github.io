@@ -95,23 +95,93 @@ class MangaManager {
         ui.showLoading('loadingDetail');
         ui.hideElement('mangaDetailContent');
 
-        // تحديث واجهة التفاصيل
-        document.getElementById('detailThumbnail').src = manga.thumbnail || 'https://via.placeholder.com/320x450/1a1a1a/ffffff?text=صورة+المانجا';
-        document.getElementById('detailTitle').textContent = manga.name;
-        document.getElementById('detailRating').textContent = manga.rating || '0.0';
-        document.getElementById('detailViews').textContent = manga.views || 0;
-        document.getElementById('detailDescription').textContent = manga.description || 'لا يوجد وصف متاح.';
-
-        // تحديث النجوم
-        const starsContainer = document.getElementById('detailStars');
-        starsContainer.innerHTML = this.generateStars(manga.rating || 0);
+        // بناء واجهة تفاصيل المانجا
+        const detailContent = document.getElementById('mangaDetailContent');
+        detailContent.innerHTML = this.createMangaDetailHTML(mangaId, manga);
 
         // تحميل وعرض الفصول
         await this.loadChapters(mangaId, manga.chapters);
 
+        // إعداد نظام التقييم
+        this.setupRatingSystem(mangaId);
+
         ui.hideLoading('loadingDetail');
         ui.showElement('mangaDetailContent');
         ui.navigateToPage('mangaDetailPage');
+    }
+
+    createMangaDetailHTML(mangaId, manga) {
+        return `
+            <div class="manga-detail">
+                <div class="manga-detail-thumbnail">
+                    <img src="${manga.thumbnail || 'https://via.placeholder.com/320x450/1a1a1a/ffffff?text=صورة+المانجا'}" 
+                         alt="${manga.name}" id="detailThumbnail">
+                </div>
+                <div class="manga-detail-info">
+                    <h1 class="manga-detail-title" id="detailTitle">${manga.name}</h1>
+                    
+                    <div class="manga-detail-meta">
+                        <div class="manga-rating">
+                            <span id="detailRating">${manga.rating || '0.0'}</span>
+                            <div class="stars" id="detailStars">
+                                ${this.generateStars(manga.rating || 0)}
+                            </div>
+                        </div>
+                        <div class="manga-views">
+                            <i class="fas fa-eye"></i>
+                            <span id="detailViews">${manga.views || 0}</span> مشاهدة
+                        </div>
+                    </div>
+
+                    <div class="rating-section">
+                        <h3>قيم المانجا</h3>
+                        <div class="rating-stars">
+                            <i class="far fa-star rating-star" data-rating="1"></i>
+                            <i class="far fa-star rating-star" data-rating="2"></i>
+                            <i class="far fa-star rating-star" data-rating="3"></i>
+                            <i class="far fa-star rating-star" data-rating="4"></i>
+                            <i class="far fa-star rating-star" data-rating="5"></i>
+                        </div>
+                    </div>
+
+                    <div class="manga-detail-description" id="detailDescription">
+                        ${manga.description || 'لا يوجد وصف متاح.'}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="chapters-list">
+                <h3>الفصول</h3>
+                <div id="chaptersList"></div>
+            </div>
+        `;
+    }
+
+    setupRatingSystem(mangaId) {
+        const stars = document.querySelectorAll('.rating-star');
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                if (!authManager.getCurrentUser()) {
+                    ui.showAuthMessage('يجب تسجيل الدخول لتقييم المانجا', 'error');
+                    ui.toggleAuthModal(true);
+                    return;
+                }
+
+                const rating = parseInt(star.dataset.rating);
+                ratingsManager.rateManga(mangaId, rating);
+                
+                // تحديث النجوم
+                stars.forEach((s, index) => {
+                    if (index < rating) {
+                        s.classList.remove('far');
+                        s.classList.add('fas', 'active');
+                    } else {
+                        s.classList.remove('fas', 'active');
+                        s.classList.add('far');
+                    }
+                });
+            });
+        });
     }
 
     async loadChapters(mangaId, chaptersData) {
@@ -123,9 +193,16 @@ class MangaManager {
             return;
         }
 
-        Object.keys(chaptersData).forEach(chapterId => {
-            const chapter = chaptersData[chapterId];
-            const chapterItem = this.createChapterItem(mangaId, chapterId, chapter);
+        // تحويل الفصول إلى مصفوفة وترتيبها
+        const chaptersArray = Object.keys(chaptersData).map(key => {
+            return { id: key, ...chaptersData[key] };
+        });
+
+        // ترتيب الفصول تنازلياً (الأحدث أولاً)
+        chaptersArray.sort((a, b) => b.id.localeCompare(a.id));
+
+        chaptersArray.forEach(chapter => {
+            const chapterItem = this.createChapterItem(mangaId, chapter.id, chapter);
             chaptersList.appendChild(chapterItem);
         });
     }
@@ -149,8 +226,9 @@ class MangaManager {
         ui.showLoading('loadingChapter');
         ui.hideElement('chapterContent');
 
-        // تحديث واجهة الفصل
-        document.getElementById('chapterTitle').textContent = chapter.chapter_name;
+        // بناء واجهة الفصل
+        const chapterContent = document.getElementById('chapterContent');
+        chapterContent.innerHTML = this.createChapterHTML(chapter);
 
         // عرض صفحات المانجا
         await this.displayChapterPages(chapter);
@@ -158,16 +236,41 @@ class MangaManager {
         // تحميل التعليقات
         commentsManager.loadComments(mangaId, chapterId, chapter.comments);
 
+        // إعداد حدث إرسال التعليق
+        document.getElementById('submitComment').addEventListener('click', () => {
+            commentsManager.submitComment();
+        });
+
         ui.hideLoading('loadingChapter');
         ui.showElement('chapterContent');
         ui.navigateToPage('chapterPage');
+    }
+
+    createChapterHTML(chapter) {
+        return `
+            <div class="chapter-header">
+                <h1 class="chapter-title">${chapter.chapter_name}</h1>
+                <p class="chapter-subtitle">${chapter.chapter_title || ''}</p>
+            </div>
+            
+            <div class="manga-pages" id="mangaPages"></div>
+            
+            <div class="comments-section">
+                <h3>التعليقات</h3>
+                <div class="comment-form">
+                    <textarea class="comment-input" id="commentInput" placeholder="اكتب تعليقك هنا..."></textarea>
+                    <button class="btn" id="submitComment">إرسال التعليق</button>
+                </div>
+                <div class="comments-list" id="commentsList"></div>
+            </div>
+        `;
     }
 
     async displayChapterPages(chapter) {
         const mangaPages = document.getElementById('mangaPages');
         mangaPages.innerHTML = '';
 
-        if (chapter.images && chapter.images.length > 0) {
+        if (chapter.images && Array.isArray(chapter.images)) {
             chapter.images.forEach((imageUrl, index) => {
                 const pageImg = document.createElement('img');
                 pageImg.src = imageUrl;

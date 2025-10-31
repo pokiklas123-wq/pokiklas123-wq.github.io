@@ -4,14 +4,13 @@ class CommentsManager {
     }
 
     setupEventListeners() {
-        document.getElementById('submitComment').addEventListener('click', () => {
-            this.submitComment();
-        });
+        // سيتم إعدادها عند تحميل الصفحة
     }
 
     async submitComment() {
         const commentText = document.getElementById('commentInput').value.trim();
         const mangaId = mangaManager.getCurrentMangaId();
+        const chapterId = this.currentChapterId;
         
         if (!commentText) {
             ui.showAuthMessage('يرجى كتابة تعليق قبل الإرسال', 'error');
@@ -33,14 +32,17 @@ class CommentsManager {
                 userId: authManager.getCurrentUser().uid
             };
 
-            const commentRef = database.ref(`manga_list/${mangaId}/chapters/${this.currentChapterId}/comments`).push();
+            // إضافة التعليق إلى قاعدة البيانات
+            const commentRef = database.ref(`manga_list/${mangaId}/chapters/${chapterId}/comments`).push();
             await commentRef.set(commentData);
             
             document.getElementById('commentInput').value = '';
             ui.showAuthMessage('تم إرسال التعليق بنجاح', 'success');
             
             // إعادة تحميل التعليقات
-            this.loadComments(mangaId, this.currentChapterId);
+            const snapshot = await database.ref(`manga_list/${mangaId}/chapters/${chapterId}/comments`).once('value');
+            const commentsData = snapshot.val();
+            this.loadComments(mangaId, chapterId, commentsData);
             
         } catch (error) {
             ui.showAuthMessage('حدث خطأ في إرسال التعليق: ' + error.message, 'error');
@@ -57,9 +59,15 @@ class CommentsManager {
             return;
         }
 
-        Object.keys(commentsData).forEach(commentId => {
-            const comment = commentsData[commentId];
-            const commentElement = this.createCommentElement(commentId, comment);
+        // تحويل التعليقات إلى مصفوفة وترتيبها
+        const commentsArray = Object.keys(commentsData).map(key => {
+            return { id: key, ...commentsData[key] };
+        });
+
+        commentsArray.sort((a, b) => b.timestamp - a.timestamp);
+
+        commentsArray.forEach(comment => {
+            const commentElement = this.createCommentElement(comment.id, comment);
             commentsList.appendChild(commentElement);
         });
     }
@@ -75,10 +83,7 @@ class CommentsManager {
             <div class="comment-text">${comment.text}</div>
             <div class="comment-actions">
                 <button class="comment-action like-btn" data-comment-id="${commentId}">
-                    <i class="fas fa-heart"></i> ${comment.likes || 0}
-                </button>
-                <button class="comment-action reply-btn">
-                    <i class="fas fa-reply"></i> رد
+                    <i class="fas fa-heart"></i> <span class="like-count">${comment.likes || 0}</span>
                 </button>
             </div>
         `;
@@ -109,7 +114,10 @@ class CommentsManager {
             await commentRef.update({ likes: newLikes });
             
             // تحديث الواجهة
-            this.loadComments(mangaId, this.currentChapterId);
+            const likeCount = document.querySelector(`[data-comment-id="${commentId}"] .like-count`);
+            if (likeCount) {
+                likeCount.textContent = newLikes;
+            }
             
         } catch (error) {
             console.error('Error liking comment:', error);

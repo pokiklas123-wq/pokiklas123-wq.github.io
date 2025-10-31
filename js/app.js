@@ -6,13 +6,19 @@ class App {
 
     init() {
         // تهيئة جميع المكونات
-        commentsManager.setupEventListeners();
+        this.setupEventListeners();
         
         // تحميل البيانات الأولية
         this.loadInitialData();
-        
-        // إعداد مستمعي الحالة
-        this.setupStateListeners();
+    }
+
+    setupEventListeners() {
+        // إعداد مستمعي الأحداث للتعليقات
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'submitComment' || e.target.closest('#submitComment')) {
+                commentsManager.submitComment();
+            }
+        });
     }
 
     async loadInitialData() {
@@ -23,15 +29,6 @@ class App {
         if (authManager.getCurrentUser()) {
             await ratingsManager.loadUserRatings();
         }
-    }
-
-    setupStateListeners() {
-        // تحديث الواجهة عند تغير حالة المصادقة
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                ratingsManager.loadUserRatings();
-            }
-        });
     }
 }
 
