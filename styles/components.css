@@ -1,17 +1,17 @@
 /* الهيدر */
-	header {
-	    background: var(--card-bg);
-	    padding: 1rem 2rem;
-	    display: flex;
-	    justify-content: space-between;
-	    align-items: center;
-	    border-bottom: 2px solid var(--border-color); /* تغيير لون الخط السفلي */
-	    position: sticky;
-	    top: 0;
-	    z-index: 1000;
-	    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.5); /* ظل أغمق */
-	    backdrop-filter: blur(10px);
-	}
+header {
+    background: var(--card-bg);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 2px solid var(--accent-color);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 20px rgba(26, 115, 232, 0.2);
+    backdrop-filter: blur(10px);
+}
 
 .logo {
     display: flex;
@@ -218,45 +218,52 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
-	.manga-card:hover {
-	    transform: translateY(-8px) scale(1.02);
-	    box-shadow: 0 12px 30px rgba(139, 92, 246, 0.5); /* ظل بلون الأكسنت الجديد */
-	    border-color: var(--accent-color);
-	}
+.manga-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(26, 115, 232, 0.3);
+    border-color: var(--accent-color);
+}
 
-	.manga-thumbnail {
-	    width: 100%;
-	    height: 300px;
-	    object-fit: cover;
-	    border-bottom: none; /* إزالة الخط السفلي */
-	}
+.manga-thumbnail {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-bottom: 2px solid var(--accent-color);
+}
 
-	.manga-info {
-	    padding: 10px; /* تقليل الحشو */
-	}
+.manga-info {
+    padding: 18px;
+}
 
-	.manga-title {
-	    font-size: 1rem; /* تصغير الخط */
-	    margin-bottom: 5px; /* تقليل الهامش */
-	    white-space: nowrap;
-	    overflow: hidden;
-	    text-overflow: ellipsis;
-	    font-weight: 600;
-	    text-align: center; /* توسيط النص */
-	}
+.manga-title {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 600;
+}
 
-	.manga-rating {
-	    display: none; /* إخفاء التقييمات في البطاقة الرئيسية */
-	}
-	
-	.manga-views {
-	    font-size: 0.8rem;
-	    color: var(--accent-light); /* تغيير لون المشاهدات */
-	    display: flex;
-	    align-items: center;
-	    gap: 5px;
-	    justify-content: center; /* توسيط المشاهدات */
-	}
+.manga-rating {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    gap: 8px;
+}
+
+.stars {
+    color: gold;
+    display: flex;
+    gap: 2px;
+}
+
+.manga-views {
+    font-size: 0.9rem;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
 
 /* صفحة تفاصيل المانجا */
 .manga-detail-content {
@@ -364,51 +371,18 @@
     margin-bottom: 8px;
 }
 
-	.chapter-item:hover {
-	    background: var(--hover-color);
-	    transform: translateX(-5px);
-	}
-	
-	.chapter-likes {
-	    color: #ff4757;
-	    margin-left: 15px;
-	    font-size: 0.9rem;
-	}
-	
-	/* ---------------------------------- */
-	/*          Comment Edit Styles       */
-	/* ---------------------------------- */
-	.edit-comment-input {
-	    width: 100%;
-	    min-height: 100px;
-	    padding: 10px;
-	    border: 1px solid var(--border-color);
-	    border-radius: 8px;
-	    background-color: var(--bg-color);
-	    color: var(--text-color);
-	    margin-bottom: 10px;
-	    resize: vertical;
-	}
-	
-	.edit-controls {
-	    display: flex;
-	    gap: 10px;
-	    justify-content: flex-end;
-	}
-	
-	.edit-controls .btn {
-	    padding: 8px 15px;
-	    font-size: 0.9rem;
-	}
-	
-	.edit-controls .btn-secondary {
-	    background: transparent;
-	    color: var(--accent-color);
-	    border: 1px solid var(--accent-color);
-	    box-shadow: none;
-	}
-	
-	/* صفحة الفصل */
+.chapter-item:hover {
+    background: var(--hover-color);
+    transform: translateX(-5px);
+}
+
+.chapter-likes {
+    color: #ff4757;
+    margin-left: 15px;
+    font-size: 0.9rem;
+}
+
+/* صفحة الفصل */
 .chapter-content {
     display: none;
 }
