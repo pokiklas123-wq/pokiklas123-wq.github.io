@@ -100,6 +100,7 @@
             </button>
             <button id="notificationsBtn" class="btn btn-outline">
                 <i class="fas fa-bell"></i>
+                <span class="notification-badge hidden"></span>
             </button>
             <button id="authBtn" class="btn">
                 <i class="fas fa-user"></i>
@@ -175,12 +176,11 @@
     <div class="container">
         <div class="notifications-container">
             <div class="notifications-header">
-                <h1>الإشعارات</h1>
-                <p>ابق على اطلاع بآخر الأنشطة والتحديثات</p>
+                <h1>الإشعارات <span id="unreadNotificationsCount"></span></h1>
             </div>
             
             <div class="mark-all-read">
-                <button class="btn btn-outline" id="markAllRead">
+                <button class="btn btn-outline" id="markAllRead" onclick="window.notificationsManager.markAllAsRead()">
                     <i class="fas fa-check-double"></i>
                     تعيين الكل كمقروء
                 </button>
@@ -199,8 +199,17 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/notifications.js"></script>
+    <script>
+        // تهيئة NotificationsManager في صفحة الإشعارات
+        document.addEventListener('DOMContentLoaded', () => {
+            // app.js will initialize appInstance, which in turn initializes NotificationsManager
+            // We just need to ensure app.js is loaded and running
+            if (typeof MangaApp !== 'undefined') {
+                window.appInstance = new MangaApp();
+            }
+        });
+    </script>
 </body>
 </html>
