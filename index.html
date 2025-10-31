@@ -3,22 +3,22 @@
 <head>
 
 
-	<script>
-	    // معالجة إعادة التوجيه من 404.html (تم تعطيلها لأننا نستخدم history.pushState الآن)
-	    // if (sessionStorage.redirect) {
-	    //     const redirect = sessionStorage.redirect;
-	    //     delete sessionStorage.redirect;
-	    //     if (redirect !== location.pathname) {
-	    //         history.replaceState(null, null, redirect);
-	    //     }
-	    // }
-	</script>
+<script>
+    // معالجة إعادة التوجيه من 404.html
+    if (sessionStorage.redirect) {
+        const redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect !== location.pathname) {
+            history.replaceState(null, null, redirect);
+        }
+    }
+</script>
 
 
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مانجا - Ully | موقع متكامل للمانجا العربية</title>
+    <title>مانجا - manus | موقع متكامل للمانجا العربية</title>
     <meta name="description" content="موقع مانجا متكامل لعرض وقراءة المانجا العربية بأفضل تجربة مستخدم">
     <meta name="keywords" content="مانجا, مانغا, قصص مصورة, مانجا عربية, قراءة مانجا">
     
@@ -87,11 +87,8 @@
         </div>
 
         <div class="drawer-section">
-            <h3>التنقل</h3>
+            <h3>التصنيفات</h3>
             <ul class="categories-list">
-                <li data-action="home" id="drawerHomeLink">
-                    <i class="fas fa-home"></i> الرئيسية
-                </li>
                 <li data-sort="newest">
                     <i class="fas fa-clock"></i> الأحدث
                 </li>
