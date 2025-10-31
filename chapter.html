@@ -13,6 +13,8 @@
             border-radius: var(--border-radius);
             margin-bottom: 2rem;
             text-align: center;
+            backdrop-filter: var(--blur-effect, none);
+            -webkit-backdrop-filter: var(--blur-effect, none);
         }
         .chapter-title {
             font-size: 1.5rem;
@@ -40,6 +42,8 @@
             border-radius: var(--border-radius);
             padding: 1.5rem;
             margin-bottom: 2rem;
+            backdrop-filter: var(--blur-effect, none);
+            -webkit-backdrop-filter: var(--blur-effect, none);
         }
         .comments-title {
             margin-bottom: 1.5rem;
@@ -192,24 +196,7 @@
                     <span>الصفحة الرئيسية</span>
                 </a>
             </li>
-            <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link">
-                    <i class="fas fa-fire"></i>
-                    <span>الأكثر مشاهدة</span>
-                </a>
-            </li>
-            <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link">
-                    <i class="fas fa-star"></i>
-                    <span>الأعلى تقييماً</span>
-                </a>
-            </li>
-            <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link">
-                    <i class="fas fa-history"></i>
-                    <span>الأحدث</span>
-                </a>
-            </li>
+
             <li class="drawer-menu-item">
                 <a href="notifications.html" class="drawer-menu-link" id="notificationsDrawerBtn">
                     <i class="fas fa-bell"></i>
@@ -249,17 +236,15 @@
             </form>
         </div>
         <div id="commentsContainer" class="comments-list">
-            <!-- Comments will be rendered here by comments.js -->
-        </div>
-    </div>
-
-    <script src="js/firebase-config.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+            <!-- Comm    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
+    <script src="js/auth-page.js"></script>
     <script src="js/db.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/chapter.js"></script>  <script src="js/manga.js"></script>
     <script src="js/comments.js"></script>
     <script src="js/chapter.js"></script>
 </body>
