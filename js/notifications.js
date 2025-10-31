@@ -133,10 +133,22 @@ class NotificationsManager {
                     chapterId: notification.chapterId
                 });
                 
-                // انتظر قليلاً لضمان تحميل الصفحة ثم اعرض الفصل
-                setTimeout(() => {
-                    mangaManager.showChapter(notification.mangaId, notification.chapterId, manga.chapters[notification.chapterId]);
-                }, 100);
+	                // انتظر قليلاً لضمان تحميل الصفحة ثم اعرض الفصل
+	                setTimeout(async () => {
+	                    await mangaManager.showChapter(notification.mangaId, notification.chapterId, manga.chapters[notification.chapterId]);
+	                    
+	                    // التمرير إلى التعليق المحدد
+	                    if (notification.commentId) {
+	                        const commentElement = document.getElementById(`comment-${notification.commentId}`);
+	                        if (commentElement) {
+	                            commentElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+	                            commentElement.classList.add('highlight-comment');
+	                            setTimeout(() => {
+	                                commentElement.classList.remove('highlight-comment');
+	                            }, 5000);
+	                        }
+	                    }
+	                }, 500);
             } else {
                 console.warn('المانجا غير موجودة للإشعار:', notification.mangaId);
                 ui.showAuthMessage('المانجا غير متاحة حالياً', 'error');

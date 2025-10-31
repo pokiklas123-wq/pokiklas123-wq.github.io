@@ -16,13 +16,23 @@ class NavigationManager {
             this.goBack();
         });
 
-        // إصلاح أزرار التصنيف
-        document.querySelectorAll('.categories-list li').forEach(item => {
+        // رابط الصفحة الرئيسية في الدراور
+        document.getElementById('drawerHomeLink').addEventListener('click', () => {
+            this.navigateTo('homePage');
+            ui.toggleDrawer(false);
+        });
+
+        // فلاتر التصنيف في الدراور
+        document.querySelectorAll('.drawer-section .categories-list li').forEach(item => {
             item.addEventListener('click', (e) => {
                 const sortType = e.currentTarget.getAttribute('data-sort');
+                const action = e.currentTarget.getAttribute('data-action');
+                
                 if (sortType) {
                     this.sortManga(sortType);
                     ui.toggleDrawer(false);
+                } else if (action === 'home') {
+                    // تم التعامل معها بالفعل
                 }
             });
         });
@@ -250,36 +260,14 @@ class NavigationManager {
             return;
         }
 
-        let sortedManga = Object.keys(mangaManager.mangaData).map(key => {
-            return { id: key, ...mangaManager.mangaData[key] };
-        });
+	        let sortedManga = Object.keys(mangaManager.mangaData).map(key => {
+	            return { id: key, ...mangaManager.mangaData[key] };
+	        });
 
-        switch (sortType) {
-            case 'newest':
-                // استخدام التاريخ إذا كان موجوداً، وإلا استخدام ترتيب الإضافة
-                sortedManga.sort((a, b) => {
-                    const timeA = a.timestamp || a.createdAt || 0;
-                    const timeB = b.timestamp || b.createdAt || 0;
-                    return timeB - timeA;
-                });
-                break;
-            case 'popular':
-                sortedManga.sort((a, b) => (b.views || 0) - (a.views || 0));
-                break;
-            case 'oldest':
-                sortedManga.sort((a, b) => {
-                    const timeA = a.timestamp || a.createdAt || 0;
-                    const timeB = b.timestamp || b.createdAt || 0;
-                    return timeA - timeB;
-                });
-                break;
-            default:
-                console.warn('نوع التصنيف غير معروف:', sortType);
-                return;
-        }
+	        const sortedList = mangaManager.sortMangaArray(sortedManga, sortType);
 
-        console.log('تصنيف المانجا حسب:', sortType, sortedManga.length);
-        mangaManager.displaySortedManga(sortedManga);
+	        console.log('تصنيف المانجا حسب:', sortType, sortedList.length);
+	        mangaManager.displaySortedManga(sortedList);
     }
 
     getCurrentState() {

@@ -24,7 +24,7 @@ class MangaManager {
             this.mangaData = snapshot.val();
 
             if (this.mangaData && Object.keys(this.mangaData).length > 0) {
-                this.displayMangaList(this.mangaData);
+                this.displayMangaList(this.mangaData, 'newest'); // عرض المانجا بترتيب الأحدث افتراضياً
                 ui.hideLoading('loadingHome');
                 ui.showElement('mangaGrid');
                 
@@ -46,17 +46,16 @@ class MangaManager {
         }
     }
 
-    displayMangaList(mangaData) {
+    displayMangaList(mangaData, sortType = 'newest') {
         const mangaGrid = document.getElementById('mangaGrid');
         if (!mangaGrid) return;
         
-        mangaGrid.innerHTML = '';
-
-        Object.keys(mangaData).forEach(mangaId => {
-            const manga = mangaData[mangaId];
-            const mangaCard = this.createMangaCard(mangaId, manga);
-            mangaGrid.appendChild(mangaCard);
+        let sortedManga = Object.keys(mangaData).map(key => {
+            return { id: key, ...mangaData[key] };
         });
+
+        const sortedList = this.sortMangaArray(sortedManga, sortType);
+        this.displaySortedManga(sortedList);
     }
 
     displaySortedManga(sortedManga) {
@@ -74,6 +73,38 @@ class MangaManager {
             const mangaCard = this.createMangaCard(manga.id, manga);
             mangaGrid.appendChild(mangaCard);
         });
+    }
+
+    sortMangaArray(mangaArray, sortType) {
+        switch (sortType) {
+            case 'newest':
+                mangaArray.sort((a, b) => {
+                    const timeA = a.timestamp || a.createdAt || 0;
+                    const timeB = b.timestamp || b.createdAt || 0;
+                    return timeB - timeA;
+                });
+                break;
+            case 'popular':
+                mangaArray.sort((a, b) => (b.views || 0) - (a.views || 0));
+                break;
+            case 'oldest':
+                mangaArray.sort((a, b) => {
+                    const timeA = a.timestamp || a.createdAt || 0;
+                    const timeB = b.timestamp || b.createdAt || 0;
+                    return timeA - timeB;
+                });
+                break;
+            default:
+                // الترتيب الافتراضي (الأحدث)
+                mangaArray.sort((a, b) => {
+                    const timeA = a.timestamp || a.createdAt || 0;
+                    const timeB = b.timestamp || b.createdAt || 0;
+                    return timeB - timeA;
+                });
+                break;
+        }
+        return mangaArray;
+    }],path:
     }
 
     createMangaCard(mangaId, manga) {

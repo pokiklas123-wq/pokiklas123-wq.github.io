@@ -8,9 +8,9 @@ class CommentsManager {
     }
 
     setupEventListeners() {
-        // إعداد حدث الإرسال مرة واحدة فقط
+        // إعداد حدث الإرسال
         document.addEventListener('click', (e) => {
-            if ((e.target.id === 'submitComment' || e.target.closest('#submitComment')) && !this.isSubmitting) {
+            if (e.target.id === 'submitComment' && !this.isSubmitting) {
                 this.submitComment();
             }
             
@@ -146,8 +146,9 @@ class CommentsManager {
 
     createCommentElement(commentId, comment) {
         const hasReplies = comment.replies && Object.keys(comment.replies).length > 0;
-        const element = document.createElement('div');
-        element.className = 'comment';
+	        const element = document.createElement('div');
+	        element.className = 'comment';
+	        element.id = `comment-${commentId}`;
         element.innerHTML = `
             <div class="comment-header">
                 <span class="comment-user">${comment.user}</span>
