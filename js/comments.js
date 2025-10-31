@@ -20,15 +20,15 @@ class CommentsManager {
         }
     }
 
-    getMangaIdFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('mangaId');
-    }
-
-    getChapterIdFromUrl() {
-        const params = new URLSearchParams(window.location.search);
-        return params.get('chapterId');
-    }
+	    getMangaIdFromUrl() {
+	        const params = new URLSearchParams(window.location.search);
+	        return params.get('manga');
+	    }
+	
+	    getChapterIdFromUrl() {
+	        const params = new URLSearchParams(window.location.search);
+	        return params.get('chapter');
+	    }
 
     setupEventListeners() {
         this.commentForm.addEventListener('submit', (e) => this.handleCommentSubmit(e));
@@ -124,9 +124,14 @@ class CommentsManager {
             <div class="comment-body">
                 <p class="comment-text">${comment.text}</p>
             </div>
-            <div class="replies-container">
-                ${this.renderReplies(comment.replies, comment.id)}
-            </div>
+	            <div class="replies-container">
+	                ${this.renderReplies(comment.replies, comment.id)}
+	            </div>
+	            ${comment.replies && Object.keys(comment.replies).length > 0 ? 
+	                `<button class="btn-icon show-replies-btn" data-id="${comment.id}">
+	                    <i class="fas fa-chevron-down"></i> إظهار الردود (${Object.keys(comment.replies).length})
+	                </button>` : ''
+	            }
             <div class="reply-form-container" data-id="${comment.id}" style="display:none;">
                 ${this.createReplyForm(comment.id, comment.userName)}
             </div>
@@ -134,22 +139,23 @@ class CommentsManager {
         return commentEl;
     }
 
-    renderReplies(replies, parentId) {
-        if (!replies) return '';
-        
-        const repliesArray = Object.keys(replies).map(key => ({
-            id: key,
-            ...replies[key]
-        })).sort((a, b) => a.timestamp - b.timestamp);
-
-        let html = '';
-        repliesArray.forEach(reply => {
-            // Replies are nested under the parent comment ID
-            reply.id = `${parentId}-${reply.id}`; 
-            html += this.createReplyElement(reply, parentId);
-        });
-        return html;
-    }
+	    renderReplies(replies, parentId) {
+	        if (!replies) return '';
+	        
+	        const repliesArray = Object.keys(replies).map(key => ({
+	            id: key,
+	            ...replies[key]
+	        })).sort((a, b) => a.timestamp - b.timestamp);
+	
+	        let html = `<div class="replies-list hidden" data-parent-id="${parentId}">`;
+	        repliesArray.forEach(reply => {
+	            // Replies are nested under the parent comment ID
+	            reply.id = `${parentId}-${reply.id}`; 
+	            html += this.createReplyElement(reply, parentId);
+	        });
+	        html += `</div>`;
+	        return html;
+	    }
 
     createReplyElement(reply, parentId) {
         const isOwner = this.auth.currentUser && this.auth.currentUser.uid === reply.userId;
@@ -209,7 +215,9 @@ class CommentsManager {
             this.editReply(parentId, commentId, target.getAttribute('data-text'));
         } else if (target.classList.contains('cancel-reply')) {
             this.hideAllReplyForms();
-        } else if (target.closest('.reply-form')) {
+	        } else if (target.classList.contains('show-replies-btn')) {
+	            this.toggleReplies(commentId);
+	        } else if (target.closest('.reply-form')) {
             const form = target.closest('.reply-form');
             if (target.type === 'submit') {
                 e.preventDefault();
@@ -286,16 +294,32 @@ class CommentsManager {
         }
     }
 
-    async deleteReply(parentId, replyId) {
-        if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
-        try {
-            await this.commentsRef.child(parentId).child('replies').child(replyId).remove();
-            Utils.showMessage('تم حذف الرد بنجاح.', 'success');
-        } catch (error) {
-            console.error('Error deleting reply:', error);
-            Utils.showMessage('حدث خطأ أثناء حذف الرد.', 'error');
-        }
-    }
+	    async deleteReply(parentId, replyId) {
+	        if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
+	        try {
+	            await this.commentsRef.child(parentId).child('replies').child(replyId).remove();
+	            Utils.showMessage('تم حذف الرد بنجاح.', 'success');
+	        } catch (error) {
+	            console.error('Error deleting reply:', error);
+	            Utils.showMessage('حدث خطأ أثناء حذف الرد.', 'error');
+	        }
+	    }
+	    
+	    toggleReplies(parentId) {
+	        const repliesList = document.querySelector(`.replies-list[data-parent-id="${parentId}"]`);
+	        const button = document.querySelector(`.show-replies-btn[data-id="${parentId}"]`);
+	        if (repliesList && button) {
+	            const isHidden = repliesList.classList.toggle('hidden');
+	            const icon = button.querySelector('i');
+	            if (isHidden) {
+	                icon.className = 'fas fa-chevron-down';
+	                button.innerHTML = `<i class="fas fa-chevron-down"></i> إظهار الردود (${repliesList.children.length})`;
+	            } else {
+	                icon.className = 'fas fa-chevron-up';
+	                button.innerHTML = `<i class="fas fa-chevron-up"></i> إخفاء الردود (${repliesList.children.length})`;
+	            }
+	        }
+	    }
 
     editComment(commentId, currentText) {
         const newText = prompt('تعديل التعليق:', currentText);

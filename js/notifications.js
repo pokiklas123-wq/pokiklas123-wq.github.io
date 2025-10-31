@@ -156,10 +156,11 @@ class NotificationsManager {
 
     redirectToTarget(notification) {
         if (notification.type === 'reply' && notification.mangaId && notification.chapterId && notification.commentId) {
-            // Construct the URL to the chapter page and scroll to the comment/reply
-            const targetId = notification.replyId ? `${notification.commentId}-${notification.replyId}` : notification.commentId;
-            const url = `chapter.html?mangaId=${notification.mangaId}&chapter=${notification.chapterId}#${targetId}`;
-            window.location.href = url;
+	            // Construct the URL to the chapter page and scroll to the comment/reply
+	            const targetId = notification.replyId ? `${notification.commentId}-${notification.replyId}` : notification.commentId;
+	            // The chapter.html uses 'manga' and 'chapter' as URL params, not 'mangaId' and 'chapterId'
+	            const url = `chapter.html?manga=${notification.mangaId}&chapter=${notification.chapterId}#${targetId}`;
+	            window.location.href = url;
         } else {
             // Default redirection for other types
             window.location.href = 'notifications.html';
