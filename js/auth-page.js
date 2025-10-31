@@ -1,20 +1,35 @@
-// إدارة صفحة المصادقة
+// js/auth-page.js - الملف المصحح
+
 class AuthPage {
     constructor() {
         this.currentTab = 'login';
+        this.auth = null;
+        this.db = null;
+        
         this.init();
     }
     
     init() {
+        this.initializeFirebase();
         this.setupEventListeners();
         Utils.loadTheme();
-        
-        // التحقق إذا كان المستخدم مسجلاً بالفعل
         this.checkAuthState();
     }
     
+    initializeFirebase() {
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            this.auth = firebase.auth();
+            this.db = firebase.database();
+        } catch (error) {
+            console.error('Firebase init error:', error);
+        }
+    }
+    
     setupEventListeners() {
-        // تبديل التبويبات
+        // التبويبات
         document.querySelectorAll('.auth-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 const tabName = e.target.getAttribute('data-tab');
@@ -22,43 +37,28 @@ class AuthPage {
             });
         });
         
-        // نموذج تسجيل الدخول
-        const loginForm = document.getElementById('loginForm');
-        if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleLogin();
-            });
-        }
+        // النماذج
+        document.getElementById('loginForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleLogin();
+        });
         
-        // نموذج إنشاء حساب
-        const registerForm = document.getElementById('registerForm');
-        if (registerForm) {
-            registerForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleRegister();
-            });
-        }
+        document.getElementById('registerForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleRegister();
+        });
         
-        // نموذج إعادة تعيين كلمة السر
-        const resetPasswordForm = document.getElementById('resetPasswordForm');
-        if (resetPasswordForm) {
-            resetPasswordForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.handleResetPassword();
-            });
-        }
+        document.getElementById('resetPasswordForm')?.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleResetPassword();
+        });
         
-        // رابط نسيت كلمة السر
-        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        if (forgotPasswordLink) {
-            forgotPasswordLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.showResetPasswordForm();
-            });
-        }
+        // الروابط
+        document.getElementById('forgotPasswordLink')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.showResetPasswordForm();
+        });
         
-        // العودة لتسجيل الدخول من صفحة إعادة التعيين
         document.querySelectorAll('.back-to-login').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -70,25 +70,17 @@ class AuthPage {
     switchTab(tabName) {
         this.currentTab = tabName;
         
-        // تحديث التبويبات النشطة
+        // تحديث التبويبات
         document.querySelectorAll('.auth-tab').forEach(tab => {
-            if (tab.getAttribute('data-tab') === tabName) {
-                tab.classList.add('active');
-            } else {
-                tab.classList.remove('active');
-            }
+            tab.classList.toggle('active', tab.getAttribute('data-tab') === tabName);
         });
         
-        // تحديث النماذج النشطة
+        // تحديث النماذج
         document.querySelectorAll('.auth-form').forEach(form => {
-            if (form.id === `${tabName}Form`) {
-                form.classList.add('active');
-            } else {
-                form.classList.remove('active');
-            }
+            form.classList.toggle('active', form.id === `${tabName}Form`);
         });
         
-        // تحديث العنوان والوصف
+        // تحديث العناوين
         this.updateAuthHeader(tabName);
         
         // مسح الرسائل
@@ -96,41 +88,28 @@ class AuthPage {
     }
     
     updateAuthHeader(tabName) {
-        const authTitle = document.getElementById('authTitle');
-        const authSubtitle = document.getElementById('authSubtitle');
+        const titles = {
+            'login': 'تسجيل الدخول',
+            'register': 'إنشاء حساب',
+            'reset': 'إعادة تعيين كلمة السر'
+        };
         
-        switch (tabName) {
-            case 'login':
-                authTitle.textContent = 'تسجيل الدخول';
-                authSubtitle.textContent = 'أدخل بياناتك للوصول إلى حسابك';
-                break;
-            case 'register':
-                authTitle.textContent = 'إنشاء حساب';
-                authSubtitle.textContent = 'أنشئ حسابك الجديد للبدء';
-                break;
-            case 'reset':
-                authTitle.textContent = 'إعادة تعيين كلمة السر';
-                authSubtitle.textContent = 'أدخل بريدك الإلكتروني لإرسال رابط التعيين';
-                break;
-        }
+        const subtitles = {
+            'login': 'أدخل بياناتك للوصول إلى حسابك',
+            'register': 'أنشئ حسابك الجديد للبدء',
+            'reset': 'أدخل بريدك الإلكتروني لإرسال رابط التعيين'
+        };
+        
+        document.getElementById('authTitle').textContent = titles[tabName];
+        document.getElementById('authSubtitle').textContent = subtitles[tabName];
     }
     
     showResetPasswordForm() {
         this.currentTab = 'reset';
-        
-        // إخفاء جميع النماذج
-        document.querySelectorAll('.auth-form').forEach(form => {
-            form.classList.remove('active');
-        });
-        
-        // إظهار نموذج إعادة التعيين
-        document.getElementById('resetPasswordForm').classList.add('active');
-        
-        // تحديث العنوان
-        this.updateAuthHeader('reset');
-        
-        // إخفاء التبويبات
         document.querySelector('.auth-tabs').style.display = 'none';
+        document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+        document.getElementById('resetPasswordForm').classList.add('active');
+        this.updateAuthHeader('reset');
     }
     
     async handleLogin() {
@@ -138,37 +117,26 @@ class AuthPage {
         const password = document.getElementById('loginPassword').value;
         const loginBtn = document.getElementById('loginBtn');
         
-        // التحقق من صحة البيانات
-        if (!email || !password) {
-            this.showFormMessage('يرجى ملء جميع الحقول', 'error');
-            return;
-        }
+        if (!this.validateLoginForm(email, password)) return;
         
-        if (!Utils.validateEmail(email)) {
-            this.showFormMessage('يرجى إدخال بريد إلكتروني صحيح', 'error');
-            return;
-        }
-        
-        // عرض حالة التحميل
         this.setButtonLoading(loginBtn, true);
         
         try {
-            const result = await authManager.signIn(email, password);
+            const result = await this.auth.signInWithEmailAndPassword(email, password);
             
-            if (result.success) {
-                this.showFormMessage('تم تسجيل الدخول بنجاح!', 'success');
-                
-                // الانتقال إلى الصفحة الرئيسية بعد ثانيتين
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
-                
-            } else {
-                this.showFormMessage(result.error, 'error');
-            }
+            // تحديث lastLogin
+            await this.db.ref('users/' + result.user.uid).update({
+                lastLogin: Date.now()
+            });
+            
+            this.showFormMessage('تم تسجيل الدخول بنجاح!', 'success');
+            
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
             
         } catch (error) {
-            this.showFormMessage('حدث خطأ غير متوقع', 'error');
+            this.showFormMessage(this.getAuthErrorMessage(error), 'error');
         } finally {
             this.setButtonLoading(loginBtn, false);
         }
@@ -181,47 +149,50 @@ class AuthPage {
         const confirmPassword = document.getElementById('registerConfirmPassword').value;
         const registerBtn = document.getElementById('registerBtn');
         
-        // التحقق من صحة البيانات
-        if (!name || !email || !password || !confirmPassword) {
-            this.showFormMessage('يرجى ملء جميع الحقول', 'error');
-            return;
-        }
+        if (!this.validateRegisterForm(name, email, password, confirmPassword)) return;
         
-        if (!Utils.validateEmail(email)) {
-            this.showFormMessage('يرجى إدخال بريد إلكتروني صحيح', 'error');
-            return;
-        }
-        
-        if (password.length < 6) {
-            this.showFormMessage('كلمة السر يجب أن تكون 6 أحرف على الأقل', 'error');
-            return;
-        }
-        
-        if (password !== confirmPassword) {
-            this.showFormMessage('كلمتا السر غير متطابقتين', 'error');
-            return;
-        }
-        
-        // عرض حالة التحميل
         this.setButtonLoading(registerBtn, true);
         
         try {
-            const result = await authManager.signUp(email, password, name);
+            const result = await this.auth.createUserWithEmailAndPassword(email, password);
             
-            if (result.success) {
-                this.showFormMessage('تم إنشاء الحساب بنجاح!', 'success');
-                
-                // الانتقال إلى الصفحة الرئيسية بعد ثانيتين
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 2000);
-                
-            } else {
-                this.showFormMessage(result.error, 'error');
-            }
+            // تحديث الملف الشخصي
+            await result.user.updateProfile({
+                displayName: name
+            });
+            
+            // حفظ بيانات المستخدم
+            const userData = {
+                displayName: name,
+                email: email,
+                createdAt: Date.now(),
+                lastLogin: Date.now(),
+                profile: {
+                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4ECDC4&color=fff&size=150`,
+                    bio: ''
+                },
+                preferences: {
+                    emailNotifications: false,
+                    notifications: true,
+                    theme: 'light'
+                },
+                stats: {
+                    commentsCount: 0,
+                    joinedDate: new Date().toISOString(),
+                    ratingsCount: 0
+                }
+            };
+            
+            await this.db.ref('users/' + result.user.uid).set(userData);
+            
+            this.showFormMessage('تم إنشاء الحساب بنجاح!', 'success');
+            
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
             
         } catch (error) {
-            this.showFormMessage('حدث خطأ غير متوقع', 'error');
+            this.showFormMessage(this.getAuthErrorMessage(error), 'error');
         } finally {
             this.setButtonLoading(registerBtn, false);
         }
@@ -231,54 +202,94 @@ class AuthPage {
         const email = document.getElementById('resetEmail').value;
         const resetBtn = document.getElementById('resetPasswordBtn');
         
-        // التحقق من صحة البيانات
-        if (!email) {
-            this.showFormMessage('يرجى إدخال البريد الإلكتروني', 'error');
-            return;
-        }
-        
-        if (!Utils.validateEmail(email)) {
+        if (!this.validateEmail(email)) {
             this.showFormMessage('يرجى إدخال بريد إلكتروني صحيح', 'error');
             return;
         }
         
-        // عرض حالة التحميل
         this.setButtonLoading(resetBtn, true);
         
         try {
-            const result = await authManager.resetPassword(email);
+            await this.auth.sendPasswordResetEmail(email);
+            this.showFormMessage('تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني', 'success');
             
-            if (result.success) {
-                this.showFormMessage('تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني', 'success');
-                
-                // العودة إلى تسجيل الدخول بعد 3 ثوانٍ
-                setTimeout(() => {
-                    this.switchTab('login');
-                    document.querySelector('.auth-tabs').style.display = 'flex';
-                }, 3000);
-                
-            } else {
-                this.showFormMessage(result.error, 'error');
-            }
+            setTimeout(() => {
+                this.switchTab('login');
+                document.querySelector('.auth-tabs').style.display = 'flex';
+            }, 3000);
             
         } catch (error) {
-            this.showFormMessage('حدث خطأ غير متوقع', 'error');
+            this.showFormMessage(this.getAuthErrorMessage(error), 'error');
         } finally {
             this.setButtonLoading(resetBtn, false);
         }
     }
     
+    validateLoginForm(email, password) {
+        if (!email || !password) {
+            this.showFormMessage('يرجى ملء جميع الحقول', 'error');
+            return false;
+        }
+        
+        if (!Utils.validateEmail(email)) {
+            this.showFormMessage('يرجى إدخال بريد إلكتروني صحيح', 'error');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    validateRegisterForm(name, email, password, confirmPassword) {
+        if (!name || !email || !password || !confirmPassword) {
+            this.showFormMessage('يرجى ملء جميع الحقول', 'error');
+            return false;
+        }
+        
+        if (!Utils.validateEmail(email)) {
+            this.showFormMessage('يرجى إدخال بريد إلكتروني صحيح', 'error');
+            return false;
+        }
+        
+        if (password.length < 6) {
+            this.showFormMessage('كلمة السر يجب أن تكون 6 أحرف على الأقل', 'error');
+            return false;
+        }
+        
+        if (password !== confirmPassword) {
+            this.showFormMessage('كلمتا السر غير متطابقتين', 'error');
+            return false;
+        }
+        
+        return true;
+    }
+    
+    getAuthErrorMessage(error) {
+        const errorMessages = {
+            'auth/invalid-email': 'البريد الإلكتروني غير صحيح',
+            'auth/user-disabled': 'هذا الحساب معطل',
+            'auth/user-not-found': 'لا يوجد حساب بهذا البريد الإلكتروني',
+            'auth/wrong-password': 'كلمة السر غير صحيحة',
+            'auth/email-already-in-use': 'هذا البريد الإلكتروني مستخدم بالفعل',
+            'auth/weak-password': 'كلمة السر ضعيفة جداً',
+            'auth/network-request-failed': 'خطأ في الاتصال بالإنترنت'
+        };
+        
+        return errorMessages[error.code] || error.message || 'حدث خطأ غير متوقع';
+    }
+    
     setButtonLoading(button, isLoading) {
+        if (!button) return;
+        
         const btnText = button.querySelector('.btn-text');
         const spinner = button.querySelector('.spinner');
         
         if (isLoading) {
             btnText.style.display = 'none';
-            spinner.style.display = 'block';
+            if (spinner) spinner.style.display = 'block';
             button.disabled = true;
         } else {
             btnText.style.display = 'block';
-            spinner.style.display = 'none';
+            if (spinner) spinner.style.display = 'none';
             button.disabled = false;
         }
     }
@@ -292,20 +303,17 @@ class AuthPage {
     clearFormMessage() {
         const formMessage = document.getElementById('formMessage');
         formMessage.className = 'form-message';
-        formMessage.style.display = 'none';
     }
     
     checkAuthState() {
-        firebase.auth().onAuthStateChanged(user => {
+        this.auth.onAuthStateChanged(user => {
             if (user) {
-                // إذا كان المستخدم مسجلاً بالفعل، انتقل إلى الصفحة الرئيسية
                 window.location.href = 'index.html';
             }
         });
     }
 }
 
-// تهيئة صفحة المصادقة
 let authPage;
 
 document.addEventListener('DOMContentLoaded', () => {

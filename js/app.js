@@ -1,4 +1,5 @@
-// js/app.js - الملف المصحح
+// js/app.js - الملف المصحح بالكامل
+
 class MangaApp {
     constructor() {
         this.currentUser = null;
@@ -11,63 +12,91 @@ class MangaApp {
     
     async init() {
         try {
-            // الانتظار حتى تحميل DOM
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', () => {
                     this.setupApp();
                 });
             } else {
-                this.setupApp();
+                await this.setupApp();
             }
         } catch (error) {
-            console.error('Error initializing app:', error);
+            console.error('App initialization error:', error);
+            this.showError('خطأ في تهيئة التطبيق');
         }
     }
     
     async setupApp() {
-        await this.setupFirebase();
-        this.setupEventListeners();
+        // تهيئة Firebase أولاً
+        await this.initializeFirebase();
+        
+        // إعداد واجهة المستخدم
+        this.setupUI();
+        
+        // تحميل البيانات
         await this.loadMangaData();
-        this.setupAuthListener();
-        this.loadTheme();
+        
+        // إعداد المستخدم
+        this.setupAuth();
         
         this.isInitialized = true;
-        console.log('Manga app initialized successfully');
+        console.log('✅ التطبيق جاهز للاستخدام');
     }
     
-    async setupFirebase() {
+    async initializeFirebase() {
         try {
-            // التحقق من أن Firebase جاهز
+            // التحقق من تحميل Firebase
             if (typeof firebase === 'undefined') {
-                throw new Error('Firebase not loaded');
+                throw new Error('Firebase لم يتم تحميله');
             }
             
-            // إعادة التهيئة إذا لزم الأمر
+            // التهيئة إذا لم تكن موجودة
             if (!firebase.apps.length) {
                 firebase.initializeApp(firebaseConfig);
             }
             
             this.auth = firebase.auth();
-            this.database = firebase.database();
+            this.db = firebase.database();
+            
+            console.log('✅ Firebase تم تهيئته بنجاح');
             
         } catch (error) {
-            console.error('Firebase setup error:', error);
-            this.showError('خطأ في تهيئة قاعدة البيانات');
+            console.error('❌ خطأ في تهيئة Firebase:', error);
+            throw error;
         }
     }
     
+    setupUI() {
+        this.setupEventListeners();
+        this.loadTheme();
+        console.log('✅ واجهة المستخدم جاهزة');
+    }
+    
     setupEventListeners() {
-        console.log('Setting up event listeners...');
+        console.log('🔧 جاري إعداد الأحداث...');
         
-        // فتح وإغلاق الدراور
+        // الدراور
+        this.setupDrawer();
+        
+        // السمات
+        this.setupTheme();
+        
+        // التصفية
+        this.setupFilters();
+        
+        // البحث
+        this.setupSearch();
+        
+        // المصادقة
+        this.setupAuthButtons();
+    }
+    
+    setupDrawer() {
         const drawerToggle = document.getElementById('drawerToggle');
         const drawerClose = document.querySelector('.drawer-close');
         const drawerOverlay = document.querySelector('.drawer-overlay');
         
         if (drawerToggle) {
             drawerToggle.addEventListener('click', () => this.openDrawer());
-        } else {
-            console.error('Drawer toggle button not found');
         }
         
         if (drawerClose) {
@@ -77,14 +106,16 @@ class MangaApp {
         if (drawerOverlay) {
             drawerOverlay.addEventListener('click', () => this.closeDrawer());
         }
-        
-        // تبديل السمة
+    }
+    
+    setupTheme() {
+        // زر تبديل السمة في الهيدر
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
             themeToggle.addEventListener('click', () => this.toggleTheme());
         }
         
-        // اختيار السمة من الدراور
+        // خيارات السمة في الدراور
         const themeOptions = document.querySelectorAll('.theme-option');
         themeOptions.forEach(option => {
             option.addEventListener('click', (e) => {
@@ -92,8 +123,9 @@ class MangaApp {
                 this.changeTheme(theme);
             });
         });
-        
-        // تصفية المانجا
+    }
+    
+    setupFilters() {
         const filterBtns = document.querySelectorAll('.filter-btn');
         filterBtns.forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -101,23 +133,31 @@ class MangaApp {
                 this.applyFilter(filter);
             });
         });
-        
-        // البحث عن المانجا
+    }
+    
+    setupSearch() {
         const searchInput = document.querySelector('.search-input');
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
                 this.handleSearch(e.target.value);
             });
+            
+            // إغلاق نتائج البحث عند النقر خارجها
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.search-container')) {
+                    this.hideSearchResults();
+                }
+            });
         }
-        
+    }
+    
+    setupAuthButtons() {
         // زر تسجيل الدخول
         const authBtn = document.getElementById('authBtn');
         if (authBtn) {
             authBtn.addEventListener('click', () => {
                 window.location.href = 'auth.html';
             });
-        } else {
-            console.error('Auth button not found');
         }
         
         // زر الإشعارات
@@ -153,36 +193,29 @@ class MangaApp {
                 this.signOut();
             });
         }
-        
-        console.log('Event listeners setup completed');
     }
     
-    setupAuthListener() {
+    setupAuth() {
         this.auth.onAuthStateChanged((user) => {
             this.currentUser = user;
-            this.updateUIForAuth(user);
+            this.updateAuthUI(user);
+            
+            if (user) {
+                this.loadUserData(user.uid);
+            }
         });
     }
     
-    updateUIForAuth(user) {
+    updateAuthUI(user) {
         const authBtn = document.getElementById('authBtn');
         const logoutBtn = document.getElementById('logoutBtn');
         const userInfo = document.getElementById('userInfo');
-        const userName = document.querySelector('.user-name');
-        const userEmail = document.querySelector('.user-email');
-        const userAvatar = document.querySelector('.user-avatar');
         
         if (user) {
-            // المستخدم مسجل الدخول
             if (authBtn) authBtn.classList.add('hidden');
             if (logoutBtn) logoutBtn.classList.remove('hidden');
             if (userInfo) userInfo.classList.remove('hidden');
-            
-            // تحميل بيانات المستخدم
-            this.loadUserData(user.uid);
-            
         } else {
-            // المستخدم غير مسجل
             if (authBtn) authBtn.classList.remove('hidden');
             if (logoutBtn) logoutBtn.classList.add('hidden');
             if (userInfo) userInfo.classList.add('hidden');
@@ -191,7 +224,7 @@ class MangaApp {
     
     async loadUserData(userId) {
         try {
-            const snapshot = await this.database.ref('users/' + userId).once('value');
+            const snapshot = await this.db.ref('users/' + userId).once('value');
             const userData = snapshot.val();
             
             if (userData) {
@@ -211,28 +244,14 @@ class MangaApp {
         }
     }
     
-    async signOut() {
-        try {
-            await this.auth.signOut();
-            this.closeDrawer();
-            Utils.showMessage('تم تسجيل الخروج بنجاح', 'success');
-        } catch (error) {
-            console.error('Error signing out:', error);
-            Utils.showMessage('حدث خطأ في تسجيل الخروج', 'error');
-        }
-    }
-    
     async loadMangaData() {
         const mangaGrid = document.getElementById('mangaGrid');
-        if (!mangaGrid) {
-            console.error('mangaGrid element not found');
-            return;
-        }
+        if (!mangaGrid) return;
         
-        mangaGrid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+        mangaGrid.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري تحميل المانجا...</p></div>';
         
         try {
-            const snapshot = await this.database.ref('manga_list').once('value');
+            const snapshot = await this.db.ref('manga_list').once('value');
             const data = snapshot.val();
             
             this.mangaList = [];
@@ -243,16 +262,16 @@ class MangaApp {
                     manga.id = key;
                     this.mangaList.push(manga);
                 });
-                console.log('Loaded manga:', this.mangaList.length);
+                console.log(`✅ تم تحميل ${this.mangaList.length} مانجا`);
             } else {
-                console.log('No manga data found');
+                console.log('⚠️ لا توجد بيانات مانجا');
             }
             
             this.displayManga(this.mangaList);
             
         } catch (error) {
-            console.error('Error loading manga data:', error);
-            this.showMangaError('حدث خطأ في تحميل البيانات: ' + error.message);
+            console.error('❌ خطأ في تحميل المانجا:', error);
+            this.showMangaError('حدث خطأ في تحميل بيانات المانجا: ' + error.message);
         }
     }
     
@@ -265,7 +284,7 @@ class MangaApp {
         
         switch (this.currentFilter) {
             case 'latest':
-                // الأحدث أولاً (بناءً على الترتيب في قاعدة البيانات)
+                // الأحدث أولاً (حسب الإضافة)
                 break;
             case 'popular':
                 filteredManga.sort((a, b) => (b.views || 0) - (a.views || 0));
@@ -274,7 +293,8 @@ class MangaApp {
                 filteredManga.sort((a, b) => (b.rating || 0) - (a.rating || 0));
                 break;
             case 'oldest':
-                filteredManga.reverse();
+                // الأقدم أولاً (عكس الأحدث)
+                filteredManga = [...mangaArray].reverse();
                 break;
         }
         
@@ -292,49 +312,59 @@ class MangaApp {
         }
         
         filteredManga.forEach(manga => {
-            const card = document.createElement('div');
-            card.className = 'manga-card';
-            
-            // الحصول على آخر فصل
-            let latestChapter = null;
-            if (manga.chapters) {
-                const chapterNumbers = Object.keys(manga.chapters)
-                    .map(key => {
-                        const num = parseInt(key.replace('chapter_', ''));
-                        return isNaN(num) ? 0 : num;
-                    })
-                    .filter(num => num > 0);
-                
-                if (chapterNumbers.length > 0) {
-                    const maxChapter = Math.max(...chapterNumbers);
-                    latestChapter = `الفصل ${maxChapter}`;
-                }
-            }
-            
-            card.innerHTML = `
-                <div style="position: relative;">
-                    <img src="${manga.thumbnail}" alt="${manga.name}" class="manga-thumbnail" 
-                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDMwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjNGE5MGUyIi8+Cjx0ZXh0IHg9IjE1MCIgeT0iMjAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE4Ij4kTUFOR0FfTkFNRTwvdGV4dD4KPC9zdmc+'">
-                    ${latestChapter ? `<div class="chapter-badge">${latestChapter}</div>` : ''}
-                </div>
-                <div class="manga-info">
-                    <div class="manga-title">${manga.name}</div>
-                    <div class="manga-meta">
-                        <span>${manga.views || 0} مشاهدة</span>
-                        <span class="rating">
-                            <i class="fas fa-star"></i>
-                            <span>${manga.rating || 0}</span>
-                        </span>
-                    </div>
-                </div>
-            `.replace('$MANGA_NAME', manga.name);
-            
-            card.addEventListener('click', () => {
-                window.location.href = `manga.html?id=${manga.id}`;
-            });
-            
+            const card = this.createMangaCard(manga);
             mangaGrid.appendChild(card);
         });
+    }
+    
+    createMangaCard(manga) {
+        const card = document.createElement('div');
+        card.className = 'manga-card';
+        
+        // الحصول على آخر فصل
+        const latestChapter = this.getLatestChapter(manga);
+        
+        card.innerHTML = `
+            <div class="manga-thumbnail-container">
+                <img src="${manga.thumbnail}" alt="${manga.name}" class="manga-thumbnail"
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgODAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiM0YTkwZTIiLz48dGV4dCB4PSI0MCIgeT0iNjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPk1hbmdhPC90ZXh0Pjwvc3ZnPg=='">
+                ${latestChapter ? `<div class="chapter-badge">${latestChapter}</div>` : ''}
+            </div>
+            <div class="manga-info">
+                <div class="manga-title">${manga.name}</div>
+                <div class="manga-meta">
+                    <span>${manga.views || 0} مشاهدة</span>
+                    <span class="rating">
+                        <i class="fas fa-star"></i>
+                        <span>${manga.rating || 0}</span>
+                    </span>
+                </div>
+            </div>
+        `;
+        
+        card.addEventListener('click', () => {
+            window.location.href = `manga.html?id=${manga.id}`;
+        });
+        
+        return card;
+    }
+    
+    getLatestChapter(manga) {
+        if (!manga.chapters) return null;
+        
+        const chapterNumbers = Object.keys(manga.chapters)
+            .map(key => {
+                const num = parseInt(key.replace('chapter_', ''));
+                return isNaN(num) ? 0 : num;
+            })
+            .filter(num => num > 0);
+        
+        if (chapterNumbers.length > 0) {
+            const maxChapter = Math.max(...chapterNumbers);
+            return `الفصل ${maxChapter}`;
+        }
+        
+        return null;
     }
     
     applyFilter(filter) {
@@ -385,13 +415,9 @@ class MangaApp {
                     <img src="${manga.thumbnail}" alt="${manga.name}" 
                          onerror="this.style.display='none'">
                     <div>
-                        <div>${manga.name}</div>
-                        <div class="manga-meta">
+                        <div class="search-result-title">${manga.name}</div>
+                        <div class="search-result-meta">
                             <span>${manga.views || 0} مشاهدة</span>
-                            <span class="rating">
-                                <i class="fas fa-star"></i>
-                                <span>${manga.rating || 0}</span>
-                            </span>
                         </div>
                     </div>
                 `;
@@ -444,7 +470,13 @@ class MangaApp {
         // تحديث الأيقونة
         const icon = document.querySelector('#themeToggle i');
         if (icon) {
-            icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            if (theme === 'dark') {
+                icon.className = 'fas fa-sun';
+            } else if (theme === 'blue') {
+                icon.className = 'fas fa-palette';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
         }
         
         // تحديث الأزرار في الدراور
@@ -463,6 +495,17 @@ class MangaApp {
         this.changeTheme(savedTheme);
     }
     
+    async signOut() {
+        try {
+            await this.auth.signOut();
+            this.closeDrawer();
+            Utils.showMessage('تم تسجيل الخروج بنجاح', 'success');
+        } catch (error) {
+            console.error('Error signing out:', error);
+            Utils.showMessage('حدث خطأ في تسجيل الخروج', 'error');
+        }
+    }
+    
     showMangaError(message) {
         const mangaGrid = document.getElementById('mangaGrid');
         if (mangaGrid) {
@@ -478,18 +521,14 @@ class MangaApp {
     
     showError(message) {
         console.error('App Error:', message);
-        // يمكن إضافة رسالة خطأ عامة هنا
     }
 }
 
-// جعل التطبيق متاحاً globally
+// تهيئة التطبيق
 let app;
 
-// بدء التطبيق عندما يصبح DOM جاهزاً
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        app = new MangaApp();
-    });
-} else {
+// بدء التطبيق
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 بدء تحميل التطبيق...');
     app = new MangaApp();
-}
+});
