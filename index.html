@@ -6,21 +6,8 @@
     <title>مانجا أونلاين</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        /* إضافة أنماط للتحميل والأخطاء */
-        .error-state {
-            text-align: center;
-            padding: 2rem;
-            color: #e74c3c;
-        }
-        .error-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-    </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <button id="drawerToggle" class="btn btn-outline">
             <i class="fas fa-bars"></i>
@@ -44,7 +31,6 @@
         </div>
     </header>
 
-    <!-- Drawer -->
     <div class="drawer">
         <div class="drawer-header">
             <h2 class="drawer-title">القائمة</h2>
@@ -107,7 +93,6 @@
     </div>
     <div class="drawer-overlay"></div>
 
-    <!-- Main Content -->
     <div class="container">
         <div class="filters">
             <button class="filter-btn active" data-filter="latest">الأحدث</button>
@@ -124,7 +109,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer>
         <div class="footer-content">
             <div class="footer-section">
@@ -155,31 +139,12 @@
         </div>
     </footer>
 
-    <!-- تحميل Firebase أولاً -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
-    <!-- ثم ملف التكوين -->
     <script src="js/firebase-config.js"></script>
-    
-    <!-- ثم الملفات المساعدة -->
     <script src="js/utils.js"></script>
-    
-    <!-- وأخيراً التطبيق الرئيسي -->
     <script src="js/app.js"></script>
-    
-    <script>
-        // كود بسيط للتحقق من أن الصفحة تعمل
-        console.log('Page loaded successfully');
-        
-        // التحقق من وجود العناصر الأساسية
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM fully loaded');
-            console.log('Manga grid:', document.getElementById('mangaGrid'));
-            console.log('Auth button:', document.getElementById('authBtn'));
-            console.log('Drawer toggle:', document.getElementById('drawerToggle'));
-        });
-    </script>
 </body>
 </html>
