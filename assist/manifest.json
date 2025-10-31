@@ -1,0 +1,25 @@
+{
+  "name": "مانجا أونلاين",
+  "short_name": "مانجا",
+  "description": "أفضل موقع لقراءة المانجا العربية",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#4a90e2",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/images/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/images/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["entertainment", "books"],
+  "lang": "ar",
+  "dir": "rtl"
+}
