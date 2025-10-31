@@ -57,21 +57,32 @@ class NotificationsManager {
         element.className = `notification ${notification.read ? 'read' : 'unread'}`;
         
         let message = '';
+        let icon = '';
+        
         switch (notification.type) {
             case 'like':
                 message = `${notification.fromUser} أعجب بتعليقك`;
+                icon = 'fas fa-heart';
                 break;
             case 'reply':
                 message = `${notification.fromUser} رد على تعليقك`;
+                icon = 'fas fa-reply';
                 break;
             default:
                 message = 'إشعار جديد';
+                icon = 'fas fa-bell';
         }
 
         element.innerHTML = `
             <div class="notification-content">
-                <p>${message}</p>
-                <span class="notification-time">${this.formatTime(notification.timestamp)}</span>
+                <div class="notification-icon">
+                    <i class="${icon}"></i>
+                </div>
+                <div class="notification-text">
+                    <p>${message}</p>
+                    ${notification.replyText ? `<p class="notification-preview">${notification.replyText}</p>` : ''}
+                    <span class="notification-time">${this.formatTime(notification.timestamp)}</span>
+                </div>
             </div>
             <button class="notification-action" data-notification-id="${notification.id}">
                 <i class="fas fa-arrow-left"></i>
@@ -93,7 +104,10 @@ class NotificationsManager {
         if (notification.mangaId && notification.chapterId) {
             const manga = mangaManager.mangaData[notification.mangaId];
             if (manga) {
-                app.saveState('chapterPage', notification.mangaId, notification.chapterId);
+                navigationManager.navigateTo('chapterPage', {
+                    mangaId: notification.mangaId,
+                    chapterId: notification.chapterId
+                });
                 mangaManager.showChapter(notification.mangaId, notification.chapterId, manga.chapters[notification.chapterId]);
             }
         }
@@ -111,7 +125,6 @@ class NotificationsManager {
     }
 
     formatTime(timestamp) {
-        // نفس دالة تنسيق الوقت في comments.js
         const date = new Date(timestamp);
         const now = new Date();
         const diffMs = now - date;

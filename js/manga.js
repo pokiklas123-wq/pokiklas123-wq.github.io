@@ -28,6 +28,13 @@ class MangaManager {
                 this.displayMangaList(this.mangaData);
                 ui.hideLoading('loadingHome');
                 ui.showElement('mangaGrid');
+                
+                // بعد تحميل البيانات، تحقق إذا كان هناك URL يحتاج معالجة
+                if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
+                    setTimeout(() => {
+                        navigationManager.loadStateFromURL();
+                    }, 100);
+                }
             } else {
                 ui.hideLoading('loadingHome');
                 ui.showElement('noMangaMessage');
@@ -167,7 +174,7 @@ class MangaManager {
 
             ui.hideLoading('loadingDetail');
             ui.showElement('mangaDetailContent');
-            ui.navigateToPage('mangaDetailPage');
+            navigationManager.navigateTo('mangaDetailPage', { mangaId: mangaId });
             
         } catch (error) {
             console.error('Error showing manga detail:', error);
@@ -340,7 +347,10 @@ class MangaManager {
 
             ui.hideLoading('loadingChapter');
             ui.showElement('chapterContent');
-            ui.navigateToPage('chapterPage');
+            navigationManager.navigateTo('chapterPage', { 
+                mangaId: mangaId, 
+                chapterId: chapterId 
+            });
             
         } catch (error) {
             console.error('Error showing chapter:', error);

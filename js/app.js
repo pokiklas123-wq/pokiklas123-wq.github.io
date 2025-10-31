@@ -9,7 +9,7 @@ class App {
             // تهيئة جميع المكونات
             this.setupEventListeners();
             
-            // تحميل حالة التنقل
+            // تحميل حالة التنقل من URL
             navigationManager.loadState();
             
             // تحميل البيانات الأولية

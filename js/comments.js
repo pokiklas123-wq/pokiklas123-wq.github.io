@@ -338,6 +338,12 @@ class CommentsManager {
             const replyRef = database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}/replies`).push();
             await replyRef.set(replyData);
             
+            // إرسال إشعار للمستخدم صاحب التعليق الأصلي
+            const originalComment = this.comments[commentId];
+            if (originalComment && originalComment.userId !== authManager.getCurrentUser().uid) {
+                await this.sendReplyNotification(originalComment.userId, commentId, replyText);
+            }
+            
             replyInput.value = '';
             this.hideAllReplyForms();
             ui.showAuthMessage('تم إرسال الرد بنجاح', 'success');
@@ -367,6 +373,27 @@ class CommentsManager {
             });
         } catch (error) {
             console.error('Error sending notification:', error);
+        }
+    }
+
+    async sendReplyNotification(targetUserId, commentId, replyText) {
+        if (targetUserId === authManager.getCurrentUser().uid) return;
+        
+        try {
+            const notificationRef = database.ref(`notifications/${targetUserId}`).push();
+            await notificationRef.set({
+                type: 'reply',
+                fromUser: authManager.getCurrentUser().displayName || authManager.getCurrentUser().email,
+                fromUserId: authManager.getCurrentUser().uid,
+                commentId: commentId,
+                mangaId: this.currentMangaId,
+                chapterId: this.currentChapterId,
+                replyText: replyText.substring(0, 100), // حفظ جزء من النص
+                timestamp: Date.now(),
+                read: false
+            });
+        } catch (error) {
+            console.error('Error sending reply notification:', error);
         }
     }
 
