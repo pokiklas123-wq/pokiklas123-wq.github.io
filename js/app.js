@@ -28,6 +28,7 @@ class MangaApp {
         await this.loadMangaData();
         this.setupAuth();
         Utils.loadTheme();
+        this.setupNotifications(); // New: Setup Notifications Manager
         this.isInitialized = true;
         console.log('✅ التطبيق جاهز للاستخدام');
     }
@@ -122,6 +123,11 @@ class MangaApp {
         }
     }
     
+    setupNotifications() {
+        // Initialize NotificationsManager globally
+        window.notificationsManager = new NotificationsManager(this);
+    }
+
     setupAuthButtons() {
         const authBtn = document.getElementById('authBtn');
         if (authBtn) {

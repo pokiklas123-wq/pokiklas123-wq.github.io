@@ -174,4 +174,8 @@ let chapterPage;
 
 document.addEventListener('DOMContentLoaded', () => {
     chapterPage = new ChapterPage();
+    // تهيئة مدير التعليقات بعد تهيئة الصفحة
+    if (typeof CommentsManager !== 'undefined') {
+        new CommentsManager(chapterPage);
+    }
 });

@@ -80,6 +80,10 @@ class Utils {
         return re.test(email);
     }
     
+    static getAvatarUrl(name) {
+        return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'مستخدم')}&background=4ECDC4&color=fff&size=150`;
+    }
+
     static requireAuth(redirectTo = 'auth.html') {
         try {
             const user = firebase.auth().currentUser;

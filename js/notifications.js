@@ -1,283 +1,192 @@
 // js/notifications.js
-class NotificationsPage {
-    constructor() {
-        this.notifications = [];
-        this.currentUser = null;
+
+class NotificationsManager {
+    constructor(app) {
+        this.app = app;
+        this.db = app.db;
+        this.auth = app.auth;
+        this.notificationsContainer = document.getElementById('notificationsList');
+        this.unreadCountElement = document.getElementById('unreadNotificationsCount');
         
-        this.init();
+        this.setupAuthListener();
     }
-    
-    init() {
-        this.currentUser = firebase.auth().currentUser;
-        
-        if (!this.currentUser) {
-            this.showLoginRequired();
-            return;
-        }
-        
-        this.initializeFirebase();
-        this.setupEventListeners();
-        this.loadNotifications();
-        Utils.loadTheme();
-    }
-    
-    initializeFirebase() {
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
+
+    setupAuthListener() {
+        this.auth.onAuthStateChanged(user => {
+            if (user) {
+                this.userId = user.uid;
+                this.notificationsRef = this.db.ref(`notifications/${this.userId}`);
+                this.listenForNotifications();
+            } else {
+                this.clearNotifications();
             }
-            this.db = firebase.database();
-        } catch (error) {
-            console.error('Firebase init error:', error);
+        });
+    }
+
+    listenForNotifications() {
+        // Listen for unread count changes
+        this.notificationsRef.orderByChild('read').equalTo(false).on('value', snapshot => {
+            const count = snapshot.numChildren();
+            this.updateUnreadCount(count);
+        });
+
+        if (this.notificationsContainer) {
+            // Listen for all notifications to render the list
+            this.notificationsRef.orderByChild('timestamp').on('value', snapshot => {
+                const notificationsData = snapshot.val();
+                this.renderNotifications(notificationsData);
+            });
+            
+            this.notificationsContainer.addEventListener('click', (e) => this.handleNotificationClick(e));
         }
     }
-    
-    setupEventListeners() {
-        const drawerToggle = document.getElementById('drawerToggle');
-        const drawerClose = document.querySelector('.drawer-close');
-        const drawerOverlay = document.querySelector('.drawer-overlay');
-        
-        if (drawerToggle) drawerToggle.addEventListener('click', () => this.openDrawer());
-        if (drawerClose) drawerClose.addEventListener('click', () => this.closeDrawer());
-        if (drawerOverlay) drawerOverlay.addEventListener('click', () => this.closeDrawer());
-        
-        const markAllReadBtn = document.getElementById('markAllRead');
-        if (markAllReadBtn) {
-            markAllReadBtn.addEventListener('click', () => this.markAllAsRead());
-        }
-    }
-    
-    async loadNotifications() {
-        try {
-            const snapshot = await this.db.ref(`notifications/${this.currentUser.uid}`).once('value');
-            const notificationsData = snapshot.val();
-            
-            this.notifications = [];
-            
-            if (notificationsData) {
-                Object.keys(notificationsData).forEach(key => {
-                    const notification = notificationsData[key];
-                    notification.id = key;
-                    this.notifications.push(notification);
-                });
-                
-                this.notifications.sort((a, b) => b.timestamp - a.timestamp);
+
+    updateUnreadCount(count) {
+        // Update header button count
+        const headerBtn = document.getElementById('notificationsBtn');
+        if (headerBtn) {
+            let badge = headerBtn.querySelector('.notification-badge');
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'notification-badge';
+                headerBtn.appendChild(badge);
             }
             
-            this.displayNotifications();
-            
-        } catch (error) {
-            console.error('Error loading notifications:', error);
-            this.displayNotificationsError();
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+        
+        // Update dedicated notifications page count
+        if (this.unreadCountElement) {
+            if (count > 0) {
+                this.unreadCountElement.textContent = `(${count} غير مقروءة)`;
+            } else {
+                this.unreadCountElement.textContent = '';
+            }
         }
     }
-    
-    displayNotifications() {
-        const notificationsList = document.getElementById('notificationsList');
-        
-        if (!notificationsList) return;
-        
-        if (this.notifications.length === 0) {
-            notificationsList.innerHTML = `
-                <div class="empty-notifications">
-                    <i class="fas fa-bell-slash"></i>
-                    <h3>لا توجد إشعارات</h3>
-                    <p>سيظهر هنا أي إشعارات جديدة تتلقاها</p>
-                </div>
-            `;
+
+    clearNotifications() {
+        if (this.notificationsContainer) {
+            this.notificationsContainer.innerHTML = '<p class="empty-state">لا توجد إشعارات.</p>';
+        }
+        this.updateUnreadCount(0);
+    }
+
+    renderNotifications(notificationsData) {
+        this.notificationsContainer.innerHTML = '';
+        if (!notificationsData) {
+            this.notificationsContainer.innerHTML = '<p class="empty-state">لا توجد إشعارات.</p>';
             return;
         }
+
+        const notificationsArray = Object.keys(notificationsData).map(key => ({
+            id: key,
+            ...notificationsData[key]
+        })).sort((a, b) => b.timestamp - a.timestamp); // Newest first
+
+        notificationsArray.forEach(notification => {
+            this.notificationsContainer.appendChild(this.createNotificationElement(notification));
+        });
+    }
+
+    createNotificationElement(notification) {
+        const notificationEl = document.createElement('div');
+        notificationEl.className = `notification-item ${notification.read ? 'read' : 'unread'}`;
+        notificationEl.setAttribute('data-id', notification.id);
         
-        notificationsList.innerHTML = this.notifications.map(notification => `
-            <div class="notification-item ${notification.read ? '' : 'unread'}" data-notification-id="${notification.id}">
-                <div class="notification-header">
-                    <div class="notification-title">${notification.title}</div>
-                    <div class="notification-date">${Utils.formatTimestamp(notification.timestamp)}</div>
-                </div>
-                <div class="notification-content">${notification.message}</div>
-                <div class="notification-actions">
-                    ${!notification.read ? `
-                        <button class="action-btn mark-read-btn" data-notification-id="${notification.id}">
-                            <i class="fas fa-check"></i>
-                            تعيين كمقروء
-                        </button>
-                    ` : ''}
-                    
-                    ${notification.link ? `
-                        <button class="action-btn view-btn" data-notification-id="${notification.id}">
-                            <i class="fas fa-external-link-alt"></i>
-                            عرض
-                        </button>
-                    ` : ''}
-                    
-                    <button class="action-btn delete-btn" data-notification-id="${notification.id}">
-                        <i class="fas fa-trash"></i>
-                        حذف
-                    </button>
-                </div>
+        const icon = notification.type === 'reply' ? 'fas fa-reply' : 'fas fa-bell';
+        const time = Utils.formatTimestamp(notification.timestamp);
+        
+        notificationEl.innerHTML = `
+            <i class="${icon} notification-icon"></i>
+            <div class="notification-content">
+                <p class="notification-text">${notification.text}</p>
+                <span class="notification-time">${time}</span>
             </div>
-        `).join('');
+            <div class="notification-actions">
+                ${!notification.read ? `
+                    <button class="btn-icon mark-read-btn" data-id="${notification.id}" title="وضع علامة كمقروء">
+                        <i class="fas fa-check"></i>
+                    </button>
+                ` : ''}
+            </div>
+        `;
         
-        this.setupNotificationInteractions();
+        return notificationEl;
     }
-    
-    setupNotificationInteractions() {
-        document.querySelectorAll('.mark-read-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const notificationId = e.target.getAttribute('data-notification-id');
-                this.markAsRead(notificationId);
-            });
-        });
+
+    handleNotificationClick(e) {
+        const item = e.target.closest('.notification-item');
+        const markReadBtn = e.target.closest('.mark-read-btn');
         
-        document.querySelectorAll('.view-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const notificationId = e.target.getAttribute('data-notification-id');
-                this.viewNotification(notificationId);
-            });
-        });
+        if (markReadBtn) {
+            const id = markReadBtn.getAttribute('data-id');
+            this.markAsRead(id);
+            return;
+        }
         
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const notificationId = e.target.getAttribute('data-notification-id');
-                this.deleteNotification(notificationId);
-            });
-        });
-        
-        document.querySelectorAll('.notification-item').forEach(item => {
-            item.addEventListener('click', (e) => {
-                if (!e.target.classList.contains('action-btn')) {
-                    const notificationId = item.getAttribute('data-notification-id');
-                    this.handleNotificationClick(notificationId);
+        if (item) {
+            const id = item.getAttribute('data-id');
+            // Fetch the full notification data to ensure we have all redirection info
+            this.notificationsRef.child(id).once('value').then(snapshot => {
+                const notification = snapshot.val();
+                if (notification) {
+                    this.markAsRead(id);
+                    this.redirectToTarget(notification);
                 }
+            }).catch(error => {
+                console.error('Error fetching notification data:', error);
             });
-        });
+        }
     }
-    
-    async markAsRead(notificationId) {
+
+    async markAsRead(id) {
         try {
-            await this.db.ref(`notifications/${this.currentUser.uid}/${notificationId}`).update({
-                read: true
-            });
-            
-            const notificationItem = document.querySelector(`[data-notification-id="${notificationId}"]`);
-            if (notificationItem) {
-                notificationItem.classList.remove('unread');
-                const markReadBtn = notificationItem.querySelector('.mark-read-btn');
-                if (markReadBtn) markReadBtn.remove();
-            }
-            
-            Utils.showMessage('تم تعيين الإشعار كمقروء', 'success');
-            
+            await this.notificationsRef.child(id).update({ read: true });
+            // The listener will handle the UI update
         } catch (error) {
-            Utils.showMessage('حدث خطأ في تحديث الإشعار', 'error');
+            console.error('Error marking notification as read:', error);
+        }
+    }
+
+    redirectToTarget(notification) {
+        if (notification.type === 'reply' && notification.mangaId && notification.chapterId && notification.commentId) {
+            // Construct the URL to the chapter page and scroll to the comment/reply
+            const targetId = notification.replyId ? `${notification.commentId}-${notification.replyId}` : notification.commentId;
+            const url = `chapter.html?mangaId=${notification.mangaId}&chapter=${notification.chapterId}#${targetId}`;
+            window.location.href = url;
+        } else {
+            // Default redirection for other types
+            window.location.href = 'notifications.html';
         }
     }
     
     async markAllAsRead() {
-        if (this.notifications.length === 0) return;
+        if (!this.userId) return;
         
         try {
+            const snapshot = await this.notificationsRef.orderByChild('read').equalTo(false).once('value');
             const updates = {};
-            this.notifications.forEach(notification => {
-                if (!notification.read) {
-                    updates[`notifications/${this.currentUser.uid}/${notification.id}/read`] = true;
-                }
+            snapshot.forEach(childSnapshot => {
+                updates[childSnapshot.key + '/read'] = true;
             });
             
             if (Object.keys(updates).length > 0) {
-                await this.db.ref().update(updates);
-                this.loadNotifications();
+                await this.notificationsRef.update(updates);
                 Utils.showMessage('تم تعيين جميع الإشعارات كمقروء', 'success');
             } else {
                 Utils.showMessage('جميع الإشعارات مقروءة مسبقاً', 'info');
             }
-            
         } catch (error) {
-            Utils.showMessage('حدث خطأ في تعيين الإشعارات كمقروء', 'error');
+            console.error('Error marking all as read:', error);
+            Utils.showMessage('حدث خطأ أثناء تعيين الإشعارات كمقروء', 'error');
         }
-    }
-    
-    async deleteNotification(notificationId) {
-        if (!confirm('هل أنت متأكد من حذف هذا الإشعار؟')) return;
-        
-        try {
-            await this.db.ref(`notifications/${this.currentUser.uid}/${notificationId}`).remove();
-            this.notifications = this.notifications.filter(n => n.id !== notificationId);
-            this.displayNotifications();
-            Utils.showMessage('تم حذف الإشعار بنجاح', 'success');
-            
-        } catch (error) {
-            Utils.showMessage('حدث خطأ في حذف الإشعار', 'error');
-        }
-    }
-    
-    viewNotification(notificationId) {
-        const notification = this.notifications.find(n => n.id === notificationId);
-        if (notification && notification.link) {
-            window.location.href = notification.link;
-            if (!notification.read) {
-                this.markAsRead(notificationId);
-            }
-        }
-    }
-    
-    handleNotificationClick(notificationId) {
-        const notification = this.notifications.find(n => n.id === notificationId);
-        if (!notification.read) {
-            this.markAsRead(notificationId);
-        }
-        if (notification.link) {
-            window.location.href = notification.link;
-        }
-    }
-    
-    displayNotificationsError() {
-        const notificationsList = document.getElementById('notificationsList');
-        if (notificationsList) {
-            notificationsList.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <p>حدث خطأ في تحميل الإشعارات</p>
-                    <button class="btn mt-2" onclick="notificationsPage.loadNotifications()">إعادة المحاولة</button>
-                </div>
-            `;
-        }
-    }
-    
-    showLoginRequired() {
-        const container = document.querySelector('.notifications-container');
-        if (container) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-user-lock"></i>
-                    <h3>يجب تسجيل الدخول</h3>
-                    <p>يجب تسجيل الدخول لعرض الإشعارات</p>
-                    <a href="auth.html" class="btn mt-2">تسجيل الدخول</a>
-                </div>
-            `;
-        }
-    }
-    
-    openDrawer() {
-        const drawer = document.querySelector('.drawer');
-        const drawerOverlay = document.querySelector('.drawer-overlay');
-        if (drawer) drawer.classList.add('open');
-        if (drawerOverlay) drawerOverlay.classList.add('open');
-    }
-    
-    closeDrawer() {
-        const drawer = document.querySelector('.drawer');
-        const drawerOverlay = document.querySelector('.drawer-overlay');
-        if (drawer) drawer.classList.remove('open');
-        if (drawerOverlay) drawerOverlay.classList.remove('open');
     }
 }
 
-let notificationsPage;
-
-document.addEventListener('DOMContentLoaded', () => {
-    notificationsPage = new NotificationsPage();
-});
+// يتم تهيئة المدير في app.js (لإدارة العدد في الهيدر) و notifications.html (لإدارة القائمة)
