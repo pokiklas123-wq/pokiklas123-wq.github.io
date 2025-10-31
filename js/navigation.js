@@ -16,11 +16,14 @@ class NavigationManager {
             this.goBack();
         });
 
+        // إصلاح أزرار التصنيف
         document.querySelectorAll('.categories-list li').forEach(item => {
-            item.addEventListener('click', () => {
-                const sortType = item.dataset.sort;
-                this.sortManga(sortType);
-                ui.toggleDrawer(false);
+            item.addEventListener('click', (e) => {
+                const sortType = e.currentTarget.getAttribute('data-sort');
+                if (sortType) {
+                    this.sortManga(sortType);
+                    ui.toggleDrawer(false);
+                }
             });
         });
     }
@@ -46,12 +49,14 @@ class NavigationManager {
         this.history.push(state);
 
         const hash = this.generateHash(state);
-        window.location.hash = hash;
+        if (window.location.hash !== `#${hash}`) {
+            window.location.hash = hash;
+        }
 
         this.saveState();
         ui.navigateToPage(pageId);
 
-        console.log('التنقل إلى:', pageId, 'التاريخ:', this.history.length);
+        console.log('التنقل إلى:', pageId, 'hash:', hash);
     }
 
     generateHash(state) {
@@ -65,48 +70,80 @@ class NavigationManager {
         }
     }
 
-    loadStateFromURL() {
-        const hash = window.location.hash.replace('#', '');
-        
-        if (!hash) {
-            this.navigateTo('homePage');
-            return;
-        }
-
+    parseHash(hash) {
         const pathParts = hash.split('/').filter(part => part);
         
         if (pathParts[0] === 'manga' && pathParts[1]) {
             const mangaId = pathParts[1];
             
             if (pathParts[2] === 'chapter' && pathParts[3]) {
-                const chapterId = pathParts[3];
-                this.loadChapterFromURL(mangaId, chapterId);
+                return {
+                    page: 'chapterPage',
+                    mangaId: mangaId,
+                    chapterId: pathParts[3]
+                };
             } else {
-                this.loadMangaFromURL(mangaId);
+                return {
+                    page: 'mangaDetailPage',
+                    mangaId: mangaId
+                };
             }
-        } else {
+        }
+        
+        return { page: 'homePage' };
+    }
+
+    loadStateFromURL() {
+        const hash = window.location.hash.replace('#', '');
+        
+        if (!hash) {
+            // إذا لم يكن هناك hash، تحقق إذا كان هناك حالة محفوظة
+            const savedState = localStorage.getItem('navigationState');
+            if (savedState) {
+                const state = JSON.parse(savedState);
+                if (state.currentState) {
+                    this.restoreState(state.currentState);
+                    return;
+                }
+            }
             this.navigateTo('homePage');
+            return;
+        }
+
+        const route = this.parseHash(hash);
+        
+        if (route.page === 'homePage') {
+            this.navigateTo('homePage');
+            return;
+        }
+
+        if (route.page === 'mangaDetailPage') {
+            this.loadMangaFromURL(route.mangaId);
+        } else if (route.page === 'chapterPage') {
+            this.loadChapterFromURL(route.mangaId, route.chapterId);
         }
     }
 
     async loadMangaFromURL(mangaId) {
         try {
+            // إذا لم تكن بيانات المانجا محملة، انتظر قليلاً ثم حاول مرة أخرى
             if (!mangaManager.mangaData || Object.keys(mangaManager.mangaData).length === 0) {
-                await mangaManager.loadMangaList();
+                setTimeout(() => {
+                    this.loadMangaFromURL(mangaId);
+                }, 500);
+                return;
             }
             
-            // انتظار قصير إضافي لضمان تحميل البيانات
-            setTimeout(async () => {
-                if (mangaManager.mangaData[mangaId]) {
-                    const manga = mangaManager.mangaData[mangaId];
-                    this.currentState = { page: 'mangaDetailPage', data: { mangaId: mangaId } };
-                    this.history = [this.currentState];
-                    ui.navigateToPage('mangaDetailPage');
-                    await mangaManager.showMangaDetail(mangaId, manga);
-                } else {
-                    this.navigateTo('homePage');
-                }
-            }, 100);
+            if (mangaManager.mangaData[mangaId]) {
+                const manga = mangaManager.mangaData[mangaId];
+                this.currentState = { page: 'mangaDetailPage', data: { mangaId: mangaId } };
+                this.history = [this.currentState];
+                ui.navigateToPage('mangaDetailPage');
+                await mangaManager.showMangaDetail(mangaId, manga);
+            } else {
+                console.warn('المانجا غير موجودة:', mangaId);
+                this.navigateTo('homePage');
+            }
             
         } catch (error) {
             console.error('Error loading manga from URL:', error);
@@ -117,27 +154,29 @@ class NavigationManager {
     async loadChapterFromURL(mangaId, chapterId) {
         try {
             if (!mangaManager.mangaData || Object.keys(mangaManager.mangaData).length === 0) {
-                await mangaManager.loadMangaList();
+                setTimeout(() => {
+                    this.loadChapterFromURL(mangaId, chapterId);
+                }, 500);
+                return;
             }
             
-            setTimeout(async () => {
-                if (mangaManager.mangaData[mangaId] && 
-                    mangaManager.mangaData[mangaId].chapters && 
-                    mangaManager.mangaData[mangaId].chapters[chapterId]) {
-                    
-                    const manga = mangaManager.mangaData[mangaId];
-                    const chapter = manga.chapters[chapterId];
-                    this.currentState = { 
-                        page: 'chapterPage', 
-                        data: { mangaId: mangaId, chapterId: chapterId } 
-                    };
-                    this.history = [this.currentState];
-                    ui.navigateToPage('chapterPage');
-                    await mangaManager.showChapter(mangaId, chapterId, chapter);
-                } else {
-                    this.navigateTo('homePage');
-                }
-            }, 100);
+            if (mangaManager.mangaData[mangaId] && 
+                mangaManager.mangaData[mangaId].chapters && 
+                mangaManager.mangaData[mangaId].chapters[chapterId]) {
+                
+                const manga = mangaManager.mangaData[mangaId];
+                const chapter = manga.chapters[chapterId];
+                this.currentState = { 
+                    page: 'chapterPage', 
+                    data: { mangaId: mangaId, chapterId: chapterId } 
+                };
+                this.history = [this.currentState];
+                ui.navigateTo('chapterPage');
+                await mangaManager.showChapter(mangaId, chapterId, chapter);
+            } else {
+                console.warn('الفصل غير موجود:', mangaId, chapterId);
+                this.navigateTo('homePage');
+            }
             
         } catch (error) {
             console.error('Error loading chapter from URL:', error);
@@ -206,25 +245,41 @@ class NavigationManager {
     }
 
     sortManga(sortType) {
-        if (mangaManager.mangaData) {
-            let sortedManga = Object.keys(mangaManager.mangaData).map(key => {
-                return { id: key, ...mangaManager.mangaData[key] };
-            });
-
-            switch (sortType) {
-                case 'newest':
-                    sortedManga.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-                    break;
-                case 'popular':
-                    sortedManga.sort((a, b) => (b.views || 0) - (a.views || 0));
-                    break;
-                case 'oldest':
-                    sortedManga.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
-                    break;
-            }
-
-            mangaManager.displaySortedManga(sortedManga);
+        if (!mangaManager.mangaData) {
+            console.warn('بيانات المانجا غير محملة بعد');
+            return;
         }
+
+        let sortedManga = Object.keys(mangaManager.mangaData).map(key => {
+            return { id: key, ...mangaManager.mangaData[key] };
+        });
+
+        switch (sortType) {
+            case 'newest':
+                // استخدام التاريخ إذا كان موجوداً، وإلا استخدام ترتيب الإضافة
+                sortedManga.sort((a, b) => {
+                    const timeA = a.timestamp || a.createdAt || 0;
+                    const timeB = b.timestamp || b.createdAt || 0;
+                    return timeB - timeA;
+                });
+                break;
+            case 'popular':
+                sortedManga.sort((a, b) => (b.views || 0) - (a.views || 0));
+                break;
+            case 'oldest':
+                sortedManga.sort((a, b) => {
+                    const timeA = a.timestamp || a.createdAt || 0;
+                    const timeB = b.timestamp || b.createdAt || 0;
+                    return timeA - timeB;
+                });
+                break;
+            default:
+                console.warn('نوع التصنيف غير معروف:', sortType);
+                return;
+        }
+
+        console.log('تصنيف المانجا حسب:', sortType, sortedManga.length);
+        mangaManager.displaySortedManga(sortedManga);
     }
 
     getCurrentState() {

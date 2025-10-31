@@ -7,7 +7,7 @@ class App {
         try {
             this.setupEventListeners();
             
-            // تحميل حالة التنقل من URL أولاً
+            // تحميل حالة التنقل أولاً
             navigationManager.loadState();
             
             // ثم تحميل البيانات
@@ -20,11 +20,7 @@ class App {
     }
 
     setupEventListeners() {
-        document.addEventListener('click', (e) => {
-            if (e.target.id === 'submitComment' || e.target.closest('#submitComment')) {
-                commentsManager.submitComment();
-            }
-        });
+        // تم إزالة مستمع التعليقات المزدوج
 
         document.getElementById('backToHome').addEventListener('click', () => {
             navigationManager.goBack();
@@ -81,6 +77,7 @@ class App {
             
             if (authManager.getCurrentUser()) {
                 await ratingsManager.loadUserRatings();
+                await notificationsManager.loadNotifications();
             }
         } catch (error) {
             console.error('خطأ في تحميل البيانات الأولية:', error);

@@ -5,7 +5,6 @@ class NotificationsManager {
     }
 
     setupEventListeners() {
-        // تحميل الإشعارات عند تسجيل الدخول
         auth.onAuthStateChanged((user) => {
             if (user) {
                 this.loadNotifications();
@@ -16,7 +15,10 @@ class NotificationsManager {
     }
 
     async loadNotifications() {
-        if (!authManager.getCurrentUser()) return;
+        if (!authManager.getCurrentUser()) {
+            this.clearNotifications();
+            return;
+        }
 
         try {
             const notificationsRef = database.ref(`notifications/${authManager.getCurrentUser().uid}`);
@@ -26,6 +28,7 @@ class NotificationsManager {
             
         } catch (error) {
             console.error('Error loading notifications:', error);
+            this.clearNotifications();
         }
     }
 
@@ -35,7 +38,7 @@ class NotificationsManager {
 
         notificationsList.innerHTML = '';
 
-        if (Object.keys(this.notifications).length === 0) {
+        if (!this.notifications || Object.keys(this.notifications).length === 0) {
             notificationsList.innerHTML = '<p class="no-notifications">لا توجد إشعارات</p>';
             return;
         }
@@ -44,12 +47,15 @@ class NotificationsManager {
             return { id: key, ...this.notifications[key] };
         });
 
+        // ترتيب الإشعارات من الأحدث إلى الأقدم
         notificationsArray.sort((a, b) => b.timestamp - a.timestamp);
 
         notificationsArray.forEach(notification => {
             const notificationElement = this.createNotificationElement(notification);
             notificationsList.appendChild(notificationElement);
         });
+
+        console.log('تم عرض الإشعارات:', notificationsArray.length);
     }
 
     createNotificationElement(notification) {
@@ -58,19 +64,23 @@ class NotificationsManager {
         
         let message = '';
         let icon = '';
+        let actionText = '';
         
         switch (notification.type) {
             case 'like':
-                message = `${notification.fromUser} أعجب بتعليقك`;
+                message = `أعجب ${notification.fromUser} بتعليقك`;
                 icon = 'fas fa-heart';
+                actionText = 'عرض التعليق';
                 break;
             case 'reply':
-                message = `${notification.fromUser} رد على تعليقك`;
+                message = `رد ${notification.fromUser} على تعليقك`;
                 icon = 'fas fa-reply';
+                actionText = 'عرض الرد';
                 break;
             default:
                 message = 'إشعار جديد';
                 icon = 'fas fa-bell';
+                actionText = 'عرض';
         }
 
         element.innerHTML = `
@@ -79,8 +89,8 @@ class NotificationsManager {
                     <i class="${icon}"></i>
                 </div>
                 <div class="notification-text">
-                    <p>${message}</p>
-                    ${notification.replyText ? `<p class="notification-preview">${notification.replyText}</p>` : ''}
+                    <p class="notification-message">${message}</p>
+                    ${notification.replyText ? `<p class="notification-preview">"${notification.replyText}"</p>` : ''}
                     <span class="notification-time">${this.formatTime(notification.timestamp)}</span>
                 </div>
             </div>
@@ -89,7 +99,16 @@ class NotificationsManager {
             </button>
         `;
 
-        element.addEventListener('click', () => {
+        element.addEventListener('click', (e) => {
+            if (!e.target.closest('.notification-action')) {
+                this.handleNotificationClick(notification);
+            }
+        });
+
+        // زر الإجراء
+        const actionBtn = element.querySelector('.notification-action');
+        actionBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             this.handleNotificationClick(notification);
         });
 
@@ -102,14 +121,28 @@ class NotificationsManager {
         
         // التنقل إلى المحتوى ذي الصلة
         if (notification.mangaId && notification.chapterId) {
+            // تأكد من تحميل بيانات المانجا أولاً
+            if (!mangaManager.mangaData || Object.keys(mangaManager.mangaData).length === 0) {
+                await mangaManager.loadMangaList();
+            }
+            
             const manga = mangaManager.mangaData[notification.mangaId];
             if (manga) {
                 navigationManager.navigateTo('chapterPage', {
                     mangaId: notification.mangaId,
                     chapterId: notification.chapterId
                 });
-                mangaManager.showChapter(notification.mangaId, notification.chapterId, manga.chapters[notification.chapterId]);
+                
+                // انتظر قليلاً لضمان تحميل الصفحة ثم اعرض الفصل
+                setTimeout(() => {
+                    mangaManager.showChapter(notification.mangaId, notification.chapterId, manga.chapters[notification.chapterId]);
+                }, 100);
+            } else {
+                console.warn('المانجا غير موجودة للإشعار:', notification.mangaId);
+                ui.showAuthMessage('المانجا غير متاحة حالياً', 'error');
             }
+        } else {
+            console.warn('بيانات الإشعار غير مكتملة:', notification);
         }
     }
 
@@ -118,13 +151,17 @@ class NotificationsManager {
 
         try {
             await database.ref(`notifications/${authManager.getCurrentUser().uid}/${notificationId}/read`).set(true);
-            await this.loadNotifications();
+            // تحديث القائمة فوراً
+            this.notifications[notificationId].read = true;
+            this.displayNotifications();
         } catch (error) {
             console.error('Error marking notification as read:', error);
         }
     }
 
     formatTime(timestamp) {
+        if (!timestamp) return 'منذ وقت';
+        
         const date = new Date(timestamp);
         const now = new Date();
         const diffMs = now - date;
@@ -144,6 +181,27 @@ class NotificationsManager {
         const notificationsList = document.getElementById('notificationsList');
         if (notificationsList) {
             notificationsList.innerHTML = '<p class="no-notifications">لا توجد إشعارات</p>';
+        }
+    }
+
+    // دالة مساعدة لإضافة إشعار تجريبي (للتطوير)
+    async addTestNotification(userId, type = 'like') {
+        try {
+            const notificationRef = database.ref(`notifications/${userId}`).push();
+            await notificationRef.set({
+                type: type,
+                fromUser: 'مستخدم تجريبي',
+                fromUserId: 'test_user',
+                commentId: 'test_comment',
+                mangaId: 'test_manga',
+                chapterId: 'test_chapter',
+                replyText: type === 'reply' ? 'هذا رد تجريبي على تعليقك' : '',
+                timestamp: Date.now(),
+                read: false
+            });
+            console.log('تم إضافة إشعار تجريبي');
+        } catch (error) {
+            console.error('Error adding test notification:', error);
         }
     }
 }

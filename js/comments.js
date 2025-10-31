@@ -3,13 +3,14 @@ class CommentsManager {
         this.currentChapterId = null;
         this.currentMangaId = null;
         this.comments = {};
+        this.isSubmitting = false; // منع الإرسال المزدوج
         this.setupEventListeners();
     }
 
     setupEventListeners() {
-        // استخدام event delegation لمنع التكرار
+        // إعداد حدث الإرسال مرة واحدة فقط
         document.addEventListener('click', (e) => {
-            if (e.target.id === 'submitComment' || e.target.closest('#submitComment')) {
+            if ((e.target.id === 'submitComment' || e.target.closest('#submitComment')) && !this.isSubmitting) {
                 this.submitComment();
             }
             
@@ -35,7 +36,7 @@ class CommentsManager {
             
             if (e.target.classList.contains('submit-reply') || e.target.closest('.submit-reply')) {
                 const commentId = e.target.closest('.submit-reply').dataset.commentId;
-                if (commentId) this.submitReply(commentId);
+                if (commentId && !this.isSubmitting) this.submitReply(commentId);
             }
             
             if (e.target.classList.contains('cancel-reply') || e.target.closest('.cancel-reply')) {
@@ -50,6 +51,8 @@ class CommentsManager {
     }
 
     async submitComment() {
+        if (this.isSubmitting) return;
+        
         const commentInput = document.getElementById('commentInput');
         const commentText = commentInput.value.trim();
         
@@ -64,8 +67,10 @@ class CommentsManager {
             return;
         }
 
-        // منع الإرسال المزدوج
+        this.isSubmitting = true;
         const submitBtn = document.getElementById('submitComment');
+        const originalText = submitBtn.textContent;
+        
         submitBtn.disabled = true;
         submitBtn.textContent = 'جاري الإرسال...';
 
@@ -86,14 +91,15 @@ class CommentsManager {
             commentInput.value = '';
             ui.showAuthMessage('تم إرسال التعليق بنجاح', 'success');
             
-            // إعادة تحميل التعليقات
             await this.loadComments(this.currentMangaId, this.currentChapterId);
             
         } catch (error) {
+            console.error('Error submitting comment:', error);
             ui.showAuthMessage('حدث خطأ في إرسال التعليق: ' + error.message, 'error');
         } finally {
+            this.isSubmitting = false;
             submitBtn.disabled = false;
-            submitBtn.textContent = 'إرسال التعليق';
+            submitBtn.textContent = originalText;
         }
     }
 
@@ -126,7 +132,6 @@ class CommentsManager {
             return;
         }
 
-        // تحويل التعليقات إلى مصفوفة وترتيبها
         const commentsArray = Object.keys(this.comments).map(key => {
             return { id: key, ...this.comments[key] };
         });
@@ -231,16 +236,16 @@ class CommentsManager {
             let newLikes = comment.likes || 0;
 
             if (likedBy[userId]) {
-                // إزالة الإعجاب
                 newLikes--;
                 delete likedBy[userId];
             } else {
-                // إضافة الإعجاب
                 newLikes++;
                 likedBy[userId] = true;
                 
-                // إرسال إشعار للمستخدم
-                this.sendLikeNotification(comment.userId, commentId);
+                // إرسال إشعار للمستخدم صاحب التعليق
+                if (comment.userId && comment.userId !== authManager.getCurrentUser().uid) {
+                    await this.sendLikeNotification(comment.userId, commentId);
+                }
             }
 
             await commentRef.update({ 
@@ -248,7 +253,6 @@ class CommentsManager {
                 likedBy: likedBy
             });
             
-            // تحديث الواجهة
             await this.loadComments(this.currentMangaId, this.currentChapterId);
             
         } catch (error) {
@@ -289,7 +293,6 @@ class CommentsManager {
     }
 
     showReplyForm(commentId) {
-        // إخفاء جميع نماذج الردود الأخرى
         this.hideAllReplyForms();
         
         const replyForm = document.getElementById(`reply-form-${commentId}`);
@@ -312,6 +315,8 @@ class CommentsManager {
     }
 
     async submitReply(commentId) {
+        if (this.isSubmitting) return;
+        
         const replyForm = document.getElementById(`reply-form-${commentId}`);
         const replyInput = replyForm.querySelector('.reply-input');
         const replyText = replyInput.value.trim();
@@ -327,6 +332,13 @@ class CommentsManager {
             return;
         }
 
+        this.isSubmitting = true;
+        const submitBtn = replyForm.querySelector('.submit-reply');
+        const originalText = submitBtn.textContent;
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'جاري الإرسال...';
+
         try {
             const replyData = {
                 user: authManager.getCurrentUser().displayName || authManager.getCurrentUser().email.split('@')[0],
@@ -340,7 +352,7 @@ class CommentsManager {
             
             // إرسال إشعار للمستخدم صاحب التعليق الأصلي
             const originalComment = this.comments[commentId];
-            if (originalComment && originalComment.userId !== authManager.getCurrentUser().uid) {
+            if (originalComment && originalComment.userId && originalComment.userId !== authManager.getCurrentUser().uid) {
                 await this.sendReplyNotification(originalComment.userId, commentId, replyText);
             }
             
@@ -348,16 +360,20 @@ class CommentsManager {
             this.hideAllReplyForms();
             ui.showAuthMessage('تم إرسال الرد بنجاح', 'success');
             
-            // إعادة تحميل التعليقات
             await this.loadComments(this.currentMangaId, this.currentChapterId);
             
         } catch (error) {
+            console.error('Error submitting reply:', error);
             ui.showAuthMessage('حدث خطأ في إرسال الرد: ' + error.message, 'error');
+        } finally {
+            this.isSubmitting = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
         }
     }
 
     async sendLikeNotification(targetUserId, commentId) {
-        if (targetUserId === authManager.getCurrentUser().uid) return;
+        if (!targetUserId || targetUserId === authManager.getCurrentUser().uid) return;
         
         try {
             const notificationRef = database.ref(`notifications/${targetUserId}`).push();
@@ -371,13 +387,14 @@ class CommentsManager {
                 timestamp: Date.now(),
                 read: false
             });
+            console.log('تم إرسال إشعار إعجاب إلى:', targetUserId);
         } catch (error) {
-            console.error('Error sending notification:', error);
+            console.error('Error sending like notification:', error);
         }
     }
 
     async sendReplyNotification(targetUserId, commentId, replyText) {
-        if (targetUserId === authManager.getCurrentUser().uid) return;
+        if (!targetUserId || targetUserId === authManager.getCurrentUser().uid) return;
         
         try {
             const notificationRef = database.ref(`notifications/${targetUserId}`).push();
@@ -388,10 +405,11 @@ class CommentsManager {
                 commentId: commentId,
                 mangaId: this.currentMangaId,
                 chapterId: this.currentChapterId,
-                replyText: replyText.substring(0, 100), // حفظ جزء من النص
+                replyText: replyText.substring(0, 100),
                 timestamp: Date.now(),
                 read: false
             });
+            console.log('تم إرسال إشعار رد إلى:', targetUserId);
         } catch (error) {
             console.error('Error sending reply notification:', error);
         }
