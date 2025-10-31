@@ -1,6 +1,7 @@
 class RatingsManager {
     constructor() {
         this.userRatings = {};
+        this.userLikes = {};
     }
 
     async rateManga(mangaId, rating) {
@@ -73,6 +74,49 @@ class RatingsManager {
 
     getUserRating(mangaId) {
         return this.userRatings[mangaId] || 0;
+    }
+
+    // نظام الإعجابات للفصول
+    async likeChapter(mangaId, chapterId) {
+        if (!authManager.getCurrentUser()) {
+            ui.showAuthMessage('يجب تسجيل الدخول للإعجاب', 'error');
+            return;
+        }
+
+        try {
+            const chapterRef = database.ref(`manga_list/${mangaId}/chapters/${chapterId}`);
+            const snapshot = await chapterRef.once('value');
+            const chapter = snapshot.val();
+            
+            const likedBy = chapter.likedBy || {};
+            let newLikes = chapter.chapter_like || 0;
+
+            if (likedBy[authManager.getCurrentUser().uid]) {
+                // إزالة الإعجاب
+                newLikes--;
+                delete likedBy[authManager.getCurrentUser().uid];
+            } else {
+                // إضافة الإعجاب
+                newLikes++;
+                likedBy[authManager.getCurrentUser().uid] = true;
+            }
+
+            await chapterRef.update({ 
+                chapter_like: newLikes,
+                likedBy: likedBy
+            });
+
+            // تحديث الواجهة
+            mangaManager.loadMangaList();
+            
+        } catch (error) {
+            console.error('Error liking chapter:', error);
+        }
+    }
+
+    hasUserLikedChapter(mangaId, chapterId) {
+        // سيتم تنفيذ هذا لاحقاً
+        return false;
     }
 }
 
