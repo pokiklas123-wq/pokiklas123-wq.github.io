@@ -1,3 +1,4 @@
+// [file name]: ui.js
 class UI {
     constructor() {
         this.currentTheme = localStorage.getItem('theme') || 'dark';
@@ -8,6 +9,7 @@ class UI {
         this.applyTheme(this.currentTheme);
         this.setupEventListeners();
         this.setupSearch();
+        this.setupDrawerNavigation();
     }
 
     setupEventListeners() {
@@ -53,6 +55,45 @@ class UI {
                 e.preventDefault();
             }
         });
+
+        // إغلاق النافذة عند الضغط على ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.toggleAuthModal(false);
+                this.toggleDrawer(false);
+                this.hideSearch();
+            }
+        });
+    }
+
+    setupDrawerNavigation() {
+        // زر الرئيسية في القائمة الجانبية
+        const homeLink = document.getElementById('drawerHomeLink');
+        if (homeLink) {
+            homeLink.addEventListener('click', () => {
+                this.navigateToPage('homePage');
+                this.toggleDrawer(false);
+            });
+        }
+
+        // أزرار التصنيفات
+        document.querySelectorAll('.categories-list li[data-sort]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const sortType = e.currentTarget.getAttribute('data-sort');
+                if (sortType) {
+                    this.sortManga(sortType);
+                    this.toggleDrawer(false);
+                }
+            });
+        });
+
+        // زر تسجيل الدخول في القائمة
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'drawerLoginBtn' || e.target.closest('#drawerLoginBtn')) {
+                this.toggleAuthModal(true);
+                this.toggleDrawer(false);
+            }
+        });
     }
 
     setupSearch() {
@@ -62,6 +103,13 @@ class UI {
         if (searchInput) {
             searchInput.addEventListener('input', (e) => {
                 this.handleSearch(e.target.value);
+            });
+
+            // البحث عند الضغط على Enter
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    this.handleSearch(e.target.value);
+                }
             });
         }
         
@@ -91,7 +139,6 @@ class UI {
             }
         });
 
-        // إظهار رسالة إذا لم توجد نتائج
         const noResults = document.getElementById('noMangaMessage');
         if (noResults) {
             if (visibleCount === 0 && searchTerm !== '') {
@@ -101,6 +148,43 @@ class UI {
                 noResults.style.display = 'none';
             }
         }
+    }
+
+    sortManga(sortType) {
+        if (!mangaManager.mangaData) {
+            console.warn('بيانات المانجا غير محملة بعد');
+            return;
+        }
+
+        let sortedManga = Object.keys(mangaManager.mangaData).map(key => {
+            return { id: key, ...mangaManager.mangaData[key] };
+        });
+
+        switch (sortType) {
+            case 'newest':
+                sortedManga.sort((a, b) => {
+                    const timeA = a.timestamp || a.createdAt || 0;
+                    const timeB = b.timestamp || b.createdAt || 0;
+                    return timeB - timeA;
+                });
+                break;
+            case 'popular':
+                sortedManga.sort((a, b) => (b.views || 0) - (a.views || 0));
+                break;
+            case 'oldest':
+                sortedManga.sort((a, b) => {
+                    const timeA = a.timestamp || a.createdAt || 0;
+                    const timeB = b.timestamp || b.createdAt || 0;
+                    return timeA - timeB;
+                });
+                break;
+            default:
+                console.warn('نوع التصنيف غير معروف:', sortType);
+                return;
+        }
+
+        console.log('تصنيف المانجا حسب:', sortType, sortedManga.length);
+        mangaManager.displaySortedManga(sortedManga);
     }
 
     switchTheme(theme) {
@@ -135,9 +219,11 @@ class UI {
         if (show) {
             drawer.classList.add('open');
             overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
         } else {
             drawer.classList.remove('open');
             overlay.classList.remove('active');
+            document.body.style.overflow = '';
         }
     }
 
@@ -163,8 +249,10 @@ class UI {
         const authModal = document.getElementById('authModal');
         if (show) {
             authModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
         } else {
             authModal.classList.remove('active');
+            document.body.style.overflow = '';
             this.clearAuthForm();
         }
     }
@@ -174,10 +262,9 @@ class UI {
         const loginEmail = document.getElementById('loginEmail');
         const loginPassword = document.getElementById('loginPassword');
         
-        if (displayName) displayName.style.display = 'none';
+        if (displayName) displayName.value = '';
         if (loginEmail) loginEmail.value = '';
         if (loginPassword) loginPassword.value = '';
-        if (displayName) displayName.value = '';
         this.hideAuthMessage();
     }
 
@@ -187,6 +274,11 @@ class UI {
             authMessage.textContent = message;
             authMessage.className = 'auth-message ' + type;
             authMessage.style.display = 'block';
+            
+            // إخفاء الرسالة تلقائياً بعد 5 ثواني
+            setTimeout(() => {
+                this.hideAuthMessage();
+            }, 5000);
         }
     }
 
@@ -244,6 +336,54 @@ class UI {
         
         // التمرير للأعلى
         window.scrollTo(0, 0);
+        
+        // إخفاء رسائل المصادقة
+        this.hideAuthMessage();
+    }
+
+    // دالة لعرض رسالة تأكيد
+    showConfirmation(message, confirmCallback, cancelCallback) {
+        const confirmation = document.createElement('div');
+        confirmation.className = 'confirmation-modal';
+        confirmation.innerHTML = `
+            <div class="confirmation-content">
+                <p>${message}</p>
+                <div class="confirmation-buttons">
+                    <button class="btn confirm-btn">نعم</button>
+                    <button class="btn cancel-btn">لا</button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(confirmation);
+        
+        const confirmBtn = confirmation.querySelector('.confirm-btn');
+        const cancelBtn = confirmation.querySelector('.cancel-btn');
+        
+        confirmBtn.addEventListener('click', () => {
+            document.body.removeChild(confirmation);
+            if (confirmCallback) confirmCallback();
+        });
+        
+        cancelBtn.addEventListener('click', () => {
+            document.body.removeChild(confirmation);
+            if (cancelCallback) cancelCallback();
+        });
+    }
+
+    // دالة لعرض تنبيه
+    showAlert(message, type = 'info') {
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type}`;
+        alert.textContent = message;
+        
+        document.body.appendChild(alert);
+        
+        setTimeout(() => {
+            if (alert.parentNode) {
+                document.body.removeChild(alert);
+            }
+        }, 3000);
     }
 }
 
