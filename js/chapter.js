@@ -1,12 +1,12 @@
 // js/chapter.js
 class ChapterPage {
     constructor() {
-        this.mangaId = this.getURLParam('mangaId');
-        this.chapterId = this.getURLParam('chapterId');
+        this.mangaId = this.getURLParam('manga');
+        this.chapterNumber = this.getURLParam('chapter');
         this.mangaData = null;
         this.chapterData = null;
         
-        if (this.mangaId && this.chapterId) {
+        if (this.mangaId && this.chapterNumber) {
             this.init();
         } else {
             this.showError('معرف المانجا أو الفصل غير موجود في الرابط');
@@ -46,12 +46,12 @@ class ChapterPage {
         if (drawerClose) drawerClose.addEventListener('click', () => this.closeDrawer());
         if (drawerOverlay) drawerOverlay.addEventListener('click', () => this.closeDrawer());
         
-        // تهيئة نظام التعليقات بعد تحميل الصفحة
-        if (typeof CommentsManager !== 'undefined') {
-            setTimeout(() => {
+        // تهيئة نظام التعليقات بعد تحميل البيانات
+        setTimeout(() => {
+            if (typeof CommentsManager !== 'undefined') {
                 this.commentsManager = new CommentsManager(this);
-            }, 1000);
-        }
+            }
+        }, 2000);
     }
     
     async loadChapterData() {
@@ -64,8 +64,9 @@ class ChapterPage {
             }
             
             this.mangaData = mangaData;
+            this.mangaData.id = this.mangaId;
             
-            const chapterKey = `chapter_${this.chapterId}`;
+            const chapterKey = `chapter_${this.chapterNumber}`;
             this.chapterData = this.mangaData.chapters?.[chapterKey];
             
             if (!this.chapterData) {
@@ -76,7 +77,7 @@ class ChapterPage {
             
         } catch (error) {
             console.error('Error loading chapter:', error);
-            this.showError('حدث خطأ في تحميل بيانات الفصل');
+            this.showError('حدث خطأ في تحميل بيانات الفصل: ' + error.message);
         }
     }
     
@@ -92,7 +93,7 @@ class ChapterPage {
         
         chapterContent.innerHTML = `
             <div class="chapter-header">
-                <h1 class="chapter-title">${this.mangaData.name} - الفصل ${this.chapterId}</h1>
+                <h1 class="chapter-title">${this.mangaData.name} - الفصل ${this.chapterNumber}</h1>
                 <div class="chapter-meta">
                     <span>عدد الصور: ${this.chapterData.images?.length || 0}</span>
                 </div>
@@ -100,7 +101,7 @@ class ChapterPage {
             
             <div class="chapter-nav">
                 ${prevChapter ? 
-                    `<a href="chapter.html?mangaId=${this.mangaId}&chapterId=${prevChapter}" class="btn btn-outline">
+                    `<a href="chapter.html?manga=${this.mangaId}&chapter=${prevChapter}" class="btn btn-outline">
                         <i class="fas fa-arrow-right"></i>
                         الفصل السابق
                     </a>` : 
@@ -113,7 +114,7 @@ class ChapterPage {
                 </a>
                 
                 ${nextChapter ? 
-                    `<a href="chapter.html?mangaId=${this.mangaId}&chapterId=${nextChapter}" class="btn btn-outline">
+                    `<a href="chapter.html?manga=${this.mangaId}&chapter=${nextChapter}" class="btn btn-outline">
                         الفصل التالي
                         <i class="fas fa-arrow-left"></i>
                     </a>` : 
@@ -140,7 +141,7 @@ class ChapterPage {
             .filter(num => !isNaN(num))
             .sort((a, b) => a - b);
         
-        const currentChapter = parseInt(this.chapterId);
+        const currentChapter = parseInt(this.chapterNumber);
         const currentIndex = chapters.indexOf(currentChapter);
         
         return {
