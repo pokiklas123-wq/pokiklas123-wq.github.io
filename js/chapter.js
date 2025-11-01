@@ -1,12 +1,12 @@
 // js/chapter.js
 class ChapterPage {
     constructor() {
-        this.mangaId = this.getURLParam('manga');
-        this.chapterNumber = this.getURLParam('chapter');
+        this.mangaId = this.getURLParam('mangaId') || this.getURLParam('manga');
+        this.chapterId = this.getURLParam('chapterId') || this.getURLParam('chapter');
         this.mangaData = null;
         this.chapterData = null;
         
-        if (this.mangaId && this.chapterNumber) {
+        if (this.mangaId && this.chapterId) {
             this.init();
         } else {
             this.showError('معرف المانجا أو الفصل غير موجود في الرابط');
@@ -18,6 +18,7 @@ class ChapterPage {
         this.setupEventListeners();
         this.loadChapterData();
         Utils.loadTheme();
+        this.initializeComments();
     }
     
     initializeFirebase() {
@@ -35,6 +36,15 @@ class ChapterPage {
     getURLParam(param) {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(param);
+    }
+
+    initializeComments() {
+        // تهيئة نظام التعليقات بعد تحميل البيانات
+        if (typeof CommentsManager !== 'undefined' && this.mangaId && this.chapterId) {
+            setTimeout(() => {
+                this.commentsManager = new CommentsManager(this);
+            }, 1000);
+        }
     }
     
     setupEventListeners() {
@@ -58,7 +68,7 @@ class ChapterPage {
             
             this.mangaData = mangaData;
             
-            const chapterKey = `chapter_${this.chapterNumber}`;
+            const chapterKey = `chapter_${this.chapterId}`;
             this.chapterData = this.mangaData.chapters?.[chapterKey];
             
             if (!this.chapterData) {
@@ -85,7 +95,7 @@ class ChapterPage {
         
         chapterContent.innerHTML = `
             <div class="chapter-header">
-                <h1 class="chapter-title">${this.mangaData.name} - الفصل ${this.chapterNumber}</h1>
+                <h1 class="chapter-title">${this.mangaData.name} - الفصل ${this.chapterId}</h1>
                 <div class="chapter-meta">
                     <span>عدد الصور: ${this.chapterData.images?.length || 0}</span>
                 </div>
@@ -133,7 +143,7 @@ class ChapterPage {
             .filter(num => !isNaN(num))
             .sort((a, b) => a - b);
         
-        const currentChapter = parseInt(this.chapterNumber);
+        const currentChapter = parseInt(this.chapterId);
         const currentIndex = chapters.indexOf(currentChapter);
         
         return {
@@ -174,8 +184,4 @@ let chapterPage;
 
 document.addEventListener('DOMContentLoaded', () => {
     chapterPage = new ChapterPage();
-    // تهيئة مدير التعليقات بعد تهيئة الصفحة
-    if (typeof CommentsManager !== 'undefined') {
-        new CommentsManager(chapterPage);
-    }
 });
