@@ -1087,3 +1087,164 @@ header {
     padding: 40px 20px;
     font-style: italic;
 }
+/* تأثير Shimmer للتحميل */
+.shimmer-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000009;
+  z-index: 2;
+  display: none;
+}
+
+.manga-card.loading .shimmer-container {
+  display: block;
+  background: linear-gradient(90deg, #000009 25%, #0a0a0a 50%, #000009 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.manga-card.loading .manga-thumbnail {
+  opacity: 0;
+}
+
+.manga-card.loading .manga-info {
+  opacity: 0;
+}
+
+/* تصميم البطاقات الجديد */
+.manga-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.manga-card {
+  background: rgba(36, 46, 79, 0.55);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  height: 245px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.manga-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(26, 115, 232, 0.2);
+  border-color: var(--accent-color);
+}
+
+.manga-image-container {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.manga-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.manga-card:hover .manga-thumbnail {
+  transform: scale(1.05);
+}
+
+.manga-info-overlay {
+  padding: 8px;
+  background: #223344;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.manga-title {
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 4px;
+  color: #FFFFFF;
+  text-shadow: 10px 10px 5px #F44336;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.manga-chapter {
+  font-size: 12px;
+  text-align: center;
+  color: #F44336;
+  text-shadow: 4px 4px 3px #000000;
+  font-weight: bold;
+}
+
+/* شريط التحميل في الأسفل */
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  margin-top: 8px;
+  background: #000009;
+  border-radius: 4px;
+}
+
+.loading-text {
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.loading-progress {
+  width: 20px;
+  height: 20px;
+}
+
+/* تجاوبية للشاشات المختلفة */
+@media (min-width: 768px) {
+  .manga-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .manga-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .manga-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .manga-grid {
+    grid-template-columns: 1fr;
+  }
+}
