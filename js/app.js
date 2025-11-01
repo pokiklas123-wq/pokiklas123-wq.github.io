@@ -7,11 +7,11 @@ class App {
         try {
             this.setupEventListeners();
             
-            // تحميل حالة التنقل أولاً
-            navigationManager.loadState();
-            
-            // ثم تحميل البيانات
+            // تحميل البيانات الأولية أولاً
             await this.loadInitialData();
+            
+            // ثم تحميل حالة التنقل من المسار (URL)
+            navigationManager.loadStateFromURL();
             
             console.log('التطبيق بدأ بنجاح');
         } catch (error) {
@@ -64,9 +64,12 @@ class App {
 
         document.body.appendChild(backButton);
 
-        setInterval(() => {
-            backButton.style.display = navigationManager.canGoBack() ? 'block' : 'none';
-        }, 100);
+        // يجب تحديث هذه الدالة لتعمل مع History API
+        // حالياً لا يوجد دالة canGoBack في navigationManager الجديد
+        // يمكننا إزالتها مؤقتاً أو تعديلها لاحقاً
+        // setInterval(() => {
+        //     backButton.style.display = navigationManager.canGoBack() ? 'block' : 'none';
+        // }, 100);
     }
 
     async loadInitialData() {
@@ -74,12 +77,12 @@ class App {
             // تحميل بيانات المانجا أولاً
             await mangaManager.loadMangaList();
             
-            // إذا كان هناك رابط مباشر، انتظر قليلاً ثم حمّله
-            setTimeout(() => {
-                if (window.location.hash && window.location.hash !== '#') {
-                    navigationManager.loadStateFromURL();
-                }
-            }, 500);
+            // إزالة منطق الهاش القديم
+            // setTimeout(() => {
+            //     if (window.location.hash && window.location.hash !== '#') {
+            //         navigationManager.loadStateFromURL();
+            //     }
+            // }, 500);
             
             if (authManager.getCurrentUser()) {
                 await ratingsManager.loadUserRatings();

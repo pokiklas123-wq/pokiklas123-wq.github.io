@@ -42,12 +42,7 @@ class MangaManager {
                 ui.hideLoading('loadingHome');
                 ui.showElement('mangaGrid');
                 
-                if (window.location.hash && window.location.hash !== '#') {
-                    console.log('تم تحميل البيانات، جارٍ معالجة الـ URL:', window.location.hash);
-                    setTimeout(() => {
-                        navigationManager.loadStateFromURL();
-                    }, 300);
-                }
+                // إزالة منطق الهاش القديم
             } else {
                 ui.hideLoading('loadingHome');
                 ui.showElement('noMangaMessage');
@@ -173,10 +168,11 @@ class MangaManager {
             const latestChapterElement = e.target.closest('.latest-chapter');
             if (latestChapterElement) {
                 const chapterId = latestChapterElement.dataset.chapterId;
-                const chapter = manga.chapters[chapterId];
-                this.showChapter(mangaId, chapterId, chapter);
+                // استخدام نظام التوجيه الجديد للفصل
+                navigationManager.navigateTo(navigationManager.getChapterPath(mangaId, chapterId));
             } else {
-                this.showMangaDetail(mangaId, manga);
+                // استخدام نظام التوجيه الجديد لتفاصيل المانجا
+                navigationManager.navigateTo(navigationManager.getMangaPath(mangaId));
             }
         });
 
@@ -234,13 +230,28 @@ class MangaManager {
         return starsHTML;
     }
 
-    async showMangaDetail(mangaId, manga) {
-        this.currentMangaId = mangaId;
-        
-        ui.showLoading('loadingDetail');
-        ui.hideElement('mangaDetailContent');
-
+    async loadMangaDetail(mangaId) {
         try {
+            // الانتظار حتى تحميل بيانات المانجا
+            if (!this.mangaData || Object.keys(this.mangaData).length === 0) {
+                setTimeout(() => {
+                    this.loadMangaDetail(mangaId);
+                }, 100);
+                return;
+            }
+
+            const manga = this.mangaData[mangaId];
+            if (!manga) {
+                console.warn('المانجا غير موجودة:', mangaId);
+                navigationManager.navigateTo('/', {}, true); // العودة للرئيسية
+                return;
+            }
+
+            this.currentMangaId = mangaId;
+            
+            ui.showLoading('loadingDetail');
+            ui.hideElement('mangaDetailContent');
+
             if (manga.views === undefined) manga.views = 0;
             manga.views++;
             await database.ref(`manga_list/${mangaId}/views`).set(manga.views);
@@ -253,15 +264,13 @@ class MangaManager {
 
             ui.hideLoading('loadingDetail');
             ui.showElement('mangaDetailContent');
-            
-            // الانتقال الفوري إلى صفحة التفاصيل
-            ui.navigateToPage('mangaDetailPage');
-            this.updateURL(mangaId);
+            ui.navigateToPage('mangaDetailPage'); // الانتقال إلى الصفحة بعد تحميل المحتوى
             
         } catch (error) {
-            console.error('Error showing manga detail:', error);
+            console.error('Error loading manga detail:', error);
             ui.hideLoading('loadingDetail');
             ui.showAuthMessage('حدث خطأ في تحميل التفاصيل', 'error');
+            navigationManager.navigateTo('/', {}, true); // العودة للرئيسية عند الخطأ
         }
     }
 
@@ -404,39 +413,71 @@ class MangaManager {
         `;
 
         item.addEventListener('click', () => {
-            this.showChapter(mangaId, chapterId, chapter);
+            // استخدام نظام التوجيه الجديد
+            navigationManager.navigateTo(navigationManager.getChapterPath(mangaId, chapterId));
         });
 
         return item;
     }
 
-    async showChapter(mangaId, chapterId, chapter) {
-        this.currentMangaId = mangaId;
-        this.currentChapterId = chapterId;
-        
-        ui.showLoading('loadingChapter');
-        ui.hideElement('chapterContent');
-
-        try {
-            const chapterContent = document.getElementById('chapterContent');
-            chapterContent.innerHTML = this.createChapterHTML(chapter);
-
-            await this.displayChapterPages(chapter);
-            commentsManager.loadComments(mangaId, chapterId, chapter.comments);
-
-            ui.hideLoading('loadingChapter');
-            ui.showElement('chapterContent');
-            
-            // الانتقال الفوري إلى صفحة الفصل
-            ui.navigateToPage('chapterPage');
-            this.updateURL(mangaId, chapterId);
-            
-        } catch (error) {
-            console.error('Error showing chapter:', error);
-            ui.hideLoading('loadingChapter');
-            ui.showAuthMessage('حدث خطأ في تحميل الفصل', 'error');
-        }
-    }
+	    async loadChapter(mangaId, chapterId) {
+	        try {
+	            // الانتظار حتى تحميل بيانات المانجا
+	            if (!this.mangaData || Object.keys(this.mangaData).length === 0) {
+	                setTimeout(() => {
+	                    this.loadChapter(mangaId, chapterId);
+	                }, 100);
+	                return;
+	            }
+	
+	            const manga = this.mangaData[mangaId];
+	            if (!manga || !manga.chapters || !manga.chapters[chapterId]) {
+	                console.warn('الفصل غير موجود:', mangaId, chapterId);
+	                navigationManager.navigateTo('/', {}, true); // العودة للرئيسية
+	                return;
+	            }
+	
+	            const chapter = manga.chapters[chapterId];
+	            this.currentMangaId = mangaId;
+	            this.currentChapterId = chapterId;
+	
+	            ui.showLoading('loadingChapter');
+	            ui.hideElement('chapterContent');
+	
+	            const chapterContent = document.getElementById('chapterContent');
+	            chapterContent.innerHTML = this.createChapterHTML(chapter);
+	
+	            await this.displayChapterPages(chapter);
+	            commentsManager.loadComments(mangaId, chapterId, chapter.comments);
+	
+	            ui.hideLoading('loadingChapter');
+	            ui.showElement('chapterContent');
+	            ui.navigateToPage('chapterPage'); // الانتقال إلى الصفحة بعد تحميل المحتوى
+	
+	            // منطق التمرير إلى التعليق المحدد
+	            const currentState = navigationManager.getCurrentState();
+	            if (currentState && currentState.data && currentState.data.commentId) {
+	                const commentId = currentState.data.commentId;
+	                setTimeout(() => {
+	                    const commentElement = document.querySelector(`.comment[data-comment-id="${commentId}"]`);
+	                    if (commentElement) {
+	                        commentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	                        // إضافة تأثير بصري لتسليط الضوء على التعليق
+	                        commentElement.classList.add('highlight');
+	                        setTimeout(() => {
+	                            commentElement.classList.remove('highlight');
+	                        }, 3000);
+	                    }
+	                }, 500);
+	            }
+	
+	        } catch (error) {
+	            console.error('Error loading chapter:', error);
+	            ui.hideLoading('loadingChapter');
+	            ui.showAuthMessage('حدث خطأ في تحميل الفصل', 'error');
+	            navigationManager.navigateTo('/', {}, true); // العودة للرئيسية عند الخطأ
+	        }
+	    }
 
     createChapterHTML(chapter) {
         return `
@@ -482,18 +523,7 @@ class MangaManager {
         }
     }
 
-    updateURL(mangaId = null, chapterId = null) {
-        let hash = '';
-        if (mangaId && chapterId) {
-            hash = `manga/${mangaId}/chapter/${chapterId}`;
-        } else if (mangaId) {
-            hash = `manga/${mangaId}`;
-        }
-        
-        if (hash !== window.location.hash.replace('#', '')) {
-            history.replaceState(null, '', hash ? `#${hash}` : '');
-        }
-    }
+
 
     getCurrentMangaId() {
         return this.currentMangaId;

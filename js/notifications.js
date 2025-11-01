@@ -14,17 +14,23 @@ class NotificationsManager {
             }
         });
         
-        // مستمع للنقر على الإشعارات في القائمة الجانبية
-        document.getElementById('notificationsList').addEventListener('click', (e) => {
-            const notificationElement = e.target.closest('.notification');
-            if (notificationElement) {
-                const notificationId = notificationElement.dataset.notificationId;
-                const notification = this.notifications[notificationId];
-                if (notification) {
-                    this.handleNotificationClick(notificationId, notification);
-                }
-            }
-        });
+	        // مستمع للنقر على الإشعارات في القائمة الجانبية
+	        document.getElementById('notificationsList').addEventListener('click', (e) => {
+	            const notificationElement = e.target.closest('.notification');
+	            if (notificationElement) {
+	                const notificationId = notificationElement.dataset.notificationId;
+	                const notification = this.notifications[notificationId];
+	                if (notification) {
+	                    this.handleNotificationClick(notificationId, notification);
+	                }
+	            }
+	        });
+
+	        // مستمع لزر الإشعارات في القائمة الجانبية
+	        document.getElementById('drawerNotificationsBtn').addEventListener('click', () => {
+	            navigationManager.navigateTo(navigationManager.getNotificationsPath());
+	            ui.closeDrawer();
+	        });
     }
 
     listenForNotifications() {
@@ -118,54 +124,25 @@ class NotificationsManager {
         return element;
     }
 
-    async handleNotificationClick(notificationId, notification) {
-        // وضع الإشعار كمقروء
-        await this.markAsRead(notificationId);
-        
-        // التنقل إلى المحتوى ذي الصلة
-        if (notification.mangaId && notification.chapterId) {
-            // 1. التأكد من تحميل بيانات المانجا
-            if (!mangaManager.mangaData || Object.keys(mangaManager.mangaData).length === 0) {
-                await mangaManager.loadMangaList();
-            }
-            
-            const manga = mangaManager.mangaData[notification.mangaId];
-            if (manga && manga.chapters && manga.chapters[notification.chapterId]) {
-                
-                // 2. الانتقال إلى صفحة الفصل
-                // نستخدم showChapter مباشرة لأنه يتضمن navigateTo
-                await mangaManager.showChapter(
-                    notification.mangaId, 
-                    notification.chapterId, 
-                    manga.chapters[notification.chapterId]
-                );
-                
-                // 3. إغلاق القائمة الجانبية
-                ui.closeDrawer();
-                
-                // 4. التمرير إلى التعليق المحدد
-                if (notification.commentId) {
-                    // الانتظار قليلاً لضمان تحميل التعليقات في DOM
-                    setTimeout(() => {
-                        const commentElement = document.querySelector(`.comment[data-comment-id="${notification.commentId}"]`);
-                        if (commentElement) {
-                            commentElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            // يمكن إضافة تأثير بصري هنا لتسليط الضوء على التعليق
-                            commentElement.classList.add('highlight');
-                            setTimeout(() => {
-                                commentElement.classList.remove('highlight');
-                            }, 3000);
-                        }
-                    }, 500); 
-                }
-            } else {
-                console.warn('المانجا أو الفصل غير موجود للإشعار:', notification.mangaId, notification.chapterId);
-                ui.showAuthMessage('المانجا أو الفصل غير متاح حالياً', 'error');
-            }
-        } else {
-            console.warn('بيانات الإشعار غير مكتملة:', notification);
-        }
-    }
+	    async handleNotificationClick(notificationId, notification) {
+	        // وضع الإشعار كمقروء
+	        await this.markAsRead(notificationId);
+	        
+	        // التنقل إلى المحتوى ذي الصلة باستخدام نظام التوجيه الجديد
+	        if (notification.mangaId && notification.chapterId) {
+	            const path = navigationManager.getChapterPath(notification.mangaId, notification.chapterId);
+	            
+	            // إضافة بيانات التعليق إلى حالة التنقل للتمرير إليه لاحقاً
+	            const data = notification.commentId ? { commentId: notification.commentId } : {};
+	            
+	            navigationManager.navigateTo(path, data);
+	            ui.closeDrawer();
+	            
+	            // ملاحظة: التمرير إلى التعليق سيتم تنفيذه في دالة showChapter بعد تحميل الفصل
+	        } else {
+	            console.warn('بيانات الإشعار غير مكتملة:', notification);
+	        }
+	    }
 
     async markAsRead(notificationId) {
         if (!authManager.getCurrentUser()) return;
@@ -196,16 +173,51 @@ class NotificationsManager {
         return date.toLocaleDateString('ar-SA');
     }
 
-    clearNotifications() {
-        if (this.notificationsRef) {
-            this.notificationsRef.off('value');
-        }
-        this.notifications = {};
-        const notificationsList = document.getElementById('notificationsList');
-        if (notificationsList) {
-            notificationsList.innerHTML = '<p class="no-notifications">لا توجد إشعارات</p>';
-        }
-    }
+	    clearNotifications() {
+	        if (this.notificationsRef) {
+	            this.notificationsRef.off('value');
+	        }
+	        this.notifications = {};
+	        const notificationsList = document.getElementById('notificationsList');
+	        if (notificationsList) {
+	            notificationsList.innerHTML = '<p class="no-notifications">لا توجد إشعارات</p>';
+	        }
+	    }
+
+	    showNotificationsPage() {
+	        ui.navigateToPage('notificationsPage');
+	        const notificationsContent = document.getElementById('notificationsContent');
+	        if (!notificationsContent) return;
+
+	        if (authManager.getCurrentUser()) {
+	            // عرض الإشعارات في صفحة الإشعارات
+	            const notificationsArray = Object.keys(this.notifications).map(key => {
+	                return { id: key, ...this.notifications[key] };
+	            });
+	            notificationsArray.sort((a, b) => b.timestamp - a.timestamp);
+
+	            notificationsContent.innerHTML = '';
+	            if (notificationsArray.length === 0) {
+	                notificationsContent.innerHTML = '<p class="status-message status-info">لا توجد إشعارات حالياً.</p>';
+	            } else {
+	                notificationsArray.forEach(notification => {
+	                    const element = this.createNotificationElement(notification);
+	                    // إزالة زر الإجراء من الإشعار في صفحة الإشعارات
+	                    const actionButton = element.querySelector('.notification-action');
+	                    if (actionButton) actionButton.remove();
+	                    
+	                    // إضافة مستمع النقر لفتح الإشعار
+	                    element.addEventListener('click', () => {
+	                        this.handleNotificationClick(notification.id, notification);
+	                    });
+
+	                    notificationsContent.appendChild(element);
+	                });
+	            }
+	        } else {
+	            notificationsContent.innerHTML = '<p class="status-message status-warning">يرجى تسجيل الدخول لعرض الإشعارات.</p>';
+	        }
+	    }
 }
 
 const notificationsManager = new NotificationsManager();

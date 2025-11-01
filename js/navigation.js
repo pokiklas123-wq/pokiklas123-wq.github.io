@@ -4,12 +4,11 @@ class NavigationManager {
         this.currentState = null;
         this.setupEventListeners();
         this.setupBrowserBackButton();
-        this.loadState(); 
     }
 
     setupEventListeners() {
         document.querySelector('.logo').addEventListener('click', () => {
-            this.navigateTo('homePage');
+            this.navigateTo('/');
         });
 
         document.getElementById('backToHome').addEventListener('click', () => {
@@ -31,260 +30,142 @@ class NavigationManager {
         });
 
         document.getElementById('drawerHomeBtn').addEventListener('click', () => {
-            this.navigateTo('homePage');
+            this.navigateTo('/');
             ui.closeDrawer();
         });
     }
 
     setupBrowserBackButton() {
+        // الاستماع لحدث popstate لمعالجة زر الرجوع/الأمام في المتصفح
         window.addEventListener('popstate', (event) => {
-            const state = event.state;
-            if (state && state.page) {
-                this.currentState = state;
-                this.restoreState(state);
-            } else {
-                this.loadStateFromURL();
-            }
-        });
-
-        window.addEventListener('hashchange', () => {
-            this.loadStateFromURL();
+            // عند استخدام زر الرجوع، يتم استدعاء loadStateFromURL لتحميل الحالة الجديدة من المسار
+            this.loadStateFromURL(event.state);
         });
     }
 
-    navigateTo(pageId, data = {}) {
+    // الدالة الرئيسية للتنقل
+    navigateTo(path, data = {}, replace = false) {
         const state = {
-            page: pageId,
+            path: path,
             data: data,
             timestamp: Date.now()
         };
 
-        const newHash = this.generateHash(state);
-        const currentHash = window.location.hash.replace('#', '');
-
-        if (newHash === currentHash) {
-            this.currentState = state;
-            this.history[this.history.length - 1] = state;
-            this.saveState();
-            ui.navigateToPage(pageId);
-            return;
+        // تحديث المسار في شريط العنوان
+        if (replace) {
+            history.replaceState(state, '', path);
+        } else {
+            history.pushState(state, '', path);
         }
 
-        if (this.currentState && this.currentState.page === pageId && JSON.stringify(this.currentState.data) === JSON.stringify(data)) {
-            return;
-        }
-
+        // تحديث الحالة الحالية
         this.currentState = state;
-        this.history.push(state);
-
-        // تحديث الـ URL أولاً
-        history.pushState(state, '', `#${newHash}`);
         
-        // ثم الانتقال إلى الصفحة
-        ui.navigateToPage(pageId);
-        this.saveState();
+        // معالجة المسار والانتقال إلى الصفحة المناسبة
+        this.handleRoute(path, state.data);
     }
 
-    generateHash(state) {
-        switch (state.page) {
-            case 'mangaDetailPage':
-                return `manga/${state.data.mangaId}`;
-            case 'chapterPage':
-                return `manga/${state.data.mangaId}/chapter/${state.data.chapterId}`;
-            default:
-                return '';
+    // دالة تحليل المسار (Routing)
+    parsePath(path) {
+        const pathParts = path.split('/').filter(part => part);
+        
+        if (pathParts.length === 0 || pathParts[0] === 'index.html') {
+            return { page: 'homePage', params: {} };
         }
-    }
 
-    parseHash(hash) {
-        const pathParts = hash.split('/').filter(part => part);
-        
         if (pathParts[0] === 'manga' && pathParts[1]) {
             const mangaId = pathParts[1];
             
             if (pathParts[2] === 'chapter' && pathParts[3]) {
                 return {
                     page: 'chapterPage',
-                    mangaId: mangaId,
-                    chapterId: pathParts[3]
+                    params: { mangaId: mangaId, chapterId: pathParts[3] }
                 };
             } else {
                 return {
                     page: 'mangaDetailPage',
-                    mangaId: mangaId
+                    params: { mangaId: mangaId }
                 };
             }
         }
         
-        return { page: 'homePage' };
+        // مسار الإشعارات (افتراضي)
+        if (pathParts[0] === 'notifications') {
+            return { page: 'notificationsPage', params: {} };
+        }
+
+        // في حالة عدم تطابق أي مسار، العودة إلى الصفحة الرئيسية
+        return { page: 'homePage', params: {} };
     }
 
-    loadStateFromURL() {
-        const hash = window.location.hash.replace('#', '');
+    // دالة معالجة المسار والانتقال الفعلي
+    handleRoute(path, data = {}) {
+        const route = this.parsePath(path);
         
-        if (!hash) {
-            if (this.currentState?.page !== 'homePage') {
-                this.navigateTo('homePage');
-            }
-            return;
-        }
+        // إظهار شاشة التحميل
+        ui.showLoading();
 
-        const route = this.parseHash(hash);
-        
-        if (route.page === 'homePage') {
-            this.navigateTo('homePage');
-            return;
-        }
-
-        if (this.currentState && this.currentState.page === route.page) {
-            if (route.page === 'mangaDetailPage' && this.currentState.data.mangaId === route.mangaId) return;
-            if (route.page === 'chapterPage' && this.currentState.data.mangaId === route.mangaId && this.currentState.data.chapterId === route.chapterId) return;
-        }
-
-        if (route.page === 'mangaDetailPage') {
-            this.loadMangaFromURL(route.mangaId);
-        } else if (route.page === 'chapterPage') {
-            this.loadChapterFromURL(route.mangaId, route.chapterId);
-        }
-    }
-
-    async loadMangaFromURL(mangaId) {
-        try {
-            // الانتظار حتى تحميل بيانات المانجا
-            if (!mangaManager.mangaData || Object.keys(mangaManager.mangaData).length === 0) {
-                setTimeout(() => {
-                    this.loadMangaFromURL(mangaId);
-                }, 100);
-                return;
-            }
-            
-            if (mangaManager.mangaData[mangaId]) {
-                const manga = mangaManager.mangaData[mangaId];
-                
-                this.currentState = { page: 'mangaDetailPage', data: { mangaId: mangaId } };
-                if (this.history.length === 0) {
-                    this.history.push(this.currentState);
-                } else {
-                    this.history[this.history.length - 1] = this.currentState;
-                }
-                this.saveState();
-                
-                // الانتقال الفوري إلى صفحة التفاصيل
-                ui.navigateToPage('mangaDetailPage');
-                await mangaManager.showMangaDetail(mangaId, manga);
-            } else {
-                console.warn('المانجا غير موجودة:', mangaId);
-                this.navigateTo('homePage');
-            }
-            
-        } catch (error) {
-            console.error('Error loading manga from URL:', error);
-            this.navigateTo('homePage');
-        }
-    }
-
-    async loadChapterFromURL(mangaId, chapterId) {
-        try {
-            if (!mangaManager.mangaData || Object.keys(mangaManager.mangaData).length === 0) {
-                setTimeout(() => {
-                    this.loadChapterFromURL(mangaId, chapterId);
-                }, 100);
-                return;
-            }
-            
-            if (mangaManager.mangaData[mangaId] && 
-                mangaManager.mangaData[mangaId].chapters && 
-                mangaManager.mangaData[mangaId].chapters[chapterId]) {
-                
-                const manga = mangaManager.mangaData[mangaId];
-                const chapter = manga.chapters[chapterId];
-                
-                this.currentState = { 
-                    page: 'chapterPage', 
-                    data: { mangaId: mangaId, chapterId: chapterId } 
-                };
-                if (this.history.length === 0) {
-                    this.history.push(this.currentState);
-                } else {
-                    this.history[this.history.length - 1] = this.currentState;
-                }
-                this.saveState();
-
-                // الانتقال الفوري إلى صفحة الفصل
-                ui.navigateToPage('chapterPage');
-                await mangaManager.showChapter(mangaId, chapterId, chapter);
-            } else {
-                console.warn('الفصل غير موجود:', mangaId, chapterId);
-                this.navigateTo('homePage');
-            }
-            
-        } catch (error) {
-            console.error('Error loading chapter from URL:', error);
-            this.navigateTo('homePage');
-        }
-    }
-
-    goBack() {
-        if (this.history.length > 1) {
-            this.history.pop();
-            const previousState = this.history[this.history.length - 1];
-            this.currentState = previousState;
-
-            window.history.back();
-        } else {
-            window.location.hash = '';
-            this.navigateTo('homePage');
-        }
-    }
-
-    restoreState(state) {
-        if (!state) return;
-
-        switch (state.page) {
+        switch (route.page) {
             case 'homePage':
                 ui.navigateToPage('homePage');
-                mangaManager.loadMangaList();
+                mangaManager.loadMangaList(); // التأكد من تحميل القائمة
+                ui.hideLoading();
                 break;
             case 'mangaDetailPage':
-                if (state.data.mangaId && mangaManager.mangaData[state.data.mangaId]) {
-                    const manga = mangaManager.mangaData[state.data.mangaId];
-                    ui.navigateToPage('mangaDetailPage');
-                    // لا نحتاج لاستدعاء showMangaDetail هنا لأن loadStateFromURL سيتكفل بذلك
-                }
+                mangaManager.loadMangaDetail(route.params.mangaId);
                 break;
             case 'chapterPage':
-                if (state.data.mangaId && state.data.chapterId && 
-                    mangaManager.mangaData[state.data.mangaId] && 
-                    mangaManager.mangaData[state.data.mangaId].chapters[state.data.chapterId]) {
-                    
-                    const manga = mangaManager.mangaData[state.data.mangaId];
-                    const chapter = manga.chapters[state.data.chapterId];
-                    ui.navigateToPage('chapterPage');
-                    // لا نحتاج لاستدعاء showChapter هنا لأن loadStateFromURL سيتكفل بذلك
-                }
+                mangaManager.loadChapter(route.params.mangaId, route.params.chapterId);
+                break;
+            case 'notificationsPage':
+                // افتراض وجود دالة لعرض الإشعارات
+                notificationsManager.showNotificationsPage();
+                ui.navigateToPage('notificationsPage'); // يجب إضافة هذه الصفحة في index.html
+                ui.hideLoading();
+                break;
+            default:
+                // في حالة عدم وجود الصفحة، الانتقال إلى 404 أو الرئيسية
+                this.navigateTo('/', {}, true);
                 break;
         }
     }
 
-    saveState() {
-        const state = {
-            history: this.history,
-            currentState: this.currentState
-        };
-        localStorage.setItem('navigationState', JSON.stringify(state));
-    }
-
-    loadState() {
-        const savedState = localStorage.getItem('navigationState');
-        if (savedState) {
-            const state = JSON.parse(savedState);
-            this.history = state.history || [];
-            this.currentState = state.currentState;
-        }
+    // تحميل الحالة من المسار الحالي عند تحميل الصفحة أو حدث popstate
+    loadStateFromURL(state = null) {
+        const path = window.location.pathname;
         
-        this.loadStateFromURL();
+        // إذا كان هناك حالة مخزنة في popstate، استخدمها
+        if (state && state.path) {
+            this.currentState = state;
+            this.handleRoute(state.path, state.data);
+            return;
+        }
+
+        // إذا لم يكن هناك حالة، قم بتحليل المسار الحالي
+        this.handleRoute(path);
     }
 
+    // دالة الرجوع
+    goBack() {
+        window.history.back();
+    }
+
+    // دالة مساعدة لإنشاء مسار المانجا
+    getMangaPath(mangaId) {
+        return `/manga/${mangaId}`;
+    }
+
+    // دالة مساعدة لإنشاء مسار الفصل
+    getChapterPath(mangaId, chapterId) {
+        return `/manga/${mangaId}/chapter/${chapterId}`;
+    }
+
+    // دالة مساعدة لإنشاء مسار الإشعارات
+    getNotificationsPath() {
+        return '/notifications';
+    }
+
+    // دالة مساعدة لفرز المانجا (تم نقلها من الدالة الأصلية)
     sortManga(sortType) {
         if (!mangaManager.mangaData) {
             console.warn('بيانات المانجا غير محملة بعد');
@@ -319,15 +200,11 @@ class NavigationManager {
         }
 
         mangaManager.displaySortedManga(sortedManga);
-        this.navigateTo('homePage');
+        this.navigateTo('/');
     }
 
     getCurrentState() {
         return this.currentState;
-    }
-
-    canGoBack() {
-        return this.history.length > 1;
     }
 }
 

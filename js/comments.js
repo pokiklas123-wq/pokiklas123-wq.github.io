@@ -171,11 +171,11 @@ class CommentsManager {
     }
 
     createCommentElement(commentId, comment) {
-        const hasReplies = comment.replies && Object.keys(comment.replies).length > 0;
-        const element = document.createElement('div');
-        element.className = 'comment';
-        element.setAttribute('data-comment-id', commentId); // إضافة معرف التعليق
-        element.innerHTML = `
+	        const hasReplies = comment.replies && Object.keys(comment.replies).length > 0;
+	        const element = document.createElement('div');
+	        element.className = 'comment';
+	        element.setAttribute('data-comment-id', commentId); // إضافة معرف التعليق
+	        element.innerHTML = `
             <div class="comment-header">
                 <span class="comment-user">${comment.user}</span>
                 <span class="comment-time">${this.formatTime(comment.timestamp)}</span>
