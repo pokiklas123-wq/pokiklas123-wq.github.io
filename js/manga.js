@@ -16,6 +16,7 @@ class MangaPage {
         this.setupEventListeners();
         this.loadMangaData();
         Utils.loadTheme();
+        this.updateThemeIcon(); // إضافة تحديث أيقونة المظهر
     }
     
     initializeFirebase() {
@@ -99,51 +100,59 @@ class MangaPage {
         }
         
         const chaptersList = this.prepareChaptersList();
+        const ratingValue = this.mangaData.rating ? this.mangaData.rating.toFixed(1) : 'N/A';
+        const viewsCount = Utils.formatNumber(this.mangaData.views || 0);
         
         mangaDetail.innerHTML = `
-            <div class="manga-header">
-                <div class="manga-poster">
-                    <img src="${this.mangaData.thumbnail}" alt="${this.mangaData.name}">
-                </div>
-                <div class="manga-info-large">
-                    <h1 class="manga-title-large">${this.mangaData.name}</h1>
-                    <div class="manga-meta-large">
-                        <div class="meta-item">
-                            <i class="fas fa-eye"></i>
-                            <span>${this.mangaData.views || 0} مشاهدة</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-star"></i>
-                            <span>${this.mangaData.rating || 0} تقييم</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-list"></i>
-                            <span>${Object.keys(this.mangaData.chapters || {}).length} فصل</span>
-                        </div>
+            <div class="manga-detail-container">
+                <div class="manga-header-detail">
+                    <div class="manga-poster-detail">
+                        <img src="${this.mangaData.thumbnail}" alt="${this.mangaData.name}">
                     </div>
-                    <div class="manga-description">
-                        <p>استمتع بقراءة ${this.mangaData.name} بأفضل جودة. يمكنك قراءة جميع الفصول مجاناً.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="chapters-section">
-                <h2>الفصول</h2>
-                <div class="chapters-list">
-                    ${chaptersList.length > 0 ? 
-                        chaptersList.map(chapter => `
-                            <div class="chapter-item">
-                                <div class="chapter-info">
-                                    <span class="chapter-number">الفصل ${chapter.number}</span>
-                                </div>
-                                <a href="chapter.html?manga=${this.mangaId}&chapter=${chapter.number}" class="btn read-chapter-btn">
-                                    <i class="fas fa-book-open"></i>
-                                    اقرأ الآن
-                                </a>
+                    <div class="manga-info-detail">
+                        <h1 class="manga-title-detail">${this.mangaData.name}</h1>
+                        <div class="manga-meta-detail">
+                            <div class="meta-item">
+                                <i class="fas fa-eye"></i>
+                                <span>${viewsCount} مشاهدة</span>
                             </div>
-                        `).join('') : 
-                        '<div class="empty-state"><p>لا توجد فصول متاحة بعد</p></div>'
-                    }
+                            <div class="meta-item">
+                                <i class="fas fa-star"></i>
+                                <span>${ratingValue} تقييم</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-list"></i>
+                                <span>${Object.keys(this.mangaData.chapters || {}).length} فصل</span>
+                            </div>
+                        </div>
+                        <div class="manga-description">
+                            <p>${this.mangaData.description || 'لا يوجد وصف متاح لهذه المانجا.'}</p>
+                        </div>
+                        <button class="btn read-chapter-btn" onclick="window.location.href='chapter.html?manga=${this.mangaId}&chapter=${chaptersList[0]?.number || 1}'">
+                            <i class="fas fa-book-open"></i>
+                            ابدأ القراءة
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="chapters-section">
+                    <h2>الفصول</h2>
+                    <div class="chapters-list">
+                        ${chaptersList.length > 0 ? 
+                            chaptersList.map(chapter => `
+                                <div class="chapter-item">
+                                    <div class="chapter-info">
+                                        <span class="chapter-number">الفصل ${chapter.number}</span>
+                                    </div>
+                                    <a href="chapter.html?manga=${this.mangaId}&chapter=${chapter.number}" class="btn read-chapter-btn">
+                                        <i class="fas fa-book-open"></i>
+                                        اقرأ الآن
+                                    </a>
+                                </div>
+                            `).join('') : 
+                            '<div class="empty-state"><p>لا توجد فصول متاحة بعد</p></div>'
+                        }
+                    </div>
                 </div>
             </div>
         `;
@@ -185,20 +194,22 @@ class MangaPage {
     
     changeTheme(theme) {
         Utils.saveTheme(theme);
-        
-        const icon = document.querySelector('#themeToggle i');
-        if (icon) {
-            icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-        }
+        this.updateThemeIcon(theme);
         
         const themeOptions = document.querySelectorAll('.theme-option');
         themeOptions.forEach(option => {
+            option.classList.remove('active');
             if (option.getAttribute('data-theme') === theme) {
                 option.classList.add('active');
-            } else {
-                option.classList.remove('active');
             }
         });
+    }
+    
+    updateThemeIcon(theme = Utils.loadTheme()) {
+        const icon = document.querySelector('#themeToggle i');
+        if (icon) {
+            icon.className = `fas ${Utils.getThemeIcon(theme)}`;
+        }
     }
     
     showError(message) {

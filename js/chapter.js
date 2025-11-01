@@ -20,6 +20,7 @@ class ChapterPage {
         this.setupEventListeners();
         this.loadChapterData();
         Utils.loadTheme();
+        this.updateThemeIcon(); // إضافة تحديث أيقونة المظهر
     }
     
     initializeFirebase() {
@@ -47,6 +48,20 @@ class ChapterPage {
         if (drawerToggle) drawerToggle.addEventListener('click', () => this.openDrawer());
         if (drawerClose) drawerClose.addEventListener('click', () => this.closeDrawer());
         if (drawerOverlay) drawerOverlay.addEventListener('click', () => this.closeDrawer());
+        
+        // إعداد تبديل المظهر
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => this.toggleTheme());
+        }
+        
+        const themeOptions = document.querySelectorAll('.theme-option');
+        themeOptions.forEach(option => {
+            option.addEventListener('click', (e) => {
+                const theme = e.target.getAttribute('data-theme');
+                this.changeTheme(theme);
+            });
+        });
         
         // تهيئة نظام التعليقات بعد تحميل البيانات
         setTimeout(() => {
@@ -137,6 +152,29 @@ class ChapterPage {
                     '<div class="empty-state"><p>لا توجد صور متاحة لهذا الفصل</p></div>'
                 }
             </div>
+            
+            <div class="chapter-nav">
+                ${prevChapter ? 
+                    `<a href="chapter.html?manga=${this.mangaId}&chapter=${prevChapter}" class="btn btn-outline">
+                        <i class="fas fa-arrow-right"></i>
+                        الفصل السابق
+                    </a>` : 
+                    '<div></div>'
+                }
+                
+                <a href="manga.html?id=${this.mangaId}" class="btn btn-outline">
+                    <i class="fas fa-list"></i>
+                    جميع الفصول
+                </a>
+                
+                ${nextChapter ? 
+                    `<a href="chapter.html?manga=${this.mangaId}&chapter=${nextChapter}" class="btn btn-outline">
+                        الفصل التالي
+                        <i class="fas fa-arrow-left"></i>
+                    </a>` : 
+                    '<div></div>'
+                }
+            </div>
         `;
     }
     
@@ -169,6 +207,32 @@ class ChapterPage {
         const drawerOverlay = document.querySelector('.drawer-overlay');
         if (drawer) drawer.classList.remove('open');
         if (drawerOverlay) drawerOverlay.classList.remove('open');
+    }
+    
+    toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        this.changeTheme(newTheme);
+    }
+    
+    changeTheme(theme) {
+        Utils.saveTheme(theme);
+        this.updateThemeIcon(theme);
+        
+        const themeOptions = document.querySelectorAll('.theme-option');
+        themeOptions.forEach(option => {
+            option.classList.remove('active');
+            if (option.getAttribute('data-theme') === theme) {
+                option.classList.add('active');
+            }
+        });
+    }
+    
+    updateThemeIcon(theme = Utils.loadTheme()) {
+        const icon = document.querySelector('#themeToggle i');
+        if (icon) {
+            icon.className = `fas ${Utils.getThemeIcon(theme)}`;
+        }
     }
     
     showError(message) {

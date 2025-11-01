@@ -79,6 +79,20 @@ class MangaApp {
         if (drawerOverlay) drawerOverlay.addEventListener('click', () => this.closeDrawer());
     }
     
+    openDrawer() {
+        const drawer = document.querySelector('.drawer');
+        const drawerOverlay = document.querySelector('.drawer-overlay');
+        if (drawer) drawer.classList.add('open');
+        if (drawerOverlay) drawerOverlay.classList.add('open');
+    }
+    
+    closeDrawer() {
+        const drawer = document.querySelector('.drawer');
+        const drawerOverlay = document.querySelector('.drawer-overlay');
+        if (drawer) drawer.classList.remove('open');
+        if (drawerOverlay) drawerOverlay.classList.remove('open');
+    }
+    
     setupTheme() {
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
@@ -94,6 +108,29 @@ class MangaApp {
         });
     }
     
+    toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        this.changeTheme(newTheme);
+    }
+    
+    changeTheme(theme) {
+        Utils.saveTheme(theme);
+        
+        const icon = document.querySelector('#themeToggle i');
+        if (icon) {
+            icon.className = `fas ${Utils.getThemeIcon(theme)}`;
+        }
+        
+        const themeOptions = document.querySelectorAll('.theme-option');
+        themeOptions.forEach(option => {
+            option.classList.remove('active');
+            if (option.getAttribute('data-theme') === theme) {
+                option.classList.add('active');
+            }
+        });
+    }
+    
     setupFilters() {
         const filterBtns = document.querySelectorAll('.filter-btn');
         filterBtns.forEach(btn => {
@@ -102,6 +139,19 @@ class MangaApp {
                 this.applyFilter(filter);
             });
         });
+    }
+    
+    applyFilter(filter) {
+        this.currentFilter = filter;
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        filterBtns.forEach(btn => {
+            if (btn.getAttribute('data-filter') === filter) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        this.displayManga(this.mangaList);
     }
     
     setupSearch() {
@@ -123,9 +173,53 @@ class MangaApp {
         }
     }
     
+    handleSearch(query) {
+        const searchResults = document.querySelector('.search-results');
+        if (!query.trim()) {
+            this.hideSearchResults();
+            return;
+        }
+        
+        const results = this.mangaList.filter(manga => 
+            manga.name.toLowerCase().includes(query.toLowerCase())
+        ).slice(0, 5);
+        
+        searchResults.innerHTML = '';
+        
+        if (results.length > 0) {
+            results.forEach(manga => {
+                const item = document.createElement('a');
+                item.href = `manga.html?id=${manga.id}`;
+                item.className = 'search-result-item';
+                item.innerHTML = `
+                    <img src="${manga.thumbnail}" alt="${manga.name}">
+                    <div>
+                        <div class="search-result-title">${manga.name}</div>
+                        <div class="search-result-meta">الفصول: ${Object.keys(manga.chapters || {}).length}</div>
+                    </div>
+                `;
+                searchResults.appendChild(item);
+            });
+            searchResults.style.display = 'block';
+        } else {
+            searchResults.innerHTML = '<div class="search-result-item"><div class="search-result-title">لا توجد نتائج</div></div>';
+            searchResults.style.display = 'block';
+        }
+    }
+    
+    hideSearchResults() {
+        const searchResults = document.querySelector('.search-results');
+        if (searchResults) {
+            searchResults.style.display = 'none';
+        }
+    }
+    
     setupNotifications() {
         // Initialize NotificationsManager
-        this.notificationsManager = new NotificationsManager(this);
+        // Assuming NotificationsManager is defined in notifications.js
+        if (typeof NotificationsManager !== 'undefined') {
+            this.notificationsManager = new NotificationsManager(this);
+        }
     }
 
     setupAuthButtons() {
@@ -207,37 +301,30 @@ class MangaApp {
             const userEmail = document.querySelector('.user-email');
             const userAvatar = document.querySelector('.user-avatar');
             
-            if (userName) userName.textContent = userData?.displayName || user.displayName || 'مستخدم';
-            if (userEmail) userEmail.textContent = userData?.email || user.email || '';
-            if (userAvatar) {
-                userAvatar.src = userData?.profile?.avatar || 
-                    user.photoURL || 
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&background=4ECDC4&color=fff&size=150`;
-            }
+            const displayName = userData?.displayName || user.displayName || 'مستخدم';
+            const email = userData?.email || user.email || '';
+            const avatarUrl = userData?.profile?.avatar || 
+                user.photoURL || 
+                Utils.getAvatarUrl(displayName);
+                
+            if (userName) userName.textContent = displayName;
+            if (userEmail) userEmail.textContent = email;
+            if (userAvatar) userAvatar.src = avatarUrl;
+            
         } catch (error) {
             console.error('Error loading user data:', error);
         }
     }
     
     async loadUserData(userId) {
-        try {
-            const snapshot = await this.db.ref('users/' + userId).once('value');
-            const userData = snapshot.val();
-            
-            if (userData) {
-                this.updateUserInfo({ uid: userId, ...userData });
-            }
-        } catch (error) {
-            console.error('Error loading user data:', error);
-        }
+        // تم دمج هذا المنطق في updateUserInfo لتجنب التكرار
     }
     
     async loadMangaData() {
         const mangaGrid = document.getElementById('mangaGrid');
         if (!mangaGrid) return;
         
-        // إظهار تأثير التحميل
-        mangaGrid.innerHTML = this.createLoadingCards();
+        mangaGrid.innerHTML = '<div class="loading-indicator"><div class="spinner"></div><p>جاري تحميل المانجا...</p></div>';
         
         try {
             const snapshot = await this.db.ref('manga_list').once('value');
@@ -264,31 +351,6 @@ class MangaApp {
             this.showMangaError('حدث خطأ في تحميل بيانات المانجا');
         }
     }
-
-    createLoadingCards() {
-        let loadingHTML = '';
-        for (let i = 0; i < 6; i++) {
-            loadingHTML += `
-                <div class="manga-card loading">
-                    <div class="shimmer-container"></div>
-                    <div class="manga-thumbnail-container">
-                        <img class="manga-thumbnail" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDE4MCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMyMjMzNDQiLz48L3N2Zz4=">
-                    </div>
-                    <div class="manga-info">
-                        <div class="manga-title">جاري التحميل...</div>
-                        <div class="manga-meta">
-                            <span>0 مشاهدة</span>
-                            <span class="rating">
-                                <i class="fas fa-star"></i>
-                                <span>0</span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        return loadingHTML;
-    }
     
     displayManga(mangaArray) {
         const mangaGrid = document.getElementById('mangaGrid');
@@ -298,6 +360,8 @@ class MangaApp {
         
         switch (this.currentFilter) {
             case 'latest':
+                // افتراض أن البيانات مرتبة حسب الأحدث افتراضياً أو يمكن إضافة حقل timestamp
+                // حالياً نعتمد على الترتيب الافتراضي للـ Firebase
                 break;
             case 'popular':
                 filteredManga.sort((a, b) => (b.views || 0) - (a.views || 0));
@@ -306,7 +370,8 @@ class MangaApp {
                 filteredManga.sort((a, b) => (b.rating || 0) - (a.rating || 0));
                 break;
             case 'oldest':
-                filteredManga = [...mangaArray].reverse();
+                // عكس الترتيب الافتراضي
+                filteredManga.reverse();
                 break;
         }
         
@@ -329,173 +394,64 @@ class MangaApp {
     }
     
     createMangaCard(manga) {
-        const card = document.createElement('div');
-        card.className = 'manga-card loading';
+        const card = document.createElement('a');
+        card.href = `manga.html?id=${manga.id}`;
+        card.className = 'manga-card';
         
-        const latestChapter = this.getLatestChapter(manga);
+        const latestChapterNumber = this.getLatestChapter(manga.chapters);
+        const ratingValue = manga.rating ? manga.rating.toFixed(1) : 'N/A';
+        const viewsCount = Utils.formatNumber(manga.views || 0);
         
         card.innerHTML = `
-            <div class="shimmer-container"></div>
-            <div class="manga-thumbnail-container">
-                <img src="${manga.thumbnail}" alt="${manga.name}" class="manga-thumbnail"
-                     onload="this.parentElement.parentElement.classList.remove('loading')"
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDE4MCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMyMjMzNDQiLz48dGV4dCB4PSI5MCIgeT0iMTI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIj5NYW5nYTwvdGV4dD48L3N2Zz4='">
-                ${latestChapter ? `<div class="chapter-badge">${latestChapter}</div>` : ''}
+            <div class="manga-image-container">
+                <img src="${manga.thumbnail}" alt="${manga.name}" class="manga-thumbnail" loading="lazy">
             </div>
             <div class="manga-info">
-                <div class="manga-title">${manga.name}</div>
-                <div class="manga-meta">
-                    <span>${manga.views || 0} مشاهدة</span>
-                    <span class="rating">
-                        <i class="fas fa-star"></i>
-                        <span>${manga.rating || 0}</span>
-                    </span>
+                <div>
+                    <h3 class="manga-title">${manga.name}</h3>
+                    <div class="manga-details">
+                        <div class="manga-rating">
+                            <i class="fas fa-star"></i>
+                            <span>${ratingValue}</span>
+                        </div>
+                        <div class="manga-views">
+                            <i class="fas fa-eye"></i>
+                            <span>${viewsCount} مشاهدة</span>
+                        </div>
+                    </div>
                 </div>
+                ${latestChapterNumber ? 
+                    `<span class="latest-chapter">الفصل ${latestChapterNumber}</span>` : 
+                    ''
+                }
             </div>
         `;
-        
-        card.addEventListener('click', () => {
-            window.location.href = `manga.html?id=${manga.id}`;
-        });
-        
         return card;
     }
     
-    getLatestChapter(manga) {
-        if (!manga.chapters) return null;
+    getLatestChapter(chapters) {
+        if (!chapters) return null;
         
-        const chapterNumbers = Object.keys(manga.chapters)
+        const chapterNumbers = Object.keys(chapters)
             .map(key => parseInt(key.replace('chapter_', '')))
-            .filter(num => !isNaN(num) && num > 0);
-        
-        if (chapterNumbers.length > 0) {
-            const maxChapter = Math.max(...chapterNumbers);
-            return `الفصل ${maxChapter}`;
-        }
-        
-        return null;
-    }
-    
-    applyFilter(filter) {
-        this.currentFilter = filter;
-        this.displayManga(this.mangaList);
-        
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        filterBtns.forEach(btn => {
-            if (btn.getAttribute('data-filter') === filter) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-    }
-    
-    handleSearch(query) {
-        const searchResults = document.querySelector('.search-results');
-        if (!searchResults) return;
-        
-        if (!query.trim()) {
-            this.hideSearchResults();
-            return;
-        }
-        
-        const results = this.mangaList.filter(manga => 
-            manga.name.toLowerCase().includes(query.toLowerCase())
-        );
-        
-        this.displaySearchResults(results);
-    }
-    
-    displaySearchResults(results) {
-        const searchResults = document.querySelector('.search-results');
-        if (!searchResults) return;
-        
-        searchResults.innerHTML = '';
-        
-        if (results.length === 0) {
-            searchResults.innerHTML = '<div class="search-result-item">لا توجد نتائج</div>';
-        } else {
-            results.slice(0, 5).forEach(manga => {
-                const item = document.createElement('div');
-                item.className = 'search-result-item';
-                
-                item.innerHTML = `
-                    <img src="${manga.thumbnail}" alt="${manga.name}" 
-                         onerror="this.style.display='none'">
-                    <div>
-                        <div class="search-result-title">${manga.name}</div>
-                        <div class="search-result-meta">
-                            <span>${manga.views || 0} مشاهدة</span>
-                        </div>
-                    </div>
-                `;
-                
-                item.addEventListener('click', () => {
-                    window.location.href = `manga.html?id=${manga.id}`;
-                    this.hideSearchResults();
-                });
-                
-                searchResults.appendChild(item);
-            });
-        }
-        
-        searchResults.style.display = 'block';
-    }
-    
-    hideSearchResults() {
-        const searchResults = document.querySelector('.search-results');
-        if (searchResults) {
-            searchResults.style.display = 'none';
-        }
-    }
-    
-    openDrawer() {
-        const drawer = document.querySelector('.drawer');
-        const drawerOverlay = document.querySelector('.drawer-overlay');
-        if (drawer) drawer.classList.add('open');
-        if (drawerOverlay) drawerOverlay.classList.add('open');
-    }
-    
-    closeDrawer() {
-        const drawer = document.querySelector('.drawer');
-        const drawerOverlay = document.querySelector('.drawer-overlay');
-        if (drawer) drawer.classList.remove('open');
-        if (drawerOverlay) drawerOverlay.classList.remove('open');
-    }
-    
-    toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        this.changeTheme(newTheme);
-    }
-    
-    changeTheme(theme) {
-        Utils.saveTheme(theme);
-        
-        const icon = document.querySelector('#themeToggle i');
-        if (icon) {
-            icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
-        }
-        
-        const themeOptions = document.querySelectorAll('.theme-option');
-        themeOptions.forEach(option => {
-            if (option.getAttribute('data-theme') === theme) {
-                option.classList.add('active');
-            } else {
-                option.classList.remove('active');
-            }
-        });
+            .filter(num => !isNaN(num));
+            
+        return chapterNumbers.length > 0 ? Math.max(...chapterNumbers) : null;
     }
     
     async signOut() {
         try {
             await this.auth.signOut();
-            this.closeDrawer();
-            Utils.showMessage('تم تسجيل الخروج بنجاح', 'success');
+            // لا حاجة لتحديث UI هنا، onAuthStateChanged ستقوم بذلك
+            console.log('✅ تم تسجيل الخروج بنجاح');
         } catch (error) {
-            console.error('Error signing out:', error);
-            Utils.showMessage('حدث خطأ في تسجيل الخروج', 'error');
+            console.error('❌ خطأ في تسجيل الخروج:', error);
+            Utils.showMessage('حدث خطأ أثناء تسجيل الخروج', 'error');
         }
+    }
+    
+    showError(message) {
+        Utils.showMessage(message, 'error');
     }
     
     showMangaError(message) {
@@ -505,21 +461,14 @@ class MangaApp {
                 <div class="empty-state">
                     <i class="fas fa-exclamation-triangle"></i>
                     <p>${message}</p>
-                    <button class="btn mt-2" onclick="app.loadMangaData()">إعادة المحاولة</button>
                 </div>
             `;
         }
     }
-    
-    showError(message) {
-        console.error('App Error:', message);
-        Utils.showMessage(message, 'error');
-    }
 }
 
-let app;
+let mangaApp;
 
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 بدء تحميل التطبيق...');
-    app = new MangaApp();
+document.addEventListener('DOMContentLoaded', () => {
+    mangaApp = new MangaApp();
 });
