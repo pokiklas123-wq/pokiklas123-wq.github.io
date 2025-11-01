@@ -67,9 +67,9 @@ class App {
         // يجب تحديث هذه الدالة لتعمل مع History API
         // حالياً لا يوجد دالة canGoBack في navigationManager الجديد
         // يمكننا إزالتها مؤقتاً أو تعديلها لاحقاً
-        // setInterval(() => {
-        //     backButton.style.display = navigationManager.canGoBack() ? 'block' : 'none';
-        // }, 100);
+         setInterval(() => {
+             backButton.style.display = navigationManager.canGoBack() ? 'block' : 'none';
+         }, 100);
     }
 
     async loadInitialData() {
