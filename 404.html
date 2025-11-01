@@ -1,3 +1,5 @@
+[file name]: 404.html
+[file content begin]
 <!DOCTYPE html>
 <html>
 <head>
@@ -7,14 +9,14 @@
     <link rel="stylesheet" href="styles/components.css">
     <link rel="stylesheet" href="styles/responsive.css">
     <script>
-        // معالجة إعادة التوجيه المتقدمة لـ GitHub Pages
+        // معالجة إعادة التوجيه لـ GitHub Pages
         (function() {
-            const path = window.location.pathname + window.location.search + window.location.hash;
+            const path = window.location.pathname;
             
             // إذا كان هناك مسار حقيقي (ليس الصفحة الرئيسية)
-            if (path && path !== '/' && path !== '/index.html' && !path.includes('.')) {
+            if (path && path !== '/' && path !== '/index.html') {
                 // حفظ المسار الكامل في sessionStorage
-                sessionStorage.setItem('redirect', path);
+                sessionStorage.setItem('redirectPath', path);
             }
             
             // التوجيه إلى الصفحة الرئيسية
@@ -31,3 +33,4 @@
     </div>
 </body>
 </html>
+[file content end]
