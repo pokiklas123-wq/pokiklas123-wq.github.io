@@ -1,6 +1,7 @@
 class MangaManager {
     constructor() {
         this.currentMangaId = null;
+        this.currentChapterId = null;
         this.mangaData = {};
         this.setupEventListeners();
     }
@@ -21,16 +22,13 @@ class MangaManager {
             ui.hideElement('noMangaMessage');
 
             const snapshot = await database.ref('manga_list').once('value');
-            this.mangaData = snapshot.val() || {}; // التأكد من أن mangaData كائن
+            this.mangaData = snapshot.val() || {};
 
             if (Object.keys(this.mangaData).length > 0) {
-                // إضافة حقول إضافية للمساعدة في التصنيف إذا لم تكن موجودة
                 Object.keys(this.mangaData).forEach(mangaId => {
                     const manga = this.mangaData[mangaId];
                     if (!manga.createdAt) {
-                        // الافتراض: استخدام timestamp من Firebase إذا كان متاحاً
-                        // أو تعيين قيمة افتراضية قديمة جداً
-                        manga.createdAt = manga.timestamp || 0; 
+                        manga.createdAt = manga.timestamp || 0;
                     }
                     if (!manga.updatedAt) {
                         manga.updatedAt = manga.createdAt;
@@ -40,13 +38,10 @@ class MangaManager {
                     }
                 });
 
-                // عرض المانجا الافتراضية (الأحدث)
                 this.sortMangaAndDisplay('newest');
-
                 ui.hideLoading('loadingHome');
                 ui.showElement('mangaGrid');
                 
-                // بعد تحميل البيانات، تحقق من الـ URL الحالي
                 if (window.location.hash && window.location.hash !== '#') {
                     console.log('تم تحميل البيانات، جارٍ معالجة الـ URL:', window.location.hash);
                     setTimeout(() => {
@@ -73,7 +68,6 @@ class MangaManager {
 
         switch (sortType) {
             case 'newest':
-                // الأحدث: حسب تاريخ الإنشاء أو التحديث
                 sortedManga.sort((a, b) => {
                     const timeA = a.updatedAt || a.createdAt || 0;
                     const timeB = b.updatedAt || b.createdAt || 0;
@@ -81,11 +75,9 @@ class MangaManager {
                 });
                 break;
             case 'popular':
-                // الأكثر شعبية: حسب عدد المشاهدات (views)
                 sortedManga.sort((a, b) => (b.views || 0) - (a.views || 0));
                 break;
             case 'oldest':
-                // الأقدم: حسب تاريخ الإنشاء
                 sortedManga.sort((a, b) => {
                     const timeA = a.createdAt || 0;
                     const timeB = b.createdAt || 0;
@@ -101,8 +93,6 @@ class MangaManager {
     }
     
     displayMangaList(mangaData) {
-        // هذه الدالة لم تعد تستخدم، تم استبدالها بـ sortMangaAndDisplay
-        // ولكن أبقيها للتوافق إذا كانت مستخدمة في مكان آخر
         const mangaGrid = document.getElementById('mangaGrid');
         if (!mangaGrid) return;
         
@@ -138,13 +128,11 @@ class MangaManager {
         
         const thumbnail = manga.thumbnail || 'https://via.placeholder.com/300x400/1a1a1a/1a73e8?text=No+Image';
         
-        // حساب آخر فصل
         let latestChapter = null;
         let latestChapterId = null;
         if (manga.chapters) {
             const chapterKeys = Object.keys(manga.chapters);
             if (chapterKeys.length > 0) {
-                // الفرز حسب رقم الفصل (افتراضياً)
                 chapterKeys.sort((a, b) => {
                     const numA = parseInt(manga.chapters[a].chapter_name?.replace(/[^0-9]/g, '')) || 0;
                     const numB = parseInt(manga.chapters[b].chapter_name?.replace(/[^0-9]/g, '')) || 0;
@@ -182,14 +170,12 @@ class MangaManager {
         `;
 
         card.addEventListener('click', (e) => {
-            // إذا تم النقر على زر آخر فصل، انتقل مباشرة للفصل
             const latestChapterElement = e.target.closest('.latest-chapter');
             if (latestChapterElement) {
                 const chapterId = latestChapterElement.dataset.chapterId;
                 const chapter = manga.chapters[chapterId];
                 this.showChapter(mangaId, chapterId, chapter);
             } else {
-                // وإلا، انتقل لصفحة التفاصيل
                 this.showMangaDetail(mangaId, manga);
             }
         });
@@ -255,7 +241,6 @@ class MangaManager {
         ui.hideElement('mangaDetailContent');
 
         try {
-            // زيادة عدد المشاهدات
             if (manga.views === undefined) manga.views = 0;
             manga.views++;
             await database.ref(`manga_list/${mangaId}/views`).set(manga.views);
@@ -264,12 +249,12 @@ class MangaManager {
             detailContent.innerHTML = this.createMangaDetailHTML(mangaId, manga);
 
             await this.loadChapters(mangaId, manga.chapters);
-
             this.setupRatingSystem(mangaId);
 
             ui.hideLoading('loadingDetail');
             ui.showElement('mangaDetailContent');
-            navigationManager.navigateTo('mangaDetailPage', { mangaId: mangaId });
+            
+            this.updateURL(mangaId);
             
         } catch (error) {
             console.error('Error showing manga detail:', error);
@@ -424,6 +409,9 @@ class MangaManager {
     }
 
     async showChapter(mangaId, chapterId, chapter) {
+        this.currentMangaId = mangaId;
+        this.currentChapterId = chapterId;
+        
         ui.showLoading('loadingChapter');
         ui.hideElement('chapterContent');
 
@@ -432,15 +420,12 @@ class MangaManager {
             chapterContent.innerHTML = this.createChapterHTML(chapter);
 
             await this.displayChapterPages(chapter);
-
             commentsManager.loadComments(mangaId, chapterId, chapter.comments);
 
             ui.hideLoading('loadingChapter');
             ui.showElement('chapterContent');
-            navigationManager.navigateTo('chapterPage', { 
-                mangaId: mangaId, 
-                chapterId: chapterId 
-            });
+            
+            this.updateURL(mangaId, chapterId);
             
         } catch (error) {
             console.error('Error showing chapter:', error);
@@ -493,8 +478,25 @@ class MangaManager {
         }
     }
 
+    updateURL(mangaId = null, chapterId = null) {
+        let hash = '';
+        if (mangaId && chapterId) {
+            hash = `manga/${mangaId}/chapter/${chapterId}`;
+        } else if (mangaId) {
+            hash = `manga/${mangaId}`;
+        }
+        
+        if (hash !== window.location.hash.replace('#', '')) {
+            history.replaceState(null, '', hash ? `#${hash}` : '');
+        }
+    }
+
     getCurrentMangaId() {
         return this.currentMangaId;
+    }
+
+    getCurrentChapterId() {
+        return this.currentChapterId;
     }
 }
 

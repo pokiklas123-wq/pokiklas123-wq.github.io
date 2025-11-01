@@ -7,10 +7,8 @@ class App {
         try {
             this.setupEventListeners();
             
-            // تحميل حالة التنقل أولاً
             navigationManager.loadState();
             
-            // ثم تحميل البيانات
             await this.loadInitialData();
             
             console.log('التطبيق بدأ بنجاح');
@@ -20,8 +18,6 @@ class App {
     }
 
     setupEventListeners() {
-        // تم إزالة مستمع التعليقات المزدوج
-
         document.getElementById('backToHome').addEventListener('click', () => {
             navigationManager.goBack();
         });
@@ -74,6 +70,10 @@ class App {
     async loadInitialData() {
         try {
             await mangaManager.loadMangaList();
+            
+            setTimeout(() => {
+                navigationManager.loadStateFromURL();
+            }, 100);
             
             if (authManager.getCurrentUser()) {
                 await ratingsManager.loadUserRatings();
