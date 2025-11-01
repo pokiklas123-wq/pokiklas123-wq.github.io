@@ -23,15 +23,15 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow);
         }
-        .manga-info {
+        .manga-info-large {
             flex: 1;
         }
-        .manga-title {
+        .manga-title-large {
             font-size: 2rem;
             margin-bottom: 1rem;
             color: var(--text-color);
         }
-        .manga-meta {
+        .manga-meta-large {
             display: flex;
             gap: 1rem;
             margin-bottom: 1.5rem;
@@ -49,26 +49,8 @@
             line-height: 1.6;
             margin-bottom: 1.5rem;
         }
-        .rating-widget {
-            background: var(--card-bg);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 2rem;
-        }
-        .rating-stars {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-        }
-        .star {
-            font-size: 1.5rem;
-            color: #ddd;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        .star:hover,
-        .star.active {
-            color: #ffc107;
+        .chapters-section {
+            margin-top: 2rem;
         }
         .chapters-list {
             background: var(--card-bg);
@@ -98,9 +80,18 @@
             font-weight: bold;
             color: var(--primary-color);
         }
-        .chapter-date {
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
             color: #666;
-            font-size: 0.875rem;
+        }
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+        .mt-2 {
+            margin-top: 1rem;
         }
         @media (max-width: 768px) {
             .manga-header {
@@ -174,17 +165,14 @@
         </ul>
         
         <div class="theme-selector">
-        
-        <span>المضهر</span>
-        
+            <span>المظهر</span>
             <div class="theme-option active" data-theme="light">فاتح</div>
             <div class="theme-option" data-theme="dark">مظلم</div>
             <div class="theme-option" data-theme="blue">أزرق</div>
         </div>
-          <span>تسجيل الخروج</span>
+        <span>تسجيل الخروج</span>
         <button id="logoutBtn" class="btn btn-outline hidden">
             <i class="fas fa-sign-out-alt"></i>
-          
         </button>
     </div>
     <div class="drawer-overlay"></div>
