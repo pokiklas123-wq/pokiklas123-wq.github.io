@@ -236,7 +236,8 @@ class MangaApp {
         const mangaGrid = document.getElementById('mangaGrid');
         if (!mangaGrid) return;
         
-        mangaGrid.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري تحميل المانجا...</p></div>';
+        // إظهار تأثير التحميل
+        mangaGrid.innerHTML = this.createLoadingCards();
         
         try {
             const snapshot = await this.db.ref('manga_list').once('value');
@@ -262,6 +263,31 @@ class MangaApp {
             console.error('❌ خطأ في تحميل المانجا:', error);
             this.showMangaError('حدث خطأ في تحميل بيانات المانجا');
         }
+    }
+
+    createLoadingCards() {
+        let loadingHTML = '';
+        for (let i = 0; i < 6; i++) {
+            loadingHTML += `
+                <div class="manga-card loading">
+                    <div class="shimmer-container"></div>
+                    <div class="manga-thumbnail-container">
+                        <img class="manga-thumbnail" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDE4MCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMyMjMzNDQiLz48L3N2Zz4=">
+                    </div>
+                    <div class="manga-info">
+                        <div class="manga-title">جاري التحميل...</div>
+                        <div class="manga-meta">
+                            <span>0 مشاهدة</span>
+                            <span class="rating">
+                                <i class="fas fa-star"></i>
+                                <span>0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        return loadingHTML;
     }
     
     displayManga(mangaArray) {
@@ -304,14 +330,16 @@ class MangaApp {
     
     createMangaCard(manga) {
         const card = document.createElement('div');
-        card.className = 'manga-card';
+        card.className = 'manga-card loading';
         
         const latestChapter = this.getLatestChapter(manga);
         
         card.innerHTML = `
+            <div class="shimmer-container"></div>
             <div class="manga-thumbnail-container">
                 <img src="${manga.thumbnail}" alt="${manga.name}" class="manga-thumbnail"
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODAiIGhlaWdodD0iMTIwIiB2aWV3Qm94PSIwIDAgODAgMTIwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSI4MCIgaGVpZ2h0PSIxMjAiIGZpbGw9IiM0YTkwZTIiLz48dGV4dCB4PSI0MCIgeT0iNjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTIiPk1hbmdhPC90ZXh0Pjwvc3ZnPg=='">
+                     onload="this.parentElement.parentElement.classList.remove('loading')"
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDE4MCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMyMjMzNDQiLz48dGV4dCB4PSI5MCIgeT0iMTI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIj5NYW5nYTwvdGV4dD48L3N2Zz4='">
                 ${latestChapter ? `<div class="chapter-badge">${latestChapter}</div>` : ''}
             </div>
             <div class="manga-info">
