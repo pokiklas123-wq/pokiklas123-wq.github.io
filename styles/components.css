@@ -204,81 +204,82 @@ header {
 /* بطاقات المانجا */
 .manga-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); /* زيادة حجم البطاقة */
-    gap: 32px; /* فراغ أكبر بين البطاقات */
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 32px;
     margin: 32px 0;
 }
 
 .manga-card {
-    background: rgba(30, 34, 43, 0.7); /* لون داكن شفاف قليلاً */
-    border-radius: 18px;
+    background: rgba(36, 46, 79, 0.55); /* خلفية شفافة مع بلور */
+    border-radius: 22px;
     overflow: hidden;
-    transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-    cursor: pointer;
-    border: 1.5px solid var(--border-color);
-    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.33), 0 1.5px 10px rgba(26, 115, 232, 0.10);
     position: relative;
-    backdrop-filter: blur(16px); /* تأثير blur واضح */
-    min-height: 440px;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 10px 40px 0 rgba(30, 34, 43, 0.22), 0 2px 10px rgba(26, 115, 232, 0.10);
+    cursor: pointer;
+    min-height: 520px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    transition: all 0.33s cubic-bezier(0.4,0,0.2,1);
+    backdrop-filter: blur(16px);
 }
+
 .manga-card:hover {
-    transform: translateY(-12px) scale(1.04);
-    box-shadow: 0 18px 50px 0 rgba(59, 130, 246, 0.55), 0 2px 10px rgba(30, 34, 43, 0.10);
+    transform: translateY(-13px) scale(1.05);
+    box-shadow: 0 22px 60px 0 rgba(59, 130, 246, 0.36), 0 2px 10px rgba(30, 34, 43, 0.13);
     border-color: var(--accent-color);
 }
 
 .manga-card:hover .manga-thumbnail {
-    transform: scale(1.07);
-    filter: brightness(1.07) blur(1px);
+    transform: scale(1.08);
+    filter: brightness(1.09) blur(1.6px);
 }
 
 .manga-thumbnail {
     width: 100%;
-    height: 350px; /* أكبر */
+    height: 370px;
     object-fit: cover;
     display: block;
-    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), filter 0.35s cubic-bezier(0.4,0,0.2,1);
-    border-bottom: 1px solid var(--border-color);
+    transition: transform 0.32s cubic-bezier(0.4,0,0.2,1), filter 0.32s cubic-bezier(0.4,0,0.2,1);
+    border-bottom: 1.5px solid var(--border-color);
 }
 
 .manga-info {
-    padding: 28px 25px 22px 25px; /* حشو أكبر */
-    background: rgba(17, 20, 28, 0.55);
-    backdrop-filter: blur(10px);
+    padding: 26px 22px 19px 22px;
+    background: rgba(19, 22, 34, 0.7);
+    backdrop-filter: blur(12px);
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    z-index: 50;
-    border-bottom-left-radius: 18px;
-    border-bottom-right-radius: 18px;
-    box-shadow: 0 3px 14px rgba(0,0,0,0.12);
+    z-index: 2;
+    border-bottom-left-radius: 22px;
+    border-bottom-right-radius: 22px;
+    box-shadow: 0 3px 14px rgba(0,0,0,0.10);
 }
 
 .manga-title {
-    font-size: 1.21rem;
-    margin-bottom: 12px;
+    font-size: 1.35rem;
+    margin-bottom: 11px;
     font-weight: bold;
     color: var(--text-color);
-    white-space: normal; /* يسمح بالسطرين */
+    white-space: normal;
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 2; /* ظهور سطرين بالضبط */
+    -webkit-line-clamp: 2; /* سطران فقط */
     -webkit-box-orient: vertical;
-    line-height: 1.35;
-    height: 2.7em; /* سطرين */
+    line-height: 1.45;
+    height: 2.9em;
 }
 
 .manga-rating {
     display: flex;
     align-items: center;
-    margin-bottom: 7px;
+    margin-bottom: 8px;
     gap: 8px;
-    font-size: 1rem;
+    font-size: 1.08rem;
 }
 
 .stars {
@@ -288,7 +289,7 @@ header {
 }
 
 .manga-views {
-    font-size: 0.92rem;
+    font-size: 0.99rem;
     color: #b2b2b2;
     display: flex;
     align-items: center;
@@ -298,10 +299,10 @@ header {
 .latest-chapter {
     background: var(--accent-color);
     color: white;
-    padding: 7px 14px;
-    margin-top: 12px;
-    border-radius: 7px;
-    font-size: 1rem;
+    padding: 8px 15px;
+    margin-top: 13px;
+    border-radius: 8px;
+    font-size: 1.04rem;
     font-weight: 700;
     display: inline-flex;
     align-items: center;
@@ -314,39 +315,23 @@ header {
     background: var(--accent-light);
 }
 
-/* Responsive for mobile */
-@media (max-width: 1024px) {
+/* تجاوب للموبايل والتابلت */
+@media (max-width: 1200px) {
     .manga-grid {
-        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-        gap: 20px;
-    }
-    .manga-thumbnail {
-        height: 240px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
     }
     .manga-card {
-        min-height: 340px;
-    }
-    .manga-info {
-        padding: 18px 15px 14px 15px;
-    }
-}
-
-@media (max-width: 600px) {
-    .manga-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+        min-height: 390px;
     }
     .manga-thumbnail {
         height: 170px;
     }
-    .manga-card {
-        min-height: 210px;
-    }
     .manga-info {
-        padding: 8px 8px 8px 8px;
+        padding: 12px 10px 10px 10px;
     }
     .manga-title {
-        font-size: 1rem;
+        font-size: 1.08rem;
         height: 2.2em;
     }
     .latest-chapter {
@@ -355,8 +340,44 @@ header {
     }
 }
 
-/* باقي التنسيقات كما هي ... */
+@media (max-width: 650px) {
+    .manga-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 9px;
+        margin: 8px 0;
+    }
+    .manga-card {
+        min-height: 170px;
+        border-radius: 11px;
+    }
+    .manga-thumbnail {
+        height: 90px;
+    }
+    .manga-info {
+        padding: 7px 5px 7px 5px;
+        border-bottom-left-radius: 11px;
+        border-bottom-right-radius: 11px;
+    }
+    .manga-title {
+        font-size: 0.93rem;
+        height: 2em;
+    }
+}
 
+@media (max-width: 430px) {
+    .manga-grid {
+        grid-template-columns: 1fr;
+    }
+    .manga-info {
+        padding: 8px 4px 5px 4px;
+    }
+    .manga-title {
+        font-size: 0.91rem;
+    }
+}
+
+/* --------------------------- */
+/* باقي التنسيقات كما هي في ملفك القديم */
 /* صفحة تفاصيل المانجا */
 .manga-detail-content {
     display: none;
@@ -405,9 +426,6 @@ header {
     font-size: 1.1rem;
     color: #e0e0e0;
 }
-
-/* ... وكل باقي التنسيقات تبقى كما هي */
-
 
 /* نظام التقييم */
 .rating-section {
