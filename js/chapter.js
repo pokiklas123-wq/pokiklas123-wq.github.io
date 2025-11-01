@@ -1,12 +1,14 @@
 // js/chapter.js
+import dbManager from './db.js';
+import CommentsManager from './comments.js';
+
 class ChapterPage {
     constructor() {
-        this.mangaId = this.getURLParam('manga');
-        this.chapterNumber = this.getURLParam('chapter');
+        this.mangaId = Utils.getQueryParam('manga');
+        this.chapterNumber = Utils.getQueryParam('chapter');
         this.mangaData = null;
         this.chapterData = null;
-        
-        console.log('ChapterPage params:', { mangaId: this.mangaId, chapterNumber: this.chapterNumber });
+        this.commentsManager = null;
         
         if (this.mangaId && this.chapterNumber) {
             this.init();
@@ -16,31 +18,31 @@ class ChapterPage {
     }
     
     init() {
-        this.initializeFirebase();
+        // يجب أن تكون Firebase مهيأة قبل استخدام هذا الملف
+        if (typeof firebase === 'undefined' || !firebase.apps.length) {
+            try {
+                firebase.initializeApp(firebaseConfig);
+            } catch (e) {
+                console.error("Failed to initialize Firebase in ChapterPage:", e);
+                this.showError('خطأ في تهيئة النظام');
+                return;
+            }
+        }
+        
+        this.auth = firebase.auth();
+        
         this.setupEventListeners();
         this.loadChapterData();
         Utils.loadTheme();
-        this.updateThemeIcon(); // إضافة تحديث أيقونة المظهر
-    }
-    
-    initializeFirebase() {
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            this.auth = firebase.auth();
-            this.db = firebase.database();
-        } catch (error) {
-            console.error('Firebase init error:', error);
-        }
-    }
-    
-    getURLParam(param) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(param);
     }
     
     setupEventListeners() {
+        // إعداد أزرار الدرج والثيم (مكرر من manga.js لضمان عملها في هذه الصفحة)
+        this.setupDrawer();
+        this.setupTheme();
+    }
+    
+    setupDrawer() {
         const drawerToggle = document.getElementById('drawerToggle');
         const drawerClose = document.querySelector('.drawer-close');
         const drawerOverlay = document.querySelector('.drawer-overlay');
@@ -48,8 +50,9 @@ class ChapterPage {
         if (drawerToggle) drawerToggle.addEventListener('click', () => this.openDrawer());
         if (drawerClose) drawerClose.addEventListener('click', () => this.closeDrawer());
         if (drawerOverlay) drawerOverlay.addEventListener('click', () => this.closeDrawer());
-        
-        // إعداد تبديل المظهر
+    }
+    
+    setupTheme() {
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
             themeToggle.addEventListener('click', () => this.toggleTheme());
@@ -63,32 +66,68 @@ class ChapterPage {
             });
         });
         
-        // تهيئة نظام التعليقات بعد تحميل البيانات
-        setTimeout(() => {
-            if (typeof CommentsManager !== 'undefined') {
-                this.commentsManager = new CommentsManager(this);
+        // تحديث أيقونة الثيم عند التحميل
+        const currentTheme = Utils.loadTheme();
+        const icon = document.querySelector('#themeToggle i');
+        if (icon) {
+            icon.className = `fas ${Utils.getThemeIcon(currentTheme)}`;
+        }
+    }
+    
+    openDrawer() {
+        const drawer = document.querySelector('.drawer');
+        const drawerOverlay = document.querySelector('.drawer-overlay');
+        if (drawer) drawer.classList.add('open');
+        if (drawerOverlay) drawerOverlay.classList.add('open');
+    }
+    
+    closeDrawer() {
+        const drawer = document.querySelector('.drawer');
+        const drawerOverlay = document.querySelector('.drawer-overlay');
+        if (drawer) drawer.classList.remove('open');
+        if (drawerOverlay) drawerOverlay.classList.remove('open');
+    }
+    
+    toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : (currentTheme === 'light' ? 'blue' : 'dark');
+        this.changeTheme(newTheme);
+    }
+    
+    changeTheme(theme) {
+        Utils.saveTheme(theme);
+        
+        const icon = document.querySelector('#themeToggle i');
+        if (icon) {
+            icon.className = `fas ${Utils.getThemeIcon(theme)}`;
+        }
+        
+        const themeOptions = document.querySelectorAll('.theme-option');
+        themeOptions.forEach(option => {
+            if (option.getAttribute('data-theme') === theme) {
+                option.classList.add('active');
+            } else {
+                option.classList.remove('active');
             }
-        }, 2000);
+        });
     }
     
     async loadChapterData() {
+        const chapterContent = document.getElementById('chapterContent');
+        if (!chapterContent) return;
+        
+        chapterContent.innerHTML = '<div class="loading"><div class="spinner"></div><p>جاري تحميل الفصل...</p></div>';
+        
         try {
-            console.log('Loading chapter data for:', this.mangaId, this.chapterNumber);
-            
-            const mangaSnapshot = await this.db.ref('manga_list/' + this.mangaId).once('value');
-            const mangaData = mangaSnapshot.val();
-            
-            if (!mangaData) {
-                throw new Error('المانجا غير موجودة');
+            // جلب بيانات المانجا
+            const { success: mangaSuccess, data: mangaData, error: mangaError } = await dbManager.getManga(this.mangaId);
+            if (!mangaSuccess || !mangaData) {
+                throw new Error(mangaError || 'المانجا غير موجودة');
             }
-            
             this.mangaData = mangaData;
-            this.mangaData.id = this.mangaId;
             
+            // جلب بيانات الفصل
             const chapterKey = `chapter_${this.chapterNumber}`;
-            console.log('Looking for chapter key:', chapterKey);
-            console.log('Available chapters:', Object.keys(mangaData.chapters || {}));
-            
             this.chapterData = this.mangaData.chapters?.[chapterKey];
             
             if (!this.chapterData) {
@@ -96,6 +135,9 @@ class ChapterPage {
             }
             
             this.displayChapterData();
+            
+            // تهيئة مدير التعليقات بعد تحميل البيانات
+            this.commentsManager = new CommentsManager(this.mangaId, this.chapterNumber);
             
         } catch (error) {
             console.error('Error loading chapter:', error);
@@ -105,18 +147,16 @@ class ChapterPage {
     
     displayChapterData() {
         const chapterContent = document.getElementById('chapterContent');
-        
-        if (!this.chapterData) {
-            chapterContent.innerHTML = '<div class="empty-state"><p>الفصل غير موجود</p></div>';
-            return;
-        }
+        if (!chapterContent) return;
         
         const { prevChapter, nextChapter } = this.getAdjacentChapters();
         
+        const chapterTitle = this.chapterData.title || `الفصل ${this.chapterNumber}`;
+        
         chapterContent.innerHTML = `
             <div class="chapter-header">
-                <h1 class="chapter-title">${this.mangaData.name} - الفصل ${this.chapterNumber}</h1>
-                <div class="chapter-meta">
+                <h1 class="chapter-title">${this.mangaData.name} - ${chapterTitle}</h1>
+                <div class="chapter-subtitle">
                     <span>عدد الصور: ${this.chapterData.images?.length || 0}</span>
                 </div>
             </div>
@@ -127,7 +167,7 @@ class ChapterPage {
                         <i class="fas fa-arrow-right"></i>
                         الفصل السابق
                     </a>` : 
-                    '<div></div>'
+                    '<button class="btn btn-outline" disabled><i class="fas fa-arrow-right"></i> الفصل السابق</button>'
                 }
                 
                 <a href="manga.html?id=${this.mangaId}" class="btn btn-outline">
@@ -140,7 +180,7 @@ class ChapterPage {
                         الفصل التالي
                         <i class="fas fa-arrow-left"></i>
                     </a>` : 
-                    '<div></div>'
+                    '<button class="btn btn-outline" disabled>الفصل التالي <i class="fas fa-arrow-left"></i></button>'
                 }
             </div>
             
@@ -159,7 +199,7 @@ class ChapterPage {
                         <i class="fas fa-arrow-right"></i>
                         الفصل السابق
                     </a>` : 
-                    '<div></div>'
+                    '<button class="btn btn-outline" disabled><i class="fas fa-arrow-right"></i> الفصل السابق</button>'
                 }
                 
                 <a href="manga.html?id=${this.mangaId}" class="btn btn-outline">
@@ -172,7 +212,7 @@ class ChapterPage {
                         الفصل التالي
                         <i class="fas fa-arrow-left"></i>
                     </a>` : 
-                    '<div></div>'
+                    '<button class="btn btn-outline" disabled>الفصل التالي <i class="fas fa-arrow-left"></i></button>'
                 }
             </div>
         `;
@@ -182,57 +222,17 @@ class ChapterPage {
         if (!this.mangaData.chapters) return { prevChapter: null, nextChapter: null };
         
         const chapters = Object.keys(this.mangaData.chapters)
-            .map(key => parseInt(key.replace('chapter_', '')))
+            .map(key => parseFloat(key.replace('chapter_', '')))
             .filter(num => !isNaN(num))
             .sort((a, b) => a - b);
         
-        const currentChapter = parseInt(this.chapterNumber);
+        const currentChapter = parseFloat(this.chapterNumber);
         const currentIndex = chapters.indexOf(currentChapter);
         
         return {
             prevChapter: currentIndex > 0 ? chapters[currentIndex - 1] : null,
             nextChapter: currentIndex < chapters.length - 1 ? chapters[currentIndex + 1] : null
         };
-    }
-    
-    openDrawer() {
-        const drawer = document.querySelector('.drawer');
-        const drawerOverlay = document.querySelector('.drawer-overlay');
-        if (drawer) drawer.classList.add('open');
-        if (drawerOverlay) drawerOverlay.classList.add('open');
-    }
-    
-    closeDrawer() {
-        const drawer = document.querySelector('.drawer');
-        const drawerOverlay = document.querySelector('.drawer-overlay');
-        if (drawer) drawer.classList.remove('open');
-        if (drawerOverlay) drawerOverlay.classList.remove('open');
-    }
-    
-    toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        this.changeTheme(newTheme);
-    }
-    
-    changeTheme(theme) {
-        Utils.saveTheme(theme);
-        this.updateThemeIcon(theme);
-        
-        const themeOptions = document.querySelectorAll('.theme-option');
-        themeOptions.forEach(option => {
-            option.classList.remove('active');
-            if (option.getAttribute('data-theme') === theme) {
-                option.classList.add('active');
-            }
-        });
-    }
-    
-    updateThemeIcon(theme = Utils.loadTheme()) {
-        const icon = document.querySelector('#themeToggle i');
-        if (icon) {
-            icon.className = `fas ${Utils.getThemeIcon(theme)}`;
-        }
     }
     
     showError(message) {
@@ -249,8 +249,6 @@ class ChapterPage {
     }
 }
 
-let chapterPage;
-
 document.addEventListener('DOMContentLoaded', () => {
-    chapterPage = new ChapterPage();
+    new ChapterPage();
 });

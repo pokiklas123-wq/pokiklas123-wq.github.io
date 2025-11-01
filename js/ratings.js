@@ -1,128 +1,76 @@
+// js/ratings.js
+// هذا الملف يدير منطق التقييمات والإعجابات
+
+import dbManager from './db.js';
+
 class RatingsManager {
     constructor() {
-        this.userRatings = {};
-        this.userLikes = {};
+        this.currentUser = null;
         this.init();
     }
     
     init() {
-        this.loadUserRatings();
+        // يجب أن تكون Firebase مهيأة قبل استخدام هذا الملف
+        if (typeof firebase === 'undefined' || !firebase.apps.length) {
+            console.error("Firebase is not initialized. RatingsManager cannot function.");
+            return;
+        }
+        
+        firebase.auth().onAuthStateChanged(user => {
+            this.currentUser = user;
+        });
     }
 
     async rateManga(mangaId, rating) {
-        if (!authManager.getCurrentUser()) {
-            ui.showAuthMessage('يجب تسجيل الدخول لتقييم المانجا', 'error');
-            ui.toggleAuthModal(true);
-            return;
+        if (!this.currentUser) {
+            Utils.showMessage('يجب تسجيل الدخول لتقييم المانجا', 'warning');
+            // يمكن إضافة منطق لتحويل المستخدم إلى صفحة تسجيل الدخول
+            return { success: false, error: 'User not logged in' };
         }
 
-        try {
-            // حفظ تقييم المستخدم
-            const userRatingRef = database.ref(`user_ratings/${authManager.getCurrentUser().uid}/${mangaId}`);
-            await userRatingRef.set(rating);
-            
-            this.userRatings[mangaId] = rating;
-            
-            // تحديث التقييم العام للمانجا
-            await this.updateMangaRating(mangaId);
-            
-            ui.showAuthMessage('تم تقييم المانجا بنجاح', 'success');
-            
-        } catch (error) {
-            ui.showAuthMessage('خطأ في التقييم: ' + error.message, 'error');
+        const { success, newRating, error } = await dbManager.rateManga(mangaId, rating, this.currentUser.uid);
+        
+        if (success) {
+            Utils.showMessage(`تم تقييم المانجا بنجاح. التقييم الجديد: ${newRating}`, 'success');
+        } else {
+            Utils.showMessage('خطأ في التقييم: ' + error, 'error');
         }
+        
+        return { success, newRating, error };
     }
-
-    async updateMangaRating(mangaId) {
-        try {
-            // جلب جميع تقييمات المستخدمين لهذه المانجا
-            const ratingsRef = database.ref('user_ratings');
-            const snapshot = await ratingsRef.once('value');
-            const allRatings = snapshot.val();
-            
-            let total = 0;
-            let count = 0;
-
-            // حساب المتوسط
-            Object.values(allRatings || {}).forEach(userRatings => {
-                if (userRatings && userRatings[mangaId]) {
-                    total += userRatings[mangaId];
-                    count++;
-                }
-            });
-
-            const average = count > 0 ? (total / count).toFixed(1) : 0;
-            
-            // تحديث تقييم المانجا في قاعدة البيانات
-            await database.ref(`manga_list/${mangaId}/rating`).set(parseFloat(average));
-            
-            // إعادة تحميل قائمة المانجا
-            mangaManager.loadMangaList();
-            
-        } catch (error) {
-            console.error('Error updating manga rating:', error);
-        }
+    
+    async getUserRating(mangaId) {
+        if (!this.currentUser) return 0;
+        return dbManager.getUserRating(mangaId, this.currentUser.uid);
     }
-
-    async loadUserRatings() {
-        if (!authManager.getCurrentUser()) return;
-
-        try {
-            const userRatingsRef = database.ref(`user_ratings/${authManager.getCurrentUser().uid}`);
-            const snapshot = await userRatingsRef.once('value');
-            this.userRatings = snapshot.val() || {};
-            
-        } catch (error) {
-            console.error('Error loading user ratings:', error);
-        }
+    
+    async getMangaRatings(mangaId) {
+        return dbManager.getMangaRatings(mangaId);
     }
-
-    getUserRating(mangaId) {
-        return this.userRatings[mangaId] || 0;
-    }
-
-    // نظام الإعجابات للفصول
-    async likeChapter(mangaId, chapterId) {
-        if (!authManager.getCurrentUser()) {
-            ui.showAuthMessage('يجب تسجيل الدخول للإعجاب', 'error');
-            return;
+    
+    // منطق الإعجاب بالتعليقات (تم نقله إلى dbManager، ولكن يمكن إضافة واجهة هنا)
+    async toggleCommentLike(mangaId, chapterId, commentId) {
+        if (!this.currentUser) {
+            Utils.showMessage('يجب تسجيل الدخول للإعجاب بالتعليقات', 'warning');
+            return { success: false, error: 'User not logged in' };
         }
-
-        try {
-            const chapterRef = database.ref(`manga_list/${mangaId}/chapters/${chapterId}`);
-            const snapshot = await chapterRef.once('value');
-            const chapter = snapshot.val();
-            
-            const likedBy = chapter.likedBy || {};
-            let newLikes = chapter.chapter_like || 0;
-
-            if (likedBy[authManager.getCurrentUser().uid]) {
-                // إزالة الإعجاب
-                newLikes--;
-                delete likedBy[authManager.getCurrentUser().uid];
-            } else {
-                // إضافة الإعجاب
-                newLikes++;
-                likedBy[authManager.getCurrentUser().uid] = true;
-            }
-
-            await chapterRef.update({ 
-                chapter_like: newLikes,
-                likedBy: likedBy
-            });
-
-            // تحديث الواجهة
-            mangaManager.loadMangaList();
-            
-        } catch (error) {
-            console.error('Error liking chapter:', error);
+        
+        const { success, liked, error } = await dbManager.toggleCommentLike(mangaId, chapterId, commentId, this.currentUser.uid);
+        
+        if (success) {
+            Utils.showMessage(liked ? 'تم الإعجاب بالتعليق' : 'تم إزالة الإعجاب', 'info');
+        } else {
+            Utils.showMessage('خطأ في الإعجاب: ' + error, 'error');
         }
+        
+        return { success, liked, error };
     }
-
-    hasUserLikedChapter(mangaId, chapterId) {
-        // سيتم تنفيذ هذا لاحقاً
-        return false;
+    
+    async isCommentLiked(mangaId, chapterId, commentId) {
+        if (!this.currentUser) return false;
+        return dbManager.isCommentLiked(mangaId, chapterId, commentId, this.currentUser.uid);
     }
 }
 
 const ratingsManager = new RatingsManager();
+export default ratingsManager;

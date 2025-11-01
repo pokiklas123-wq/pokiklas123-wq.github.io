@@ -4,6 +4,7 @@ class Utils {
         if (!timestamp) return '';
         
         try {
+            // تحويل التاريخ من timestamp إلى كائن Date
             const date = new Date(parseInt(timestamp));
             const now = new Date();
             const diffMs = now - date;
@@ -21,9 +22,11 @@ class Utils {
             } else if (diffDays < 7) {
                 return `منذ ${diffDays} يوم`;
             } else {
-                return date.toLocaleDateString('ar-EG');
+                // تنسيق التاريخ ليوم/شهر/سنة
+                return date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'numeric', day: 'numeric' });
             }
         } catch (error) {
+            console.error("Error formatting timestamp:", error);
             return 'تاريخ غير معروف';
         }
     }
@@ -32,7 +35,8 @@ class Utils {
         // إزالة أي رسائل سابقة
         const existingMessages = document.querySelectorAll('.message');
         existingMessages.forEach(msg => {
-            msg.style.animation = 'slideOut 0.3s ease';
+            // تطبيق animation slideOut
+            msg.style.animation = 'slideOut 0.3s ease forwards';
             setTimeout(() => {
                 if (msg.parentNode) {
                     msg.parentNode.removeChild(msg);
@@ -44,7 +48,15 @@ class Utils {
         const messageEl = document.createElement('div');
         messageEl.className = `message message-${type}`;
         messageEl.textContent = message;
-        messageEl.style.backgroundColor = this.getMessageColor(type);
+        
+        // تحديد لون الخلفية بناءً على النوع (للتوافق مع CSS الموحد)
+        const colors = {
+            'success': '#27ae60',
+            'error': '#e74c3c',
+            'warning': '#f39c12',
+            'info': '#3498db'
+        };
+        messageEl.style.backgroundColor = colors[type] || colors.info;
         
         // إضافة الرسالة إلى الصفحة
         document.body.appendChild(messageEl);
@@ -52,7 +64,7 @@ class Utils {
         // إزالة الرسالة بعد 5 ثوانٍ
         setTimeout(() => {
             if (messageEl.parentNode) {
-                messageEl.style.animation = 'slideOut 0.3s ease';
+                messageEl.style.animation = 'slideOut 0.3s ease forwards';
                 setTimeout(() => {
                     if (messageEl.parentNode) {
                         messageEl.parentNode.removeChild(messageEl);
@@ -62,16 +74,6 @@ class Utils {
         }, 5000);
         
         return messageEl;
-    }
-    
-    static getMessageColor(type) {
-        const colors = {
-            'success': '#27ae60',
-            'error': '#e74c3c',
-            'warning': '#f39c12',
-            'info': '#3498db'
-        };
-        return colors[type] || colors.info;
     }
     
     static validateEmail(email) {
@@ -86,13 +88,15 @@ class Utils {
 
     static requireAuth(redirectTo = 'auth.html') {
         try {
-            const user = firebase.auth().currentUser;
-            if (!user) {
+            // يجب أن يتم استدعاء هذه الدالة بعد تهيئة Firebase
+            if (typeof firebase === 'undefined' || !firebase.auth().currentUser) {
                 window.location.href = redirectTo;
                 return false;
             }
             return true;
         } catch (error) {
+            // في حال لم يتم تهيئة Firebase بعد
+            console.warn("Firebase not initialized when calling requireAuth. Redirecting.");
             window.location.href = redirectTo;
             return false;
         }
@@ -100,7 +104,7 @@ class Utils {
     
     static loadTheme() {
         try {
-            const savedTheme = localStorage.getItem('theme') || 'dark'; // تغيير الافتراضي إلى dark
+            const savedTheme = localStorage.getItem('theme') || 'dark'; // تغيير الافتراضي إلى dark ليتناسب مع main.css
             document.documentElement.setAttribute('data-theme', savedTheme);
             return savedTheme;
         } catch (error) {
@@ -124,7 +128,7 @@ class Utils {
             'dark': 'fa-sun',
             'blue': 'fa-palette'
         };
-        return icons[theme] || icons.dark; // تغيير الافتراضي إلى dark
+        return icons[theme] || icons.dark;
     }
     
     static async sleep(ms) {
@@ -150,11 +154,17 @@ class Utils {
     }
     
     static formatNumber(num) {
+        if (num === undefined || num === null) return '0';
         if (num >= 1000000) {
             return (num / 1000000).toFixed(1) + 'M';
         } else if (num >= 1000) {
             return (num / 1000).toFixed(1) + 'K';
         }
         return num.toString();
+    }
+    
+    static getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
     }
 }

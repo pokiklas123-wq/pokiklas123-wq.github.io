@@ -1,31 +1,33 @@
 // js/auth-page.js
+// هذا الملف مخصص لمعالجة واجهة المستخدم لصفحة المصادقة (auth.html)
+
+import authManager from './auth.js';
+import dbManager from './db.js';
+
 class AuthPage {
     constructor() {
         this.currentTab = 'login';
-        this.auth = null;
-        this.db = null;
         
         this.init();
     }
     
     init() {
-        this.initializeFirebase();
+        // يجب أن تكون Firebase مهيأة قبل استخدام هذا الملف
+        if (typeof firebase === 'undefined' || !firebase.apps.length) {
+            // محاولة تهيئة Firebase إذا لم تكن مهيأة
+            try {
+                firebase.initializeApp(firebaseConfig);
+            } catch (e) {
+                console.error("Failed to initialize Firebase in AuthPage:", e);
+                this.showFormMessage('خطأ في تهيئة النظام', 'error');
+                return;
+            }
+        }
+        
         this.setupEventListeners();
         Utils.loadTheme();
         this.checkAuthState();
-    }
-    
-    initializeFirebase() {
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            this.auth = firebase.auth();
-            this.db = firebase.database();
-        } catch (error) {
-            console.error('Firebase init error:', error);
-            this.showFormMessage('خطأ في تهيئة النظام', 'error');
-        }
+        this.handleUrlParams();
     }
     
     setupEventListeners() {
@@ -60,8 +62,19 @@ class AuthPage {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
                 this.switchTab('login');
+                document.querySelector('.auth-tabs').style.display = 'flex';
             });
         });
+    }
+    
+    handleUrlParams() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+        
+        if (mode === 'resetPassword') {
+            this.showResetPasswordForm();
+            this.showFormMessage('يرجى إدخال بريدك الإلكتروني لإعادة تعيين كلمة السر', 'info');
+        }
     }
     
     switchTab(tabName) {
@@ -113,24 +126,21 @@ class AuthPage {
         
         this.setButtonLoading(loginBtn, true);
         
-        try {
-            const result = await this.auth.signInWithEmailAndPassword(email, password);
-            
-            await this.db.ref('users/' + result.user.uid).update({
-                lastLogin: Date.now()
-            });
-            
-            this.showFormMessage('تم تسجيل الدخول بنجاح!', 'success');
+        const { success } = await authManager.signIn(email, password);
+        
+        if (success) {
+            // تحديث وقت آخر تسجيل دخول
+            const user = firebase.auth().currentUser;
+            if (user) {
+                await dbManager.updateUserData(user.uid, { lastLogin: firebase.database.ServerValue.TIMESTAMP });
+            }
             
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1500);
-            
-        } catch (error) {
-            this.showFormMessage(this.getAuthErrorMessage(error), 'error');
-        } finally {
-            this.setButtonLoading(loginBtn, false);
         }
+        
+        this.setButtonLoading(loginBtn, false);
     }
     
     async handleRegister() {
@@ -144,79 +154,38 @@ class AuthPage {
         
         this.setButtonLoading(registerBtn, true);
         
-        try {
-            const result = await this.auth.createUserWithEmailAndPassword(email, password);
-            
-            await result.user.updateProfile({
-                displayName: name
-            });
-            
-            const userData = {
-                displayName: name,
-                email: email,
-                createdAt: Date.now(),
-                lastLogin: Date.now(),
-                profile: {
-                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4ECDC4&color=fff&size=150`,
-                    bio: ''
-                },
-                preferences: {
-                    emailNotifications: false,
-                    notifications: true,
-                    theme: 'light'
-                },
-                stats: {
-                    commentsCount: 0,
-                    joinedDate: new Date().toISOString(),
-                    ratingsCount: 0
-                }
-            };
-            
-            await this.db.ref('users/' + result.user.uid).set(userData);
-            
-            this.showFormMessage('تم إنشاء الحساب بنجاح!', 'success');
-            
+        const { success } = await authManager.register(name, email, password);
+        
+        if (success) {
             setTimeout(() => {
                 window.location.href = 'index.html';
             }, 1500);
-            
-        } catch (error) {
-            this.showFormMessage(this.getAuthErrorMessage(error), 'error');
-        } finally {
-            this.setButtonLoading(registerBtn, false);
         }
+        
+        this.setButtonLoading(registerBtn, false);
     }
     
     async handleResetPassword() {
         const email = document.getElementById('resetEmail').value;
         const resetBtn = document.getElementById('resetPasswordBtn');
         
-        if (!this.validateEmail(email)) {
+        if (!Utils.validateEmail(email)) {
             this.showFormMessage('يرجى إدخال بريد إلكتروني صحيح', 'error');
             return;
         }
         
         this.setButtonLoading(resetBtn, true);
         
-        try {
-            // Fix: Add ActionCodeSettings to ensure the link works correctly
-            const actionCodeSettings = {
-                url: window.location.origin + '/auth.html?mode=resetPassword', // Redirect back to auth page after reset
-                handleCodeInApp: true
-            };
-            await this.auth.sendPasswordResetEmail(email, actionCodeSettings);
-            this.showFormMessage('تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني', 'success');
-            
+        const { success } = await authManager.resetPassword(email);
+        
+        if (success) {
             setTimeout(() => {
                 this.switchTab('login');
                 document.querySelector('.auth-tabs').style.display = 'flex';
             }, 3000);
-            
-        } catch (error) {
-            this.showFormMessage(this.getAuthErrorMessage(error), 'error');
-        } finally {
-            this.setButtonLoading(resetBtn, false);
         }
+        
+        this.setButtonLoading(resetBtn, false);
     }
     
     validateLoginForm(email, password) {
@@ -262,25 +231,6 @@ class AuthPage {
         return true;
     }
     
-    validateEmail(email) {
-        return Utils.validateEmail(email);
-    }
-    
-    getAuthErrorMessage(error) {
-        const errorMessages = {
-            'auth/invalid-email': 'البريد الإلكتروني غير صحيح',
-            'auth/user-disabled': 'هذا الحساب معطل',
-            'auth/user-not-found': 'لا يوجد حساب بهذا البريد الإلكتروني',
-            'auth/wrong-password': 'كلمة السر غير صحيحة',
-            'auth/email-already-in-use': 'هذا البريد الإلكتروني مستخدم بالفعل',
-            'auth/weak-password': 'كلمة السر ضعيفة جداً',
-            'auth/network-request-failed': 'خطأ في الاتصال بالإنترنت',
-            'auth/too-many-requests': 'محاولات تسجيل دخول كثيرة جداً، يرجى المحاولة لاحقاً'
-        };
-        
-        return errorMessages[error.code] || error.message || 'حدث خطأ غير متوقع';
-    }
-    
     setButtonLoading(button, isLoading) {
         if (!button) return;
         
@@ -302,6 +252,7 @@ class AuthPage {
         const formMessage = document.getElementById('formMessage');
         formMessage.textContent = message;
         formMessage.className = `form-message ${type}`;
+        formMessage.style.display = 'block';
     }
     
     clearFormMessage() {
@@ -311,16 +262,15 @@ class AuthPage {
     }
     
     checkAuthState() {
-        this.auth.onAuthStateChanged(user => {
+        firebase.auth().onAuthStateChanged(user => {
             if (user) {
+                // إذا كان المستخدم مسجلاً الدخول، قم بتحويله إلى الصفحة الرئيسية
                 window.location.href = 'index.html';
             }
         });
     }
 }
 
-let authPage;
-
 document.addEventListener('DOMContentLoaded', () => {
-    authPage = new AuthPage();
+    new AuthPage();
 });

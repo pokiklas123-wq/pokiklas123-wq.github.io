@@ -1,40 +1,53 @@
 // js/notifications.js
-class NotificationsManager {
+// هذا الملف يدير منطق الإشعارات (جلب، عرض، تعيين كمقروء)
+
+import dbManager from './db.js';
+
+export class NotificationsManager {
     constructor(app) {
         this.app = app;
-        this.db = app.db;
-        this.auth = app.auth;
+        this.db = firebase.database();
         this.notificationsContainer = document.getElementById('notificationsList');
         this.unreadCountElement = document.getElementById('unreadNotificationsCount');
         this.userId = null;
         this.notificationsRef = null;
+        this.isListening = false;
         
-        this.setupAuthListener();
+        // جعل الدالة متاحة globally للاستدعاء من الزر في notifications.html
+        window.notificationsManager = this;
     }
-
-    setupAuthListener() {
-        this.auth.onAuthStateChanged(user => {
-            if (user) {
-                this.userId = user.uid;
-                this.notificationsRef = this.db.ref(`notifications/${this.userId}`);
-                this.listenForNotifications();
-            } else {
-                this.userId = null;
-                this.notificationsRef = null;
-                this.clearNotifications();
-            }
-        });
+    
+    startListening(userId) {
+        if (this.isListening && this.userId === userId) return;
+        
+        this.userId = userId;
+        this.notificationsRef = this.db.ref(`notifications/${this.userId}`);
+        this.listenForNotifications();
+        this.isListening = true;
     }
-
+    
+    stopListening() {
+        if (!this.isListening) return;
+        
+        if (this.notificationsRef) {
+            this.notificationsRef.off(); // إيقاف جميع المستمعين
+        }
+        this.userId = null;
+        this.notificationsRef = null;
+        this.isListening = false;
+        this.clearNotifications();
+    }
+    
     listenForNotifications() {
         if (!this.notificationsRef) return;
-
-        // تحديث عدد الإشعارات غير المقروءة
+        
+        // المستمع لتحديث عدد الإشعارات غير المقروءة في الهيدر
         this.notificationsRef.orderByChild('read').equalTo(false).on('value', snapshot => {
             const count = snapshot.numChildren();
             this.updateUnreadCount(count);
         });
-
+        
+        // المستمع لعرض الإشعارات في صفحة الإشعارات
         if (this.notificationsContainer) {
             this.notificationsRef.orderByChild('timestamp').on('value', snapshot => {
                 const notificationsData = snapshot.val();
@@ -42,7 +55,7 @@ class NotificationsManager {
             });
         }
     }
-
+    
     updateUnreadCount(count) {
         // تحديث العداد في الهيدر
         const headerBtn = document.getElementById('notificationsBtn');
@@ -71,7 +84,7 @@ class NotificationsManager {
             }
         }
     }
-
+    
     clearNotifications() {
         if (this.notificationsContainer) {
             this.notificationsContainer.innerHTML = `
@@ -83,7 +96,7 @@ class NotificationsManager {
         }
         this.updateUnreadCount(0);
     }
-
+    
     renderNotifications(notificationsData) {
         if (!this.notificationsContainer) return;
         
@@ -93,31 +106,27 @@ class NotificationsManager {
             this.clearNotifications();
             return;
         }
-
+        
         const notificationsArray = Object.keys(notificationsData).map(key => ({
             id: key,
             ...notificationsData[key]
         })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-
+        
         if (notificationsArray.length === 0) {
             this.clearNotifications();
             return;
         }
-
+        
         notificationsArray.forEach(notification => {
             const notificationElement = this.createNotificationElement(notification);
             this.notificationsContainer.appendChild(notificationElement);
         });
     }
-
+    
     createNotificationElement(notification) {
         const notificationEl = document.createElement('div');
-        notificationEl.className = `notification-item ${notification.read ? 'read' : 'unread'}`;
+        notificationEl.className = `notification-item ${notification.read ? '' : 'unread'}`;
         notificationEl.setAttribute('data-id', notification.id);
-        notificationEl.setAttribute('data-manga-id', notification.mangaId || '');
-        notificationEl.setAttribute('data-chapter-id', notification.chapterId || '');
-        notificationEl.setAttribute('data-comment-id', notification.commentId || '');
-        notificationEl.setAttribute('data-reply-id', notification.replyId || '');
         
         const icon = this.getNotificationIcon(notification.type);
         const time = notification.timestamp ? Utils.formatTimestamp(notification.timestamp) : 'غير معروف';
@@ -126,12 +135,12 @@ class NotificationsManager {
             <div class="notification-header">
                 <div class="notification-title">
                     <i class="${icon}"></i>
-                    ${this.getNotificationTitle(notification.type)}
+                    ${notification.title || this.getNotificationTitle(notification.type)}
                 </div>
                 <div class="notification-date">${time}</div>
             </div>
             <div class="notification-content">
-                ${notification.text || 'إشعار جديد'}
+                ${notification.message || 'إشعار جديد'}
             </div>
             <div class="notification-actions">
                 ${!notification.read ? `
@@ -148,11 +157,12 @@ class NotificationsManager {
         // جعل الإشعار قابلاً للنقر
         notificationEl.style.cursor = 'pointer';
         notificationEl.addEventListener('click', (e) => {
+            // تجنب النقر على الأزرار الداخلية
             if (!e.target.closest('.action-btn')) {
                 this.handleNotificationClick(notification);
             }
         });
-
+        
         // إضافة event listeners للأزرار
         const markAsReadBtn = notificationEl.querySelector('.mark-as-read');
         const deleteBtn = notificationEl.querySelector('.delete-notification');
@@ -172,7 +182,7 @@ class NotificationsManager {
         
         return notificationEl;
     }
-
+    
     getNotificationIcon(type) {
         const icons = {
             'reply': 'fas fa-reply',
@@ -182,7 +192,7 @@ class NotificationsManager {
         };
         return icons[type] || 'fas fa-bell';
     }
-
+    
     getNotificationTitle(type) {
         const titles = {
             'reply': 'رد جديد',
@@ -192,33 +202,28 @@ class NotificationsManager {
         };
         return titles[type] || 'إشعار';
     }
-
+    
     handleNotificationClick(notification) {
-        if (notification.type === 'reply' && notification.mangaId && notification.chapterId) {
-            // الانتقال إلى الفصل مع التركيز على التعليق والرد
-            let hash = `comment-${notification.commentId}`;
-            if (notification.replyId) {
-                hash = `reply-${notification.commentId}-${notification.replyId}`;
-            }
-            
-            window.location.href = `chapter.html?manga=${notification.mangaId}&chapter=${notification.chapterId}#${hash}`;
+        if (notification.link) {
+            window.location.href = notification.link;
         }
         
         // وضع علامة كمقروء عند النقر
         this.markAsRead(notification.id);
     }
-
+    
     async markAsRead(id) {
         if (!this.notificationsRef || !this.userId) return;
         
         try {
             await this.notificationsRef.child(id).update({ read: true });
+            Utils.showMessage('تم تعيين الإشعار كمقروء', 'info');
         } catch (error) {
             console.error('Error marking notification as read:', error);
             Utils.showMessage('حدث خطأ أثناء تعيين الإشعار كمقروء', 'error');
         }
     }
-
+    
     async deleteNotification(id) {
         if (!confirm('هل أنت متأكد من حذف هذا الإشعار؟')) return;
         
@@ -254,14 +259,3 @@ class NotificationsManager {
         }
     }
 }
-
-// جعل الدالة متاحة globally للاستدعاء من الزر
-window.notificationsManager = {
-    markAllAsRead: function() {
-        if (window.app && window.app.notificationsManager) {
-            window.app.notificationsManager.markAllAsRead();
-        } else if (window.appInstance && window.appInstance.notificationsManager) {
-            window.appInstance.notificationsManager.markAllAsRead();
-        }
-    }
-};
