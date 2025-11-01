@@ -1,5 +1,4 @@
-[file name]: app.js
-[file content begin]
+
 class App {
     constructor() {
         this.init();
@@ -90,4 +89,3 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
     new App();
 });
-[file content end]
