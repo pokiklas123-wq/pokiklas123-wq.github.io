@@ -4,8 +4,35 @@ class NavigationManager {
         this.currentState = null;
         this.setupEventListeners();
         this.setupBrowserBackButton();
+        this.setupGitHubPagesSupport();
         this.loadState(); 
     }
+
+// في navigation.js - أضف هذا في constructor
+
+
+// ثم أضف هذه الدالة خارج constructor
+setupGitHubPagesSupport() {
+    // للتأكد من أن الـ URL صحيح عند التحميل الأول
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            if (window.location.hash && window.location.hash !== '#') {
+                this.loadStateFromURL();
+            }
+        }, 500);
+    });
+    
+    // معالجة خاصة لـ GitHub Pages
+    if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
+        const path = window.location.pathname.replace(/^\//, '');
+        if (path.includes('manga/')) {
+            window.location.hash = path;
+            history.replaceState(null, '', window.location.pathname + '#' + path);
+        }
+    }
+}
+
+
 
     setupEventListeners() {
         document.querySelector('.logo').addEventListener('click', () => {

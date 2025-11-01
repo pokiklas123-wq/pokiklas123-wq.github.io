@@ -16,6 +16,28 @@ class App {
             console.error('خطأ في بدء التطبيق:', error);
         }
     }
+    
+async loadInitialData() {
+    try {
+        // تحميل بيانات المانجا أولاً
+        await mangaManager.loadMangaList();
+        
+        // معالجة خاصة لـ GitHub Pages - انتظر ثم حمّل الحالة
+        setTimeout(() => {
+            if (window.location.hash && window.location.hash !== '#') {
+                console.log('معالجة الـ URL بعد تحميل البيانات:', window.location.hash);
+                navigationManager.loadStateFromURL();
+            }
+        }, 800);
+        
+        if (authManager.getCurrentUser()) {
+            await ratingsManager.loadUserRatings();
+            await notificationsManager.loadNotifications();
+        }
+    } catch (error) {
+        console.error('خطأ في تحميل البيانات الأولية:', error);
+    }
+}
 
     setupEventListeners() {
         document.getElementById('backToHome').addEventListener('click', () => {
