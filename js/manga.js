@@ -254,6 +254,8 @@ class MangaManager {
             ui.hideLoading('loadingDetail');
             ui.showElement('mangaDetailContent');
             
+            // الانتقال الفوري إلى صفحة التفاصيل
+            ui.navigateToPage('mangaDetailPage');
             this.updateURL(mangaId);
             
         } catch (error) {
@@ -425,6 +427,8 @@ class MangaManager {
             ui.hideLoading('loadingChapter');
             ui.showElement('chapterContent');
             
+            // الانتقال الفوري إلى صفحة الفصل
+            ui.navigateToPage('chapterPage');
             this.updateURL(mangaId, chapterId);
             
         } catch (error) {

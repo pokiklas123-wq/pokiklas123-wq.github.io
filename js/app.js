@@ -7,8 +7,10 @@ class App {
         try {
             this.setupEventListeners();
             
+            // تحميل حالة التنقل أولاً
             navigationManager.loadState();
             
+            // ثم تحميل البيانات
             await this.loadInitialData();
             
             console.log('التطبيق بدأ بنجاح');
@@ -16,28 +18,6 @@ class App {
             console.error('خطأ في بدء التطبيق:', error);
         }
     }
-    
-async loadInitialData() {
-    try {
-        // تحميل بيانات المانجا أولاً
-        await mangaManager.loadMangaList();
-        
-        // معالجة خاصة لـ GitHub Pages - انتظر ثم حمّل الحالة
-        setTimeout(() => {
-            if (window.location.hash && window.location.hash !== '#') {
-                console.log('معالجة الـ URL بعد تحميل البيانات:', window.location.hash);
-                navigationManager.loadStateFromURL();
-            }
-        }, 800);
-        
-        if (authManager.getCurrentUser()) {
-            await ratingsManager.loadUserRatings();
-            await notificationsManager.loadNotifications();
-        }
-    } catch (error) {
-        console.error('خطأ في تحميل البيانات الأولية:', error);
-    }
-}
 
     setupEventListeners() {
         document.getElementById('backToHome').addEventListener('click', () => {
@@ -91,11 +71,15 @@ async loadInitialData() {
 
     async loadInitialData() {
         try {
+            // تحميل بيانات المانجا أولاً
             await mangaManager.loadMangaList();
             
+            // إذا كان هناك رابط مباشر، انتظر قليلاً ثم حمّله
             setTimeout(() => {
-                navigationManager.loadStateFromURL();
-            }, 100);
+                if (window.location.hash && window.location.hash !== '#') {
+                    navigationManager.loadStateFromURL();
+                }
+            }, 500);
             
             if (authManager.getCurrentUser()) {
                 await ratingsManager.loadUserRatings();

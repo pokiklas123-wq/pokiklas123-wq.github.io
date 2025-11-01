@@ -4,35 +4,8 @@ class NavigationManager {
         this.currentState = null;
         this.setupEventListeners();
         this.setupBrowserBackButton();
-        this.setupGitHubPagesSupport();
         this.loadState(); 
     }
-
-// في navigation.js - أضف هذا في constructor
-
-
-// ثم أضف هذه الدالة خارج constructor
-setupGitHubPagesSupport() {
-    // للتأكد من أن الـ URL صحيح عند التحميل الأول
-    window.addEventListener('load', () => {
-        setTimeout(() => {
-            if (window.location.hash && window.location.hash !== '#') {
-                this.loadStateFromURL();
-            }
-        }, 500);
-    });
-    
-    // معالجة خاصة لـ GitHub Pages
-    if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
-        const path = window.location.pathname.replace(/^\//, '');
-        if (path.includes('manga/')) {
-            window.location.hash = path;
-            history.replaceState(null, '', window.location.pathname + '#' + path);
-        }
-    }
-}
-
-
 
     setupEventListeners() {
         document.querySelector('.logo').addEventListener('click', () => {
@@ -94,7 +67,6 @@ setupGitHubPagesSupport() {
             this.history[this.history.length - 1] = state;
             this.saveState();
             ui.navigateToPage(pageId);
-            console.log('تحديث الحالة الداخلية فقط:', pageId, 'hash:', newHash);
             return;
         }
 
@@ -105,12 +77,12 @@ setupGitHubPagesSupport() {
         this.currentState = state;
         this.history.push(state);
 
+        // تحديث الـ URL أولاً
         history.pushState(state, '', `#${newHash}`);
-
-        this.saveState();
+        
+        // ثم الانتقال إلى الصفحة
         ui.navigateToPage(pageId);
-
-        console.log('التنقل إلى:', pageId, 'hash:', newHash);
+        this.saveState();
     }
 
     generateHash(state) {
@@ -178,17 +150,11 @@ setupGitHubPagesSupport() {
 
     async loadMangaFromURL(mangaId) {
         try {
-            let attempts = 0;
-            const maxAttempts = 10;
-            
-            while ((!mangaManager.mangaData || Object.keys(mangaManager.mangaData).length === 0) && attempts < maxAttempts) {
-                await new Promise(resolve => setTimeout(resolve, 200));
-                attempts++;
-            }
-            
-            if (attempts >= maxAttempts) {
-                console.warn('فشل تحميل بيانات المانجا بعد عدة محاولات');
-                this.navigateTo('homePage');
+            // الانتظار حتى تحميل بيانات المانجا
+            if (!mangaManager.mangaData || Object.keys(mangaManager.mangaData).length === 0) {
+                setTimeout(() => {
+                    this.loadMangaFromURL(mangaId);
+                }, 100);
                 return;
             }
             
@@ -203,6 +169,7 @@ setupGitHubPagesSupport() {
                 }
                 this.saveState();
                 
+                // الانتقال الفوري إلى صفحة التفاصيل
                 ui.navigateToPage('mangaDetailPage');
                 await mangaManager.showMangaDetail(mangaId, manga);
             } else {
@@ -221,7 +188,7 @@ setupGitHubPagesSupport() {
             if (!mangaManager.mangaData || Object.keys(mangaManager.mangaData).length === 0) {
                 setTimeout(() => {
                     this.loadChapterFromURL(mangaId, chapterId);
-                }, 500);
+                }, 100);
                 return;
             }
             
@@ -243,6 +210,7 @@ setupGitHubPagesSupport() {
                 }
                 this.saveState();
 
+                // الانتقال الفوري إلى صفحة الفصل
                 ui.navigateToPage('chapterPage');
                 await mangaManager.showChapter(mangaId, chapterId, chapter);
             } else {
@@ -275,12 +243,13 @@ setupGitHubPagesSupport() {
         switch (state.page) {
             case 'homePage':
                 ui.navigateToPage('homePage');
+                mangaManager.loadMangaList();
                 break;
             case 'mangaDetailPage':
                 if (state.data.mangaId && mangaManager.mangaData[state.data.mangaId]) {
                     const manga = mangaManager.mangaData[state.data.mangaId];
                     ui.navigateToPage('mangaDetailPage');
-                    mangaManager.showMangaDetail(state.data.mangaId, manga);
+                    // لا نحتاج لاستدعاء showMangaDetail هنا لأن loadStateFromURL سيتكفل بذلك
                 }
                 break;
             case 'chapterPage':
@@ -291,7 +260,7 @@ setupGitHubPagesSupport() {
                     const manga = mangaManager.mangaData[state.data.mangaId];
                     const chapter = manga.chapters[state.data.chapterId];
                     ui.navigateToPage('chapterPage');
-                    mangaManager.showChapter(state.data.mangaId, state.data.chapterId, chapter);
+                    // لا نحتاج لاستدعاء showChapter هنا لأن loadStateFromURL سيتكفل بذلك
                 }
                 break;
         }
