@@ -1,68 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-
-
-<script>
-    // معالجة إعادة التوجيه لـ GitHub Pages - الإصدار المحسّن
-    (function() {
-        // معالجة المسارات من 404.html
-        const redirectPath = sessionStorage.getItem('redirectPath');
-        const redirectHash = sessionStorage.getItem('redirectHash');
-        
-        if (redirectPath) {
-            sessionStorage.removeItem('redirectPath');
-            sessionStorage.removeItem('redirectHash');
-            
-            // إذا كان هناك hash في المسار الأصلي، استخدمه
-            if (redirectHash) {
-                window.location.hash = redirectHash;
-            } else {
-                // تحويل المسار إلى hash
-                const hash = redirectPath
-                    .replace('/manga/', 'manga/')
-                    .replace('/chapter/', '/chapter/')
-                    .replace(/^\//, ''); // إزالة / من البداية
-                
-                if (hash) {
-                    window.location.hash = hash;
-                }
-            }
-        }
-        
-        // أيضاً معالجة الـ hash المباشر إذا كان موجوداً في URL
-        if (window.location.hash && window.location.hash !== '#') {
-            const currentHash = window.location.hash.replace('#', '');
-            if (!currentHash.includes('manga/')) {
-                // إذا كان hash بسيطاً، حاول تحويله
-                const parts = currentHash.split('/');
-                if (parts.length >= 2 && parts[0] && parts[1]) {
-                    if (parts.length === 2) {
-                        window.location.hash = `manga/${parts[0]}/chapter/${parts[1]}`;
-                    } else if (parts.length === 1) {
-                        window.location.hash = `manga/${parts[0]}`;
-                    }
-                }
-            }
-        }
-    })();
-</script>
-
-    
-
-<script>
-    // معالجة إعادة التوجيه من 404.html
-    if (sessionStorage.redirect) {
-        const redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect !== location.pathname) {
-            history.replaceState(null, null, redirect);
-        }
-    }
-</script>
-
-
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مانجا - manus | موقع متكامل للمانجا العربية</title>
@@ -75,6 +13,21 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
     <link rel="stylesheet" href="styles/responsive.css">
+    
+    <script>
+        // معالجة إعادة التوجيه من 404.html
+        (function() {
+            const redirectPath = sessionStorage.redirect;
+            if (redirectPath && redirectPath !== location.pathname) {
+                sessionStorage.removeItem('redirect');
+                
+                const hash = redirectPath.replace('/manga/', 'manga/').replace('/chapter/', '/chapter/');
+                if (hash.includes('manga/')) {
+                    window.location.hash = hash;
+                }
+            }
+        })();
+    </script>
 </head>
 <body>
     <!-- الهيدر -->
@@ -121,13 +74,11 @@
         </div>
 
         <div class="drawer-section">
-            <h3>الحساب</h3>>
+            <h3>الحساب</h3>
             <div id="userSection">
                 <button class="btn drawer-login-btn" id="drawerLoginBtn">تسجيل الدخول</button>
             </div>
         </div>
-
-        
 
         <div class="drawer-section">
             <h3>الإشعارات</h3>
@@ -135,8 +86,6 @@
                 <p class="no-notifications">لا توجد إشعارات</p>
             </div>
         </div>
-
-        
 
         <div class="drawer-section">
             <h3>المظهر</h3>
@@ -146,8 +95,6 @@
                 <button class="theme-btn" data-theme="colored">الملون</button>
             </div>
         </div>
-
-        
 
         <div class="drawer-section">
             <h3>التصنيفات</h3>
@@ -190,8 +137,8 @@
                 <p>جاري تحميل التفاصيل...</p>
             </div>
             <div id="mangaDetailContent" class="manga-detail-content">
-    <!-- سيتم ملؤه ديناميكياً من manga.js -->
-</div>
+                <!-- سيتم ملؤه ديناميكياً من manga.js -->
+            </div>
         </div>
 
         <!-- صفحة عرض الفصل -->
@@ -205,8 +152,8 @@
                     <p>جاري تحميل الفصل...</p>
                 </div>
                 <div id="chapterContent" class="chapter-content">
-    <!-- سيتم ملؤه ديناميكياً من manga.js -->
-</div>
+                    <!-- سيتم ملؤه ديناميكياً من manga.js -->
+                </div>
             </div>
         </div>
     </div>
@@ -231,20 +178,18 @@
         </div>
     </div>
 
-<!-- السكريبتات -->
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <!-- السكريبتات -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 
-<script src="js/firebase-config.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/manga.js"></script>
-<script src="js/comments.js"></script>
-<script src="js/ratings.js"></script>
-<script src="js/navigation.js"></script>
-
-    
+    <script src="js/firebase-config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/manga.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/ratings.js"></script>
+    <script src="js/navigation.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

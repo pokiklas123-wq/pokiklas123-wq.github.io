@@ -14,12 +14,7 @@
             // إذا كان هناك مسار حقيقي (ليس الصفحة الرئيسية)
             if (path && path !== '/' && path !== '/index.html' && !path.includes('.')) {
                 // حفظ المسار الكامل في sessionStorage
-                sessionStorage.setItem('redirectPath', path);
-                
-                // إذا كان هناك hash، احفظه أيضاً
-                if (window.location.hash) {
-                    sessionStorage.setItem('redirectHash', window.location.hash);
-                }
+                sessionStorage.setItem('redirect', path);
             }
             
             // التوجيه إلى الصفحة الرئيسية
