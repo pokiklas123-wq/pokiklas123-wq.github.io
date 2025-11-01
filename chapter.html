@@ -66,6 +66,8 @@
             padding: 1rem;
             border-bottom: 1px solid rgba(0,0,0,0.1);
             margin-bottom: 1rem;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
         }
         .comment:last-child {
             border-bottom: none;
@@ -122,14 +124,6 @@
         .reply-form {
             margin-top: 1rem;
             display: none;
-        }
-        .show-replies-btn {
-            background: none;
-            border: none;
-            color: var(--primary-color);
-            cursor: pointer;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
         }
         .empty-state {
             text-align: center;
@@ -253,6 +247,7 @@
         <div id="chapterContent">
             <div class="loading">
                 <div class="spinner"></div>
+                <p>جاري تحميل الفصل...</p>
             </div>
         </div>
     </div>
@@ -266,7 +261,10 @@
             </form>
         </div>
         <div id="commentsContainer" class="comments-list">
-            <!-- Comments will be rendered here by comments.js -->
+            <div class="empty-state">
+                <i class="fas fa-comments"></i>
+                <p>لا توجد تعليقات بعد. كن أول من يعلق!</p>
+            </div>
         </div>
     </div>
 
