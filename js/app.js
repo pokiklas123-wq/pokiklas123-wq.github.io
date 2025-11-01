@@ -28,7 +28,7 @@ class MangaApp {
         await this.loadMangaData();
         this.setupAuth();
         Utils.loadTheme();
-        this.setupNotifications(); // New: Setup Notifications Manager
+        this.setupNotifications();
         this.isInitialized = true;
         console.log('✅ التطبيق جاهز للاستخدام');
     }
@@ -124,8 +124,8 @@ class MangaApp {
     }
     
     setupNotifications() {
-        // Initialize NotificationsManager globally
-        window.notificationsManager = new NotificationsManager(this);
+        // Initialize NotificationsManager
+        this.notificationsManager = new NotificationsManager(this);
     }
 
     setupAuthButtons() {
@@ -188,10 +188,34 @@ class MangaApp {
             if (authBtn) authBtn.classList.add('hidden');
             if (logoutBtn) logoutBtn.classList.remove('hidden');
             if (userInfo) userInfo.classList.remove('hidden');
+            
+            // تحديث معلومات المستخدم في الدراور
+            this.updateUserInfo(user);
         } else {
             if (authBtn) authBtn.classList.remove('hidden');
             if (logoutBtn) logoutBtn.classList.add('hidden');
             if (userInfo) userInfo.classList.add('hidden');
+        }
+    }
+    
+    async updateUserInfo(user) {
+        try {
+            const snapshot = await this.db.ref('users/' + user.uid).once('value');
+            const userData = snapshot.val();
+            
+            const userName = document.querySelector('.user-name');
+            const userEmail = document.querySelector('.user-email');
+            const userAvatar = document.querySelector('.user-avatar');
+            
+            if (userName) userName.textContent = userData?.displayName || user.displayName || 'مستخدم';
+            if (userEmail) userEmail.textContent = userData?.email || user.email || '';
+            if (userAvatar) {
+                userAvatar.src = userData?.profile?.avatar || 
+                    user.photoURL || 
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&background=4ECDC4&color=fff&size=150`;
+            }
+        } catch (error) {
+            console.error('Error loading user data:', error);
         }
     }
     
@@ -201,16 +225,7 @@ class MangaApp {
             const userData = snapshot.val();
             
             if (userData) {
-                const userName = document.querySelector('.user-name');
-                const userEmail = document.querySelector('.user-email');
-                const userAvatar = document.querySelector('.user-avatar');
-                
-                if (userName) userName.textContent = userData.displayName || 'مستخدم';
-                if (userEmail) userEmail.textContent = userData.email || '';
-                if (userAvatar) {
-                    userAvatar.src = userData.profile?.avatar || 
-                        `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || 'مستخدم')}&background=4ECDC4&color=fff&size=150`;
-                }
+                this.updateUserInfo({ uid: userId, ...userData });
             }
         } catch (error) {
             console.error('Error loading user data:', error);
@@ -431,7 +446,7 @@ class MangaApp {
         
         const icon = document.querySelector('#themeToggle i');
         if (icon) {
-            icon.className = `fas ${Utils.getThemeIcon(theme)}`;
+            icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
         }
         
         const themeOptions = document.querySelectorAll('.theme-option');

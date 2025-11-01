@@ -265,10 +265,17 @@ class CommentsManager {
                 timestamp: Date.now()
             };
 
-            await parentCommentRef.child('replies').push(newReply);
+            const replyRef = parentCommentRef.child('replies').push();
+            await replyRef.set(newReply);
+            
             input.value = '';
             this.toggleReplyForm(commentId, false);
             Utils.showMessage('تم إرسال الرد بنجاح.', 'success');
+
+            // إرسال إشعار لصاحب التعليق الأصلي
+            if (parentComment.userId !== user.uid) {
+                await this.sendReplyNotification(parentComment.userId, commentId, replyRef.key, newReply);
+            }
 
         } catch (error) {
             console.error('Error adding reply:', error);
@@ -312,6 +319,30 @@ class CommentsManager {
                 edited: true,
                 editTimestamp: Date.now()
             });
+        }
+    }
+
+    async sendReplyNotification(parentCommentUserId, commentId, replyId, replyData) {
+        try {
+            const notificationRef = this.db.ref(`notifications/${parentCommentUserId}`).push();
+            
+            const notification = {
+                type: 'reply',
+                senderId: this.auth.currentUser.uid,
+                senderName: this.auth.currentUser.displayName || 'مستخدم',
+                mangaId: this.mangaId,
+                chapterId: this.chapterNumber,
+                commentId: commentId,
+                replyId: replyId,
+                text: `رد ${this.auth.currentUser.displayName || 'مستخدم'} على تعليقك: "${replyData.text.substring(0, 100)}${replyData.text.length > 100 ? '...' : ''}"`,
+                timestamp: Date.now(),
+                read: false
+            };
+            
+            await notificationRef.set(notification);
+            console.log('تم إرسال الإشعار بنجاح إلى:', parentCommentUserId);
+        } catch (error) {
+            console.error('Error sending notification:', error);
         }
     }
 }

@@ -3,6 +3,7 @@ class MangaPage {
     constructor() {
         this.mangaId = this.getMangaIdFromURL();
         this.mangaData = null;
+        this.currentUserRating = 0;
         
         if (this.mangaId) {
             this.init();
@@ -192,7 +193,7 @@ class MangaPage {
         
         const icon = document.querySelector('#themeToggle i');
         if (icon) {
-            icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            icon.className = `fas ${Utils.getThemeIcon(theme)}`;
         }
         
         const themeOptions = document.querySelectorAll('.theme-option');

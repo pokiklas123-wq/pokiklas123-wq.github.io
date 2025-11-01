@@ -114,6 +114,10 @@ class NotificationsManager {
         const notificationEl = document.createElement('div');
         notificationEl.className = `notification-item ${notification.read ? 'read' : 'unread'}`;
         notificationEl.setAttribute('data-id', notification.id);
+        notificationEl.setAttribute('data-manga-id', notification.mangaId || '');
+        notificationEl.setAttribute('data-chapter-id', notification.chapterId || '');
+        notificationEl.setAttribute('data-comment-id', notification.commentId || '');
+        notificationEl.setAttribute('data-reply-id', notification.replyId || '');
         
         const icon = this.getNotificationIcon(notification.type);
         const time = notification.timestamp ? Utils.formatTimestamp(notification.timestamp) : 'غير معروف';
@@ -141,15 +145,29 @@ class NotificationsManager {
             </div>
         `;
         
+        // جعل الإشعار قابلاً للنقر
+        notificationEl.style.cursor = 'pointer';
+        notificationEl.addEventListener('click', (e) => {
+            if (!e.target.closest('.action-btn')) {
+                this.handleNotificationClick(notification);
+            }
+        });
+
         // إضافة event listeners للأزرار
         const markAsReadBtn = notificationEl.querySelector('.mark-as-read');
         const deleteBtn = notificationEl.querySelector('.delete-notification');
         
         if (markAsReadBtn) {
-            markAsReadBtn.addEventListener('click', () => this.markAsRead(notification.id));
+            markAsReadBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.markAsRead(notification.id);
+            });
         }
         if (deleteBtn) {
-            deleteBtn.addEventListener('click', () => this.deleteNotification(notification.id));
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.deleteNotification(notification.id);
+            });
         }
         
         return notificationEl;
@@ -173,6 +191,21 @@ class NotificationsManager {
             'update': 'تحديث'
         };
         return titles[type] || 'إشعار';
+    }
+
+    handleNotificationClick(notification) {
+        if (notification.type === 'reply' && notification.mangaId && notification.chapterId) {
+            // الانتقال إلى الفصل مع التركيز على التعليق والرد
+            let hash = `comment-${notification.commentId}`;
+            if (notification.replyId) {
+                hash = `reply-${notification.commentId}-${notification.replyId}`;
+            }
+            
+            window.location.href = `chapter.html?manga=${notification.mangaId}&chapter=${notification.chapterId}#${hash}`;
+        }
+        
+        // وضع علامة كمقروء عند النقر
+        this.markAsRead(notification.id);
     }
 
     async markAsRead(id) {
