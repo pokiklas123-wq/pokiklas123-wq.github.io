@@ -3,13 +3,21 @@
 <head>
     <meta charset="utf-8">
     <title>Redirecting...</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/responsive.css">
     <script>
-        // إعادة التوجيه إلى الصفحة الرئيسية مع الحفاظ على المسار
-        sessionStorage.redirect = location.pathname;
-        location.replace('/');
+        const path = window.location.pathname + window.location.search;
+        if (path && path !== '/' && path !== '/index.html') {
+            sessionStorage.setItem('redirect', path);
+        }
+        window.location.href = '/';
     </script>
 </head>
 <body>
-    <p>If you are not redirected automatically, <a href="/">click here</a>.</p>
+    <div style="padding: 20px; text-align: center;">
+        <h1>جاري التوجيه...</h1>
+        <p>إذا لم يتم توجيهك تلقائياً، <a href="/">اضغط هنا</a>.</p>
+    </div>
 </body>
 </html>
