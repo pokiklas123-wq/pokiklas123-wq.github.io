@@ -15,10 +15,6 @@
             margin-bottom: 2rem;
             text-align: center;
         }
-        .notifications-header h1 {
-            font-size: 2rem;
-            color: var(--primary-color);
-        }
         .notifications-list {
             background: var(--card-bg);
             border-radius: var(--border-radius);
@@ -26,17 +22,17 @@
         }
         .notification-item {
             padding: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
             transition: var(--transition);
         }
         .notification-item:hover {
-            background: var(--dark-color);
+            background: rgba(0,0,0,0.05);
         }
         .notification-item:last-child {
             border-bottom: none;
         }
         .notification-item.unread {
-            background: rgba(59, 130, 246, 0.1);
+            background: rgba(74, 144, 226, 0.1);
         }
         .notification-header {
             display: flex;
@@ -52,18 +48,16 @@
             gap: 0.5rem;
         }
         .notification-date {
-            color: var(--text-secondary);
+            color: #666;
             font-size: 0.875rem;
         }
         .notification-content {
             margin-bottom: 0.5rem;
             line-height: 1.5;
-            color: var(--text-color);
         }
         .notification-actions {
             display: flex;
             gap: 1rem;
-            margin-top: 1rem;
         }
         .action-btn {
             background: none;
@@ -74,10 +68,6 @@
             display: flex;
             align-items: center;
             gap: 0.25rem;
-            transition: var(--transition);
-        }
-        .action-btn:hover {
-            color: var(--accent-color);
         }
         .mark-all-read {
             margin-bottom: 1rem;
@@ -86,12 +76,12 @@
         .empty-notifications {
             text-align: center;
             padding: 3rem;
-            color: var(--text-secondary);
+            color: #666;
         }
         .empty-notifications i {
             font-size: 4rem;
             margin-bottom: 1rem;
-            color: var(--border-color);
+            color: #ccc;
         }
     </style>
 </head>
@@ -172,7 +162,6 @@
         </ul>
         
         <div class="theme-selector">
-            <span>المظهر</span>
             <div class="theme-option active" data-theme="light">فاتح</div>
             <div class="theme-option" data-theme="dark">مظلم</div>
             <div class="theme-option" data-theme="blue">أزرق</div>
@@ -193,7 +182,7 @@
             </div>
             
             <div class="mark-all-read">
-                <button class="btn btn-outline" id="markAllReadBtn">
+                <button class="btn btn-outline" onclick="notificationsManager.markAllAsRead()">
                     <i class="fas fa-check-double"></i>
                     تعيين الكل كمقروء
                 </button>
@@ -208,41 +197,20 @@
         </div>
     </div>
 
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>مانجا أونلاين</h3>
-                <p>أفضل موقع لقراءة المانجا العربية. استمتع بأفضل القصص المصورة من مختلف الأنواع.</p>
-            </div>
-            <div class="footer-section">
-                <h3>روابط سريعة</h3>
-                <ul class="footer-links">
-                    <li><a href="index.html">الصفحة الرئيسية</a></li>
-                    <li><a href="#">المانجا الجديدة</a></li>
-                    <li><a href="#">الأكثر مشاهدة</a></li>
-                    <li><a href="#">الأعلى تقييماً</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>الدعم</h3>
-                <ul class="footer-links">
-                    <li><a href="https://wa.me/2130562622999">اتصل بنا WhatsApp</a></li>
-                    <li><a href="#">الأسئلة الشائعة</a></li>
-                    <li><a href="#">سياسة الخصوصية</a></li>
-                    <li><a href="#">شروط الاستخدام</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            &copy; 2023 مانجا أونلاين. جميع الحقوق محفوظة.
-        </div>
-    </footer>
-
     <script src="js/firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="js/utils.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // تأكد من تهيئة التطبيق
+            if (typeof app === 'undefined') {
+                window.app = new MangaApp();
+            }
+        });
+    </script>
 </body>
 </html>
