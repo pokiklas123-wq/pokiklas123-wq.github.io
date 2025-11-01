@@ -4,19 +4,51 @@
 
 
 <script>
-    // معالجة إعادة التوجيه من 404.html - النسخة المحسنة
+    // معالجة إعادة التوجيه لـ GitHub Pages - الإصدار المحسّن
     (function() {
-        const redirectPath = sessionStorage.redirect;
-        if (redirectPath && redirectPath !== location.pathname) {
-            sessionStorage.removeItem('redirect');
+        // معالجة المسارات من 404.html
+        const redirectPath = sessionStorage.getItem('redirectPath');
+        const redirectHash = sessionStorage.getItem('redirectHash');
+        
+        if (redirectPath) {
+            sessionStorage.removeItem('redirectPath');
+            sessionStorage.removeItem('redirectHash');
             
-            const hash = redirectPath.replace('/manga/', 'manga/').replace('/chapter/', '/chapter/');
-            if (hash.includes('manga/')) {
-                history.replaceState(null, null, '#' + hash);
+            // إذا كان هناك hash في المسار الأصلي، استخدمه
+            if (redirectHash) {
+                window.location.hash = redirectHash;
+            } else {
+                // تحويل المسار إلى hash
+                const hash = redirectPath
+                    .replace('/manga/', 'manga/')
+                    .replace('/chapter/', '/chapter/')
+                    .replace(/^\//, ''); // إزالة / من البداية
+                
+                if (hash) {
+                    window.location.hash = hash;
+                }
+            }
+        }
+        
+        // أيضاً معالجة الـ hash المباشر إذا كان موجوداً في URL
+        if (window.location.hash && window.location.hash !== '#') {
+            const currentHash = window.location.hash.replace('#', '');
+            if (!currentHash.includes('manga/')) {
+                // إذا كان hash بسيطاً، حاول تحويله
+                const parts = currentHash.split('/');
+                if (parts.length >= 2 && parts[0] && parts[1]) {
+                    if (parts.length === 2) {
+                        window.location.hash = `manga/${parts[0]}/chapter/${parts[1]}`;
+                    } else if (parts.length === 1) {
+                        window.location.hash = `manga/${parts[0]}`;
+                    }
+                }
             }
         }
     })();
 </script>
+
+    
 
 <script>
     // معالجة إعادة التوجيه من 404.html
