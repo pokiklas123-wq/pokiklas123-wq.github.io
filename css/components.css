@@ -238,19 +238,19 @@ header {
 }
 
 .manga-info {
-    padding: 10px 15px; /* تقليل الحشو */
+    padding: 50px 70px; /* تقليل الحشو */
     background: var(--card-bg);
     position: relative;
-    z-index: 10;
+    z-index: 50;
 }
 
 .manga-title {
-    font-size: 1rem; /* تصغير الخط قليلاً */
-    margin-bottom: 5px;
+    font-size: 16px; /* تصغير الخط قليلاً */
+    margin-bottom: 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 700;
+    font-weight: bold;
     color: var(--text-color);
 }
 .manga-rating {
