@@ -48,6 +48,19 @@
             </div>
         </div>
         
+        
+        
+        <div class="container">
+        <div class="filters">
+            
+           
+           
+            
+        </div>
+        
+        
+        
+        
         <ul class="drawer-menu">
             <li class="drawer-menu-item">
                 <a href="index.html" class="drawer-menu-link">
@@ -58,21 +71,38 @@
             <li class="drawer-menu-item">
                 <a href="#" class="drawer-menu-link" data-filter="popular">
                     <i class="fas fa-fire"></i>
-                    <span>الأكثر مشاهدة</span>
+                   <!--<span>الأكثر مشاهدة</span>-->
+                    <button class="filter-btn" data-filter="popular">الأكثر مشاهدة</button>
                 </a>
             </li>
             <li class="drawer-menu-item">
                 <a href="#" class="drawer-menu-link" data-filter="rating">
                     <i class="fas fa-star"></i>
-                    <span>الأعلى تقييماً</span>
+                    <!--<span>الأعلى تقييماً</span>-->
+                    
+                     <button class="filter-btn" data-filter="rating">الأعلى تقييماً</button>
+                     
                 </a>
             </li>
             <li class="drawer-menu-item">
                 <a href="#" class="drawer-menu-link" data-filter="latest">
                     <i class="fas fa-history"></i>
-                    <span>الأحدث</span>
+                  <!-- <span>الأحدث</span>-->
+                    
+                    <button class="filter-btn" data-filter="oldest">الأحدث</button>
+                    
                 </a>
             </li>
+            
+            
+            <li class ="drawer-menu-item">
+            <a href="#" class="drawer-menu-item" data-filter="oldest">
+            <i class="fas fa-history"></i>
+            
+<button class="filter-btn active" data-filter="latest">الأقدم</button>
+</a>
+</li>
+            
             <li class="drawer-menu-item">
                 <a href="#" class="drawer-menu-link" id="notificationsDrawerBtn">
                     <i class="fas fa-bell"></i>
@@ -82,6 +112,9 @@
         </ul>
         
         <div class="theme-selector">
+        
+         <span>المظهر</span>
+         
             <div class="theme-option active" data-theme="light">فاتح</div>
             <div class="theme-option" data-theme="dark">مظلم</div>
             <div class="theme-option" data-theme="blue">أزرق</div>
@@ -96,10 +129,10 @@
 
     <div class="container">
         <div class="filters">
-            <button class="filter-btn active" data-filter="latest">الأحدث</button>
+            <button class="filter-btn active" data-filter="latest">الأقدم</button>
             <button class="filter-btn" data-filter="popular">الأكثر مشاهدة</button>
             <button class="filter-btn" data-filter="rating">الأعلى تقييماً</button>
-            <button class="filter-btn" data-filter="oldest">الأقدم</button>
+            <button class="filter-btn" data-filter="oldest">الأحدث</button>
         </div>
         
         <div class="manga-grid" id="mangaGrid">
