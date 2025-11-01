@@ -1,75 +1,122 @@
+/*
+*   ملف style.css الموحد
+*   تم دمج محتويات style.css, main.css, components.css, و responsive.css
+*   تم تعديل الأنماط لتطبيق تصميم داكن حديث مشابه لموقع waveteamy.com
+*/
 
-/* css/style.css */
+/* 1. متغيرات CSS (Themes) */
 :root {
-    /* Professional Light Theme (Default) */
+    /* Default: Dark Theme (Inspired by waveteamy.com and user's main.css) */
+    --primary-color: #3b82f6; /* أزرق بارز */
+    --secondary-color: #161b22; /* خلفية البطاقة */
+    --accent-color: #ff5252; /* لون التمييز */
+    --light-color: #e2e8f0; /* لون النص الفاتح */
+    --dark-color: #0d1117; /* خلفية داكنة */
+    --text-color: #e2e8f0;
+    --text-secondary: #8b949e;
+    --bg-color: #0d1117;
+    --card-bg: #161b22;
+    --border-color: #30363d;
+    --border-radius: 8px;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    --transition: all 0.3s ease;
+    --blur-bg: rgba(13, 17, 23, 0.8);
+    --primary-color-rgb: 59, 130, 246;
+}
+
+[data-theme="light"] {
+    /* Light Theme (Fallback) */
     --primary-color: #007bff;
     --secondary-color: #343a40;
     --accent-color: #dc3545;
-    --light-color: #f8f9fa;
-    --dark-color: #212529;
+    --light-color: #212529;
+    --dark-color: #f8f9fa;
     --text-color: #212529;
     --text-secondary: #6c757d;
     --bg-color: #ffffff;
     --card-bg: #ffffff;
     --border-color: #dee2e6;
-    --border-radius: 10px;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --transition: all 0.3s ease;
     --blur-bg: rgba(255, 255, 255, 0.9);
+    --primary-color-rgb: 0, 123, 255;
 }
 
-[data-theme="dark"] {
-    /* Professional Dark Theme */
-    --primary-color: #009688;
-    --secondary-color: #1a1a1a;
-    --accent-color: #ff5252;
-    --light-color: #f8f9fa;
-    --dark-color: #212529;
-    --text-color: #f8f9fa;
-    --text-secondary: #adb5bd;
-    --bg-color: #121212;
-    --card-bg: #1e1e1e;
-    --border-color: #333;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-    --blur-bg: rgba(30, 30, 30, 0.9);
-}
-
-[data-theme="blue"] {
-    /* Professional Dark Blue Theme */
-    --primary-color: #3498db;
-    --secondary-color: #2c3e50;
-    --accent-color: #e74c3c;
-    --light-color: #ecf0f1;
-    --dark-color: #2c3e50;
-    --text-color: #ecf0f1;
-    --text-secondary: #bdc3c7;
-    --bg-color: #1a2b3c;
-    --card-bg: #243447;
-    --border-color: #34495e;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --blur-bg: rgba(36, 52, 71, 0.9);
-}
-
+/* 2. الأنماط الأساسية */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* استخدام خط عربي حديث */
+    font-family: 'Tajawal', 'Cairo', 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
 }
 
 body {
     background-color: var(--bg-color);
     color: var(--text-color);
+    direction: rtl;
+    line-height: 1.6;
     transition: var(--transition);
     min-height: 100vh;
-    line-height: 1.6;
 }
 
-/* Header */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--accent-color);
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1.5rem;
+}
+
+/* 3. الأزرار (Buttons) */
+.btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+    white-space: nowrap;
+}
+
+.btn:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(var(--primary-color-rgb), 0.4);
+}
+
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: none;
+}
+
+.btn-outline:hover {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+}
+
+/* 4. الرأس (Header) */
 header {
     background-color: var(--secondary-color);
     color: white;
-    padding: 1rem;
+    padding: 1rem 1.5rem;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -81,9 +128,9 @@ header {
 }
 
 .logo {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: bold;
-    color: white;
+    color: var(--primary-color);
     text-decoration: none;
     white-space: nowrap;
 }
@@ -98,21 +145,21 @@ header {
     width: 100%;
     padding: 0.6rem 1rem;
     border-radius: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    background-color: rgba(255, 255, 255, 0.15);
-    color: white;
+    border: 2px solid var(--border-color);
+    background-color: var(--dark-color);
+    color: var(--text-color);
     transition: var(--transition);
     font-size: 0.9rem;
 }
 
 .search-input:focus {
     outline: none;
-    background-color: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
+    background-color: var(--card-bg);
+    border-color: var(--primary-color);
 }
 
 .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-secondary);
 }
 
 .search-results {
@@ -128,16 +175,21 @@ header {
     z-index: 10;
     display: none;
     margin-top: 0.5rem;
+    border: 1px solid var(--border-color);
 }
 
 .search-result-item {
     padding: 0.75rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border-color);
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 0.75rem;
     transition: var(--transition);
+}
+
+.search-result-item:hover {
+    background-color: var(--dark-color);
 }
 
 .search-result-item img {
@@ -149,13 +201,13 @@ header {
 
 .search-result-title {
     font-weight: bold;
-    margin-bottom: 0.25rem;
     font-size: 0.9rem;
+    color: var(--text-color);
 }
 
 .search-result-meta {
     font-size: 0.75rem;
-    color: #666;
+    color: var(--text-secondary);
 }
 
 .header-actions {
@@ -164,38 +216,22 @@ header {
     gap: 0.5rem;
 }
 
-.btn {
-    background-color: var(--primary-color);
+.notification-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: var(--accent-color);
     color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    white-space: nowrap;
+    border-radius: 50%;
+    padding: 0.2rem 0.4rem;
+    font-size: 0.7rem;
+    line-height: 1;
+    min-width: 1.2rem;
+    text-align: center;
+    transform: translate(50%, -50%);
 }
 
-.btn:hover {
-    background-color: var(--secondary-color);
-    transform: translateY(-1px);
-}
-
-.btn-outline {
-    background-color: transparent;
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-}
-
-.btn-outline:hover {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-/* Drawer */
+/* 5. القائمة الجانبية (Drawer) */
 .drawer {
     position: fixed;
     top: 0;
@@ -207,7 +243,8 @@ header {
     transition: var(--transition);
     z-index: 1000;
     overflow-y: auto;
-    padding: 1rem;
+    padding: 1.5rem;
+    border-left: 1px solid var(--border-color);
 }
 
 .drawer.open {
@@ -220,7 +257,7 @@ header {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     z-index: 999;
     display: none;
 }
@@ -233,14 +270,15 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .drawer-title {
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: bold;
+    color: var(--primary-color);
 }
 
 .drawer-close {
@@ -256,10 +294,11 @@ header {
     display: flex;
     align-items: center;
     gap: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     padding: 1rem;
-    background-color: var(--bg-color);
+    background-color: var(--dark-color);
     border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
 }
 
 .user-avatar {
@@ -267,6 +306,7 @@ header {
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
+    border: 2px solid var(--primary-color);
 }
 
 .user-details {
@@ -276,6 +316,7 @@ header {
 .user-name {
     font-weight: bold;
     margin-bottom: 0.25rem;
+    color: var(--light-color);
 }
 .user-email {
     font-size: 0.875rem;
@@ -300,11 +341,11 @@ header {
     color: var(--text-color);
     text-decoration: none;
     transition: var(--transition);
-    pointer-events: auto;
 }
 
 .drawer-menu-link:hover {
-    background-color: rgba(var(--primary-color-rgb), 0.1);
+    background-color: var(--dark-color);
+    color: var(--primary-color);
 }
 
 .drawer-menu-link i {
@@ -315,7 +356,16 @@ header {
 .theme-selector {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 1rem;
+    margin-bottom: 2rem;
+    padding: 0.5rem;
+    background-color: var(--dark-color);
+    border-radius: var(--border-radius);
+}
+
+.theme-selector span {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    padding: 0.5rem;
 }
 
 .theme-option {
@@ -324,9 +374,10 @@ header {
     border-radius: var(--border-radius);
     text-align: center;
     cursor: pointer;
-    border: 2px solid rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
     transition: var(--transition);
     font-size: 0.9rem;
+    background-color: var(--secondary-color);
 }
 
 .theme-option.active {
@@ -336,13 +387,7 @@ header {
     box-shadow: 0 2px 4px rgba(var(--primary-color-rgb), 0.4);
 }
 
-/* Main Content */
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 1.5rem;
-}
-
+/* 6. الفلاتر (Filters) */
 .filters {
     display: flex;
     gap: 0.75rem;
@@ -379,17 +424,17 @@ header {
     transform: translateY(-2px);
 }
 
-/* Manga Grid - التصميم الجديد كما طلبت */
+/* 7. شبكة المانجا (Manga Grid) */
 .manga-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1.5rem;
     margin: 1rem 0;
 }
 
 .manga-card {
     background-color: var(--card-bg);
-    border-radius: 10px;
+    border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: var(--transition);
@@ -402,18 +447,21 @@ header {
 
 .manga-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     border-color: var(--primary-color);
 }
 
 .manga-image-container {
     position: relative;
     width: 100%;
-    height: 200px;
+    padding-top: 140%; /* نسبة عرض إلى ارتفاع 1:1.4 */
     overflow: hidden;
 }
 
 .manga-thumbnail {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -422,59 +470,42 @@ header {
 
 .manga-info {
     padding: 0.8rem;
-    background: var(--blur-bg);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-top: 1px solid var(--border-color);
+    background: var(--card-bg);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .manga-title {
     font-weight: bold;
-    font-size: 0.95rem;
+    font-size: 1rem;
     color: var(--text-color);
-    line-height: 1.4;
+    line-height: 1.3;
     margin-bottom: 0.5rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 2.8em;
+    min-height: 2.6em;
 }
 
 .manga-details {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+    font-size: 0.85rem;
 }
 
-.manga-rating {
+.manga-rating, .manga-views {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.85rem;
-    color: var(--text-color);
-}
-
-.rating-stars {
-    display: flex;
-    gap: 0.1rem;
+    color: var(--text-secondary);
 }
 
 .rating-stars i {
     color: #ffc107;
-    font-size: 0.8rem;
-}
-
-.manga-views {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-}
-
-.manga-views i {
-    color: var(--primary-color);
     font-size: 0.8rem;
 }
 
@@ -493,32 +524,229 @@ header {
 }
 
 .latest-chapter:hover {
-    background-color: var(--secondary-color);
+    background-color: var(--accent-color);
 }
 
-/* Footer */
+/* 8. صفحة المانجا (Manga Detail Page) */
+.manga-detail-container {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    margin-top: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.manga-header-detail {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.manga-poster-detail {
+    width: 250px;
+    flex-shrink: 0;
+}
+
+.manga-poster-detail img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+}
+
+.manga-info-detail {
+    flex-grow: 1;
+}
+
+.manga-title-detail {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.manga-meta-detail {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: var(--text-secondary);
+}
+
+.meta-item i {
+    color: var(--primary-color);
+}
+
+.manga-description {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-color);
+    margin-bottom: 2rem;
+}
+
+.chapters-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.chapters-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.chapter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: var(--dark-color);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    border: 1px solid var(--border-color);
+}
+
+.chapter-item:hover {
+    background-color: var(--secondary-color);
+    border-color: var(--primary-color);
+}
+
+.chapter-number {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.read-chapter-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* 9. صفحة الفصل (Chapter Page) - تطبيق نمط العرض المتسلسل */
+.chapter-header {
+    background: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 2rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+}
+
+.chapter-title {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 0 1.5rem;
+}
+
+.chapter-images {
+    /* إزالة max-width لتمكين عرض الصور بعرض كامل الشاشة */
+    margin: 0 auto 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0; /* إزالة الفراغات بين الصور */
+}
+
+.chapter-image {
+    width: 100%;
+    max-width: 1000px; /* تحديد أقصى عرض معقول للصور */
+    height: auto;
+    margin-bottom: 0; /* إزالة الفراغ بين الصور */
+    border-radius: 0; /* إزالة الحواف الدائرية للصور المتسلسلة */
+    box-shadow: none; /* إزالة الظل من الصور المتسلسلة */
+    display: block;
+    border-bottom: 1px solid var(--border-color); /* فاصل خفيف بين الصور */
+}
+
+.chapter-image:last-child {
+    border-bottom: none;
+}
+
+/* 10. التعليقات (Comments) */
+.comments-section {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.comments-section h2 {
+    color: var(--primary-color);
+}
+
+.comment-input {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: var(--dark-color);
+    color: var(--text-color);
+    margin-bottom: 1rem;
+    resize: vertical;
+    min-height: 100px;
+}
+
+.comment {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 1rem;
+}
+
+.comment:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.comment-date {
+    color: var(--text-secondary);
+}
+
+.replies {
+    border-right: 2px solid var(--primary-color);
+}
+
+/* 11. التذييل (Footer) */
 footer {
     background-color: var(--secondary-color);
-    color: white;
-    padding: 2rem 1rem;
-    margin-top: 3rem;
+    color: var(--text-secondary);
+    padding: 2rem 1.5rem;
+    border-top: 1px solid var(--border-color);
 }
 
 .footer-content {
     max-width: 1200px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 2rem;
+    margin-bottom: 1.5rem;
 }
 
 .footer-section h3 {
+    color: var(--primary-color);
     margin-bottom: 1rem;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
 }
 
 .footer-links {
     list-style: none;
+    padding: 0;
 }
 
 .footer-links li {
@@ -526,342 +754,98 @@ footer {
 }
 
 .footer-links a {
-    color: #ccc;
-    text-decoration: none;
-    transition: var(--transition);
-    font-size: 0.9rem;
+    color: var(--text-secondary);
 }
 
 .footer-links a:hover {
-    color: white;
+    color: var(--primary-color);
 }
 
 .copyright {
     text-align: center;
-    margin-top: 2rem;
     padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    font-size: 0.9rem;
-    color: #ccc;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.85rem;
 }
 
-/* Utility Classes */
-.hidden {
-    display: none !important;
-}
-
-.text-center {
+/* 12. حالات التحميل والخطأ */
+.loading-indicator, .empty-state {
     text-align: center;
-}
-
-.mt-1 { margin-top: 0.5rem; }
-.mt-2 { margin-top: 1rem; }
-.mt-3 { margin-top: 1.5rem; }
-.mb-1 { margin-bottom: 0.5rem; }
-.mb-2 { margin-bottom: 1rem; }
-.mb-3 { margin-bottom: 1.5rem; }
-
-/* Loading Spinner */
-.loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     padding: 2rem;
-    flex-direction: column;
-    gap: 1rem;
-    grid-column: 1 / -1;
+    color: var(--text-secondary);
 }
 
-.spinner {
+.loading-indicator .spinner {
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--primary-color);
+    border-radius: 50%;
     width: 40px;
     height: 40px;
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    border-left-color: var(--primary-color);
-    border-radius: 50%;
     animation: spin 1s linear infinite;
+    margin: 1rem auto;
 }
 
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-/* Empty State */
-.empty-state {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--text-secondary);
-    grid-column: 1 / -1;
-}
-
-.empty-state i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: var(--border-color);
-}
-
-.empty-state p {
-    margin-bottom: 1.5rem;
-    font-size: 1rem;
-}
-
-/* Notification Badge */
-.notification-badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background-color: var(--accent-color);
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-    font-size: 0.7rem;
-    font-weight: bold;
-    line-height: 1;
-    min-width: 18px;
-    height: 18px;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* RGB variables for themes */
-:root {
-    --primary-color-rgb: 0, 123, 255;
-}
-
-[data-theme="dark"] {
-    --primary-color-rgb: 0, 150, 136;
-}
-
-[data-theme="blue"] {
-    --primary-color-rgb: 52, 152, 219;
-}
-
-/* Responsive Design */
-@media (min-width: 768px) {
+/* 13. استجابة الشاشة (Responsive) */
+@media (max-width: 1024px) {
     .manga-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     }
-    
-    .container {
-        padding: 2rem;
+    .manga-header-detail {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
-    
-    .manga-image-container {
-        height: 250px;
+    .manga-poster-detail {
+        width: 180px;
+    }
+    .manga-title-detail {
+        font-size: 2rem;
     }
 }
 
-@media (min-width: 1024px) {
-    .manga-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
+@media (max-width: 768px) {
+    header {
+        padding: 0.8rem 1rem;
     }
-    
-    .manga-image-container {
-        height: 280px;
+    .search-container {
+        display: none; /* إخفاء شريط البحث في الشاشات الصغيرة */
+    }
+    .manga-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 1rem;
+    }
+    .manga-title {
+        font-size: 0.9rem;
+    }
+    .chapter-nav {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .chapter-nav .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    .drawer {
+        width: 280px;
     }
 }
 
 @media (max-width: 480px) {
     .manga-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+        grid-template-columns: repeat(2, 1fr);
     }
-    
-    header {
-        padding: 0.75rem;
+    .manga-image-container {
+        padding-top: 150%;
     }
-    
-    .logo {
-        font-size: 1.1rem;
-    }
-    
-    .search-container {
-        display: none;
-    }
-    
-    .header-actions .btn:not(#drawerToggle) span {
-        display: none;
-    }
-    
-    .filters {
-        gap: 0.5rem;
-    }
-    
-    .filter-btn {
-        padding: 0.6rem 1rem;
+    .manga-title {
         font-size: 0.85rem;
     }
-    
-    .drawer {
-        width: 280px;
+    .manga-info {
+        padding: 0.6rem;
     }
-    
-    .footer-content {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-    }
-}
-
-/* Message Styles */
-.message {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 1rem 1.5rem;
-    border-radius: var(--border-radius);
-    color: white;
-    z-index: 10000;
-    max-width: 400px;
-    box-shadow: var(--shadow);
-    animation: slideIn 0.3s ease;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-@keyframes slideIn {
-    from { transform: translateX(100%); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes slideOut {
-    from { transform: translateX(0); opacity: 1; }
-    to { transform: translateX(100%); opacity: 0; }
-}
-
-/* تصميم البطاقات الجديد - إضافة للأنماط الحالية */
-.manga-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin: 16px 0;
-}
-
-.manga-card {
-    background: rgba(36, 46, 79, 0.55);
-    border-radius: 8px;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    height: 320px;
-    display: flex;
-    flex-direction: column;
-    transition: all 0.3s ease;
-}
-
-.manga-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(26, 115, 232, 0.2);
-    border-color: var(--primary-color);
-}
-
-.manga-thumbnail-container {
-    position: relative;
-    width: 100%;
-    height: 250px;
-    overflow: hidden;
-}
-
-.manga-thumbnail {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: transform 0.3s ease;
-}
-
-.manga-card:hover .manga-thumbnail {
-    transform: scale(1.05);
-}
-
-.manga-info {
-    padding: 12px 8px;
-    background: #223344;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.manga-title {
-    font-weight: bold;
-    font-size: 14px;
-    text-align: center;
-    margin-bottom: 6px;
-    color: #FFFFFF;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.manga-meta {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-    color: #FFFFFF;
-}
-
-.rating {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    color: #F44336;
-}
-
-.rating i {
-    color: gold;
-}
-
-.chapter-badge {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    background: #F44336;
-    color: white;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: bold;
-}
-
-/* تأثير Shimmer للتحميل */
-.shimmer-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #000009;
-    z-index: 2;
-    display: none;
-}
-
-.manga-card.loading .shimmer-container {
-    display: block;
-    background: linear-gradient(90deg, #000009 25%, #0a0a0a 50%, #000009 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: -200% 0;
-    }
-    100% {
-        background-position: 200% 0;
-    }
-}
-
-.manga-card.loading .manga-thumbnail {
-    opacity: 0;
-}
-
-.manga-card.loading .manga-info {
-    opacity: 0;
 }
