@@ -1,3 +1,5 @@
+[file name]: navigation.js
+[file content begin]
 class NavigationManager {
     constructor() {
         this.history = [];
@@ -45,17 +47,26 @@ class NavigationManager {
 
     // الدالة الرئيسية للتنقل
     navigateTo(path, data = {}, replace = false) {
+        // تنظيف المسار من الـ hash إذا كان موجوداً
+        if (path.startsWith('#')) {
+            path = path.substring(1);
+        }
+        
+        // إضافة الـ base URL للمشروع
+        const basePath = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '');
+        const fullPath = path === '/' ? basePath + '/' : basePath + path;
+
         const state = {
             path: path,
             data: data,
             timestamp: Date.now()
         };
 
-        // تحديث المسار في شريط العنوان
+        // تحديث المسار في شريط العنوان بدون hash
         if (replace) {
-            history.replaceState(state, '', path);
+            history.replaceState(state, '', fullPath);
         } else {
-            history.pushState(state, '', path);
+            history.pushState(state, '', fullPath);
         }
 
         // تحديث الحالة الحالية
@@ -67,12 +78,21 @@ class NavigationManager {
 
     // دالة تحليل المسار (Routing)
     parsePath(path) {
-        const pathParts = path.split('/').filter(part => part);
+        // إزالة الـ base path إذا كان موجوداً
+        const basePath = window.location.pathname.replace(/\/[^\/]*$/, '');
+        let cleanPath = path;
         
-        if (pathParts.length === 0 || pathParts[0] === 'index.html') {
+        if (path.startsWith(basePath)) {
+            cleanPath = path.substring(basePath.length);
+        }
+        
+        // إذا كان المسار فارغاً أو الجذر، العودة للصفحة الرئيسية
+        if (!cleanPath || cleanPath === '/' || cleanPath === '/index.html') {
             return { page: 'homePage', params: {} };
         }
 
+        const pathParts = cleanPath.split('/').filter(part => part);
+        
         if (pathParts[0] === 'manga' && pathParts[1]) {
             const mangaId = pathParts[1];
             
@@ -89,7 +109,7 @@ class NavigationManager {
             }
         }
         
-        // مسار الإشعارات (افتراضي)
+        // مسار الإشعارات
         if (pathParts[0] === 'notifications') {
             return { page: 'notificationsPage', params: {} };
         }
@@ -102,13 +122,15 @@ class NavigationManager {
     handleRoute(path, data = {}) {
         const route = this.parsePath(path);
         
+        console.log('معالجة المسار:', path, '->', route);
+        
         // إظهار شاشة التحميل
         ui.showLoading();
 
         switch (route.page) {
             case 'homePage':
                 ui.navigateToPage('homePage');
-                mangaManager.loadMangaList(); // التأكد من تحميل القائمة
+                mangaManager.loadMangaList();
                 ui.hideLoading();
                 break;
             case 'mangaDetailPage':
@@ -118,13 +140,12 @@ class NavigationManager {
                 mangaManager.loadChapter(route.params.mangaId, route.params.chapterId);
                 break;
             case 'notificationsPage':
-                // افتراض وجود دالة لعرض الإشعارات
                 notificationsManager.showNotificationsPage();
-                ui.navigateToPage('notificationsPage'); // يجب إضافة هذه الصفحة في index.html
+                ui.navigateToPage('notificationsPage');
                 ui.hideLoading();
                 break;
             default:
-                // في حالة عدم وجود الصفحة، الانتقال إلى 404 أو الرئيسية
+                // في حالة عدم وجود الصفحة، الانتقال إلى الرئيسية
                 this.navigateTo('/', {}, true);
                 break;
         }
@@ -132,7 +153,15 @@ class NavigationManager {
 
     // تحميل الحالة من المسار الحالي عند تحميل الصفحة أو حدث popstate
     loadStateFromURL(state = null) {
-        const path = window.location.pathname;
+        // التحقق أولاً من وجود مسار مخزن في sessionStorage (من 404.html)
+        const redirectPath = sessionStorage.getItem('redirectPath');
+        if (redirectPath) {
+            sessionStorage.removeItem('redirectPath');
+            this.navigateTo(redirectPath, {}, true);
+            return;
+        }
+
+        const path = window.location.pathname + window.location.search;
         
         // إذا كان هناك حالة مخزنة في popstate، استخدمها
         if (state && state.path) {
@@ -147,7 +176,11 @@ class NavigationManager {
 
     // دالة الرجوع
     goBack() {
-        window.history.back();
+        if (window.history.length > 1) {
+            window.history.back();
+        } else {
+            this.navigateTo('/');
+        }
     }
 
     // دالة مساعدة لإنشاء مسار المانجا
@@ -165,7 +198,7 @@ class NavigationManager {
         return '/notifications';
     }
 
-    // دالة مساعدة لفرز المانجا (تم نقلها من الدالة الأصلية)
+    // دالة مساعدة لفرز المانجا
     sortManga(sortType) {
         if (!mangaManager.mangaData) {
             console.warn('بيانات المانجا غير محملة بعد');
@@ -206,6 +239,12 @@ class NavigationManager {
     getCurrentState() {
         return this.currentState;
     }
+
+    // دالة جديدة للتحقق مما إذا كان يمكن العودة للخلف
+    canGoBack() {
+        return window.history.length > 1;
+    }
 }
 
 const navigationManager = new NavigationManager();
+[file content end]

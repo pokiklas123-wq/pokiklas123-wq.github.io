@@ -1,3 +1,5 @@
+[file name]: app.js
+[file content begin]
 class App {
     constructor() {
         this.init();
@@ -64,25 +66,16 @@ class App {
 
         document.body.appendChild(backButton);
 
-        // يجب تحديث هذه الدالة لتعمل مع History API
-        // حالياً لا يوجد دالة canGoBack في navigationManager الجديد
-        // يمكننا إزالتها مؤقتاً أو تعديلها لاحقاً
-         setInterval(() => {
-             backButton.style.display = navigationManager.canGoBack() ? 'block' : 'none';
-         }, 100);
+        // تحديث زر الرجوع المتنقل بناءً على إمكانية العودة
+        setInterval(() => {
+            backButton.style.display = navigationManager.canGoBack() ? 'block' : 'none';
+        }, 100);
     }
 
     async loadInitialData() {
         try {
             // تحميل بيانات المانجا أولاً
             await mangaManager.loadMangaList();
-            
-            // إزالة منطق الهاش القديم
-            // setTimeout(() => {
-            //     if (window.location.hash && window.location.hash !== '#') {
-            //         navigationManager.loadStateFromURL();
-            //     }
-            // }, 500);
             
             if (authManager.getCurrentUser()) {
                 await ratingsManager.loadUserRatings();
@@ -97,3 +90,4 @@ class App {
 document.addEventListener('DOMContentLoaded', () => {
     new App();
 });
+[file content end]
