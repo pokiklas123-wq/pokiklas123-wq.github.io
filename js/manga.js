@@ -3,7 +3,6 @@ class MangaPage {
     constructor() {
         this.mangaId = this.getMangaIdFromURL();
         this.mangaData = null;
-        this.currentUserRating = 0;
         
         if (this.mangaId) {
             this.init();
@@ -137,10 +136,10 @@ class MangaPage {
                                 <div class="chapter-info">
                                     <span class="chapter-number">الفصل ${chapter.number}</span>
                                 </div>
-                                <button class="btn read-chapter-btn" onclick="mangaPage.openChapter('${chapter.number}')">
+                                <a href="chapter.html?manga=${this.mangaId}&chapter=${chapter.number}" class="btn read-chapter-btn">
                                     <i class="fas fa-book-open"></i>
                                     اقرأ الآن
-                                </button>
+                                </a>
                             </div>
                         `).join('') : 
                         '<div class="empty-state"><p>لا توجد فصول متاحة بعد</p></div>'
@@ -162,10 +161,6 @@ class MangaPage {
                 };
             })
             .sort((a, b) => parseInt(b.number) - parseInt(a.number));
-    }
-    
-    openChapter(chapterNumber) {
-        window.location.href = `chapter.html?manga=${this.mangaId}&chapter=${chapterNumber}`;
     }
     
     openDrawer() {
@@ -193,7 +188,7 @@ class MangaPage {
         
         const icon = document.querySelector('#themeToggle i');
         if (icon) {
-            icon.className = `fas ${Utils.getThemeIcon(theme)}`;
+            icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
         }
         
         const themeOptions = document.querySelectorAll('.theme-option');
