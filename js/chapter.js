@@ -1,8 +1,8 @@
 // js/chapter.js
 class ChapterPage {
     constructor() {
-        this.mangaId = this.getURLParam('mangaId') || this.getURLParam('manga');
-        this.chapterId = this.getURLParam('chapterId') || this.getURLParam('chapter');
+        this.mangaId = this.getURLParam('mangaId');
+        this.chapterId = this.getURLParam('chapterId');
         this.mangaData = null;
         this.chapterData = null;
         
@@ -18,7 +18,6 @@ class ChapterPage {
         this.setupEventListeners();
         this.loadChapterData();
         Utils.loadTheme();
-        this.initializeComments();
     }
     
     initializeFirebase() {
@@ -37,15 +36,6 @@ class ChapterPage {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get(param);
     }
-
-    initializeComments() {
-        // تهيئة نظام التعليقات بعد تحميل البيانات
-        if (typeof CommentsManager !== 'undefined' && this.mangaId && this.chapterId) {
-            setTimeout(() => {
-                this.commentsManager = new CommentsManager(this);
-            }, 1000);
-        }
-    }
     
     setupEventListeners() {
         const drawerToggle = document.getElementById('drawerToggle');
@@ -55,6 +45,13 @@ class ChapterPage {
         if (drawerToggle) drawerToggle.addEventListener('click', () => this.openDrawer());
         if (drawerClose) drawerClose.addEventListener('click', () => this.closeDrawer());
         if (drawerOverlay) drawerOverlay.addEventListener('click', () => this.closeDrawer());
+        
+        // تهيئة نظام التعليقات بعد تحميل الصفحة
+        if (typeof CommentsManager !== 'undefined') {
+            setTimeout(() => {
+                this.commentsManager = new CommentsManager(this);
+            }, 1000);
+        }
     }
     
     async loadChapterData() {
@@ -103,7 +100,7 @@ class ChapterPage {
             
             <div class="chapter-nav">
                 ${prevChapter ? 
-                    `<a href="chapter.html?manga=${this.mangaId}&chapter=${prevChapter}" class="btn btn-outline">
+                    `<a href="chapter.html?mangaId=${this.mangaId}&chapterId=${prevChapter}" class="btn btn-outline">
                         <i class="fas fa-arrow-right"></i>
                         الفصل السابق
                     </a>` : 
@@ -116,7 +113,7 @@ class ChapterPage {
                 </a>
                 
                 ${nextChapter ? 
-                    `<a href="chapter.html?manga=${this.mangaId}&chapter=${nextChapter}" class="btn btn-outline">
+                    `<a href="chapter.html?mangaId=${this.mangaId}&chapterId=${nextChapter}" class="btn btn-outline">
                         الفصل التالي
                         <i class="fas fa-arrow-left"></i>
                     </a>` : 
