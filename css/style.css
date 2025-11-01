@@ -3,7 +3,7 @@
     /* Professional Light Theme (Default) */
     --primary-color: #007bff; /* A vibrant, professional blue */
     --secondary-color: #343a40; /* Dark gray for header/footer */
-    --accent-color: #e64a19;
+    --accent-color: #dc3545;
     --light-color: #f8f9fa;
     --dark-color: #212529;
     --text-color: #212529;
@@ -11,23 +11,23 @@
     --bg-color: #ffffff;
     --card-bg: #f8f9fa;
     --border-color: #dee2e6;
-    --border-radius: 10px;
+    --border-radius: 8px;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --transition: all 0.1s ease;
+    --transition: all 0.3s ease;
 }
 
 [data-theme="dark"] {
-    /* المظهر الداكن الاحترافي (أسود غامق / أزرق) */
-    --primary-color: #E64A19; /* أزرق مخضر / سماوي للتباين */
-    --secondary-color: #1c1c1c; /* رمادي غامق جدا / أسود للرأس / التذييل */
-    --accent-color: #e64a19;
+    /* Professional Dark Theme (Deep Black/Blue) */
+    --primary-color: #009688; /* Teal/Cyan for contrast */
+    --secondary-color: #1c1c1c; /* Very dark gray/black for header/footer */
+    --accent-color: #ff5252;
     --light-color: #f8f9fa;
     --dark-color: #212529;
     --text-color: #f8f9fa;
     --text-secondary: #adb5bd;
-    --bg-color: #121212; /* خلفية داكنة عميقة */
+    --bg-color: #121212; /* Deep dark background */
     --card-bg: #1e1e1e;
-    --border-color: #000000;
+    --border-color: #343a40;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
@@ -35,7 +35,7 @@
     /* Professional Dark Blue Theme */
     --primary-color: #3498db;
     --secondary-color: #2c3e50;
-    --accent-color: #e64a19;
+    --accent-color: #e74c3c;
     --light-color: #ecf0f1;
     --dark-color: #2c3e50;
     --text-color: #ecf0f1;
