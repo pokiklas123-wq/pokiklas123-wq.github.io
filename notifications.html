@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الإشعارات</title>
+    <title>الإشعارات - مانجا أونلاين</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -24,7 +24,6 @@
             padding: 1.5rem;
             border-bottom: 1px solid rgba(0,0,0,0.1);
             transition: var(--transition);
-            cursor: pointer;
         }
         .notification-item:hover {
             background: rgba(0,0,0,0.05);
@@ -44,6 +43,9 @@
         .notification-title {
             font-weight: bold;
             color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         .notification-date {
             color: #666;
@@ -180,15 +182,16 @@
             </div>
             
             <div class="mark-all-read">
-                <button class="btn btn-outline" id="markAllRead" onclick="window.notificationsManager.markAllAsRead()">
+                <button class="btn btn-outline" onclick="notificationsManager.markAllAsRead()">
                     <i class="fas fa-check-double"></i>
                     تعيين الكل كمقروء
                 </button>
             </div>
             
             <div class="notifications-list" id="notificationsList">
-                <div class="loading">
-                    <div class="spinner"></div>
+                <div class="empty-notifications">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>لا توجد إشعارات</p>
                 </div>
             </div>
         </div>
@@ -202,12 +205,10 @@
     <script src="js/app.js"></script>
     <script src="js/notifications.js"></script>
     <script>
-        // تهيئة NotificationsManager في صفحة الإشعارات
         document.addEventListener('DOMContentLoaded', () => {
-            // app.js will initialize appInstance, which in turn initializes NotificationsManager
-            // We just need to ensure app.js is loaded and running
-            if (typeof MangaApp !== 'undefined') {
-                window.appInstance = new MangaApp();
+            // تأكد من تهيئة التطبيق
+            if (typeof app === 'undefined') {
+                window.app = new MangaApp();
             }
         });
     </script>
