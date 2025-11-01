@@ -1,0 +1,4 @@
+title: "مانجا - manus"
+description: "موقع متكامل للمانجا العربية"
+theme: jekyll-theme-cayman
+include: [".well-known"]
