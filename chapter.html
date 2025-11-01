@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قراءة الفصل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .chapter-header {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .chapter-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        .chapter-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .chapter-images {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        .chapter-image {
+            width: 100%;
+            margin-bottom: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .comments-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .comments-title {
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+        }
+        .comment-form {
+            margin-bottom: 2rem;
+        }
+        .comment-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            resize: vertical;
+            min-height: 100px;
+        }
+        .comments-list {
+            margin-top: 2rem;
+        }
+        .comment {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        .comment:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .comment-user {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .user-avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .user-name {
+            font-weight: bold;
+        }
+        .comment-date {
+            color: #666;
+            font-size: 0.875rem;
+        }
+        .comment-content {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+        }
+        .comment-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        .replies {
+            margin-top: 1rem;
+            margin-right: 2rem;
+            padding-right: 1rem;
+            border-right: 2px solid rgba(0,0,0,0.1);
+        }
+        .reply-form {
+            margin-top: 1rem;
+            display: none;
+        }
+        .show-replies-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        @media (max-width: 768px) {
+            .chapter-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .replies {
+                margin-right: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <button id="drawerToggle" class="btn btn-outline">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a href="index.html" class="logo">مانجا أونلاين</a>
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="ابحث عن مانجا...">
+            <div class="search-results"></div>
+        </div>
+        <div class="header-actions">
+            <button id="themeToggle" class="btn btn-outline">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button id="notificationsBtn" class="btn btn-outline">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge hidden"></span>
+            </button>
+            <button id="authBtn" class="btn">
+                <i class="fas fa-user"></i>
+                <span>تسجيل الدخول</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Drawer -->
+    <div class="drawer">
+        <div class="drawer-header">
+            <h2 class="drawer-title">القائمة</h2>
+            <button class="drawer-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="userInfo" class="user-info hidden">
+            <img src="" alt="صورة المستخدم" class="user-avatar">
+            <div class="user-details">
+                <div class="user-name"></div>
+                <div class="user-email"></div>
+            </div>
+        </div>
+        
+        <ul class="drawer-menu">
+            <li class="drawer-menu-item">
+                <a href="index.html" class="drawer-menu-link">
+                    <i class="fas fa-home"></i>
+                    <span>الصفحة الرئيسية</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link">
+                    <i class="fas fa-fire"></i>
+                    <span>الأكثر مشاهدة</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link">
+                    <i class="fas fa-star"></i>
+                    <span>الأعلى تقييماً</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link">
+                    <i class="fas fa-history"></i>
+                    <span>الأحدث</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="notifications.html" class="drawer-menu-link" id="notificationsDrawerBtn">
+                    <i class="fas fa-bell"></i>
+                    <span>الإشعارات</span>
+                </a>
+            </li>
+        </ul>
+        
+        <div class="theme-selector">
+            <div class="theme-option active" data-theme="light">فاتح</div>
+            <div class="theme-option" data-theme="dark">مظلم</div>
+            <div class="theme-option" data-theme="blue">أزرق</div>
+        </div>
+        
+        <button id="logoutBtn" class="btn btn-outline hidden">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>تسجيل الخروج</span>
+        </button>
+    </div>
+    <div class="drawer-overlay"></div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div id="chapterContent">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container comments-section">
+        <h2>التعليقات</h2>
+        <div id="commentFormContainer">
+            <form id="commentForm">
+                <textarea id="commentInput" placeholder="اكتب تعليقك هنا..." required></textarea>
+                <button type="submit" class="btn">إرسال التعليق</button>
+            </form>
+        </div>
+        <div id="commentsContainer" class="comments-list">
+            <!-- Comments will be rendered here by comments.js -->
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/chapter.js"></script>
+</body>
+</html>

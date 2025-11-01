@@ -3,11 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مانجا أونلاين</title>
+    <title>تفاصيل المانجا</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .manga-detail {
+            margin-bottom: 2rem;
+        }
+        .manga-header {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .manga-poster {
+            flex: 0 0 300px;
+        }
+        .manga-poster img {
+            width: 100%;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        .manga-info {
+            flex: 1;
+        }
+        .manga-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        .manga-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: var(--card-bg);
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+        }
+        .manga-description {
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+        .rating-widget {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+        }
+        .rating-stars {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .star {
+            font-size: 1.5rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .star:hover,
+        .star.active {
+            color: #ffc107;
+        }
+        .chapters-list {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+        .chapter-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            transition: var(--transition);
+        }
+        .chapter-item:hover {
+            background: rgba(0,0,0,0.05);
+        }
+        .chapter-item:last-child {
+            border-bottom: none;
+        }
+        .chapter-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .chapter-number {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .chapter-date {
+            color: #666;
+            font-size: 0.875rem;
+        }
+        @media (max-width: 768px) {
+            .manga-header {
+                flex-direction: column;
+            }
+            .manga-poster {
+                flex: none;
+                max-width: 250px;
+                margin: 0 auto;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Header -->
     <header>
         <button id="drawerToggle" class="btn btn-outline">
             <i class="fas fa-bars"></i>
@@ -32,6 +140,7 @@
         </div>
     </header>
 
+    <!-- Drawer -->
     <div class="drawer">
         <div class="drawer-header">
             <h2 class="drawer-title">القائمة</h2>
@@ -43,8 +152,8 @@
         <div id="userInfo" class="user-info hidden">
             <img src="" alt="صورة المستخدم" class="user-avatar">
             <div class="user-details">
-                <div class="user-name">مستخدم</div>
-                <div class="user-email">user@example.com</div>
+                <div class="user-name"></div>
+                <div class="user-email"></div>
             </div>
         </div>
         
@@ -56,25 +165,25 @@
                 </a>
             </li>
             <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link" data-filter="popular">
+                <a href="#" class="drawer-menu-link">
                     <i class="fas fa-fire"></i>
                     <span>الأكثر مشاهدة</span>
                 </a>
             </li>
             <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link" data-filter="rating">
+                <a href="#" class="drawer-menu-link">
                     <i class="fas fa-star"></i>
                     <span>الأعلى تقييماً</span>
                 </a>
             </li>
             <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link" data-filter="latest">
+                <a href="#" class="drawer-menu-link">
                     <i class="fas fa-history"></i>
                     <span>الأحدث</span>
                 </a>
             </li>
             <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link" id="notificationsDrawerBtn">
+                <a href="notifications.html" class="drawer-menu-link" id="notificationsDrawerBtn">
                     <i class="fas fa-bell"></i>
                     <span>الإشعارات</span>
                 </a>
@@ -94,59 +203,22 @@
     </div>
     <div class="drawer-overlay"></div>
 
+    <!-- Main Content -->
     <div class="container">
-        <div class="filters">
-            <button class="filter-btn active" data-filter="latest">الأحدث</button>
-            <button class="filter-btn" data-filter="popular">الأكثر مشاهدة</button>
-            <button class="filter-btn" data-filter="rating">الأعلى تقييماً</button>
-            <button class="filter-btn" data-filter="oldest">الأقدم</button>
-        </div>
-        
-        <div class="manga-grid" id="mangaGrid">
+        <div id="mangaDetail" class="manga-detail">
             <div class="loading">
                 <div class="spinner"></div>
-                <p>جاري تحميل المانجا...</p>
             </div>
         </div>
     </div>
 
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>مانجا أونلاين</h3>
-                <p>أفضل موقع لقراءة المانجا العربية. استمتع بأفضل القصص المصورة من مختلف الأنواع.</p>
-            </div>
-            <div class="footer-section">
-                <h3>روابط سريعة</h3>
-                <ul class="footer-links">
-                    <li><a href="index.html">الصفحة الرئيسية</a></li>
-                    <li><a href="#">المانجا الجديدة</a></li>
-                    <li><a href="#">الأكثر مشاهدة</a></li>
-                    <li><a href="#">الأعلى تقييماً</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>الدعم</h3>
-                <ul class="footer-links">
-                    <li><a href="#">اتصل بنا</a></li>
-                    <li><a href="#">الأسئلة الشائعة</a></li>
-                    <li><a href="#">سياسة الخصوصية</a></li>
-                    <li><a href="#">شروط الاستخدام</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            &copy; 2023 مانجا أونلاين. جميع الحقوق محفوظة.
-        </div>
-    </footer>
-
+    <script src="js/firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
-    <script src="js/firebase-config.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/notifications.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/manga.js"></script>
 </body>
 </html>
