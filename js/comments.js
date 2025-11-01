@@ -8,24 +8,19 @@ class CommentsManager {
         this.commentsContainer = document.getElementById('commentsContainer');
         this.commentForm = document.getElementById('commentForm');
         this.mangaId = chapterPage.mangaId;
-        this.chapterId = chapterPage.chapterId;
+        this.chapterNumber = chapterPage.chapterNumber;
 
         console.log('CommentsManager initialized:', { 
             mangaId: this.mangaId, 
-            chapterId: this.chapterId 
+            chapterNumber: this.chapterNumber 
         });
 
-        if (this.commentsContainer && this.commentForm && this.mangaId && this.chapterId) {
-            this.commentsRef = this.db.ref(`manga_comments/${this.mangaId}/${this.chapterId}`);
+        if (this.commentsContainer && this.commentForm && this.mangaId && this.chapterNumber) {
+            this.commentsRef = this.db.ref(`comments/${this.mangaId}/${this.chapterNumber}`);
             this.setupEventListeners();
             this.loadComments();
         } else {
-            console.error('CommentsManager: Missing required elements or IDs:', {
-                commentsContainer: !!this.commentsContainer,
-                commentForm: !!this.commentForm,
-                mangaId: this.mangaId,
-                chapterId: this.chapterId
-            });
+            console.error('CommentsManager: Missing required elements or IDs');
         }
     }
 
@@ -61,9 +56,9 @@ class CommentsManager {
             const newComment = {
                 userId: user.uid,
                 userName: user.displayName || 'مستخدم',
-                userAvatar: user.photoURL || Utils.getAvatarUrl(user.displayName || 'مستخدم'),
+                userAvatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&size=150`,
                 text: commentText,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                timestamp: Date.now(),
                 replies: {}
             };
 
@@ -154,8 +149,10 @@ class CommentsManager {
             </div>
             <div class="reply-form" id="reply-form-${comment.id}" style="display: none;">
                 <textarea class="comment-input" placeholder="اكتب ردك هنا..." id="reply-input-${comment.id}"></textarea>
-                <button class="btn btn-sm submit-reply" data-id="${comment.id}">إرسال الرد</button>
-                <button class="btn btn-outline btn-sm cancel-reply" data-id="${comment.id}">إلغاء</button>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <button type="button" class="btn btn-sm submit-reply" data-id="${comment.id}">إرسال الرد</button>
+                    <button type="button" class="btn btn-outline btn-sm cancel-reply" data-id="${comment.id}">إلغاء</button>
+                </div>
             </div>
             <div class="replies" id="replies-${comment.id}">
                 ${this.renderReplies(comment.replies, comment.id)}
@@ -262,21 +259,16 @@ class CommentsManager {
             const newReply = {
                 userId: user.uid,
                 userName: user.displayName || 'مستخدم',
-                userAvatar: user.photoURL || Utils.getAvatarUrl(user.displayName || 'مستخدم'),
+                userAvatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&size=150`,
                 text: replyText,
                 replyingTo: parentComment.userName,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
+                timestamp: Date.now()
             };
 
             await parentCommentRef.child('replies').push(newReply);
             input.value = '';
             this.toggleReplyForm(commentId, false);
             Utils.showMessage('تم إرسال الرد بنجاح.', 'success');
-
-            // إرسال إشعار لصاحب التعليق الأصلي
-            if (parentComment.userId !== user.uid) {
-                this.sendReplyNotification(parentComment.userId, commentId, newReply);
-            }
 
         } catch (error) {
             console.error('Error adding reply:', error);
@@ -318,29 +310,8 @@ class CommentsManager {
             this.commentsRef.child(commentId).update({ 
                 text: newText,
                 edited: true,
-                editTimestamp: firebase.database.ServerValue.TIMESTAMP
+                editTimestamp: Date.now()
             });
-        }
-    }
-
-    async sendReplyNotification(userId, commentId, reply) {
-        try {
-            const notificationRef = this.db.ref(`notifications/${userId}`).push();
-            const notification = {
-                type: 'reply',
-                senderId: this.auth.currentUser.uid,
-                senderName: this.auth.currentUser.displayName || 'مستخدم',
-                mangaId: this.mangaId,
-                chapterId: this.chapterId,
-                commentId: commentId,
-                text: `رد ${this.auth.currentUser.displayName || 'مستخدم'} على تعليقك: "${reply.text.substring(0, 50)}..."`,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                read: false
-            };
-            
-            await notificationRef.set(notification);
-        } catch (error) {
-            console.error('Error sending notification:', error);
         }
     }
 }
