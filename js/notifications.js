@@ -40,8 +40,6 @@ class NotificationsManager {
                 const notificationsData = snapshot.val();
                 this.renderNotifications(notificationsData);
             });
-            
-            this.notificationsContainer.addEventListener('click', (e) => this.handleNotificationClick(e));
         }
     }
 
@@ -129,7 +127,7 @@ class NotificationsManager {
                 <div class="notification-date">${time}</div>
             </div>
             <div class="notification-content">
-                ${notification.text}
+                ${notification.text || 'إشعار جديد'}
             </div>
             <div class="notification-actions">
                 ${!notification.read ? `
@@ -142,6 +140,17 @@ class NotificationsManager {
                 </button>
             </div>
         `;
+        
+        // إضافة event listeners للأزرار
+        const markAsReadBtn = notificationEl.querySelector('.mark-as-read');
+        const deleteBtn = notificationEl.querySelector('.delete-notification');
+        
+        if (markAsReadBtn) {
+            markAsReadBtn.addEventListener('click', () => this.markAsRead(notification.id));
+        }
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => this.deleteNotification(notification.id));
+        }
         
         return notificationEl;
     }
@@ -166,21 +175,6 @@ class NotificationsManager {
         return titles[type] || 'إشعار';
     }
 
-    handleNotificationClick(e) {
-        const target = e.target.closest('button');
-        if (!target) return;
-
-        const notificationId = target.getAttribute('data-id');
-        
-        if (target.classList.contains('mark-as-read')) {
-            this.markAsRead(notificationId);
-        } else if (target.classList.contains('delete-notification')) {
-            this.deleteNotification(notificationId);
-        } else if (e.target.closest('.notification-item')) {
-            this.handleNotificationOpen(notificationId);
-        }
-    }
-
     async markAsRead(id) {
         if (!this.notificationsRef || !this.userId) return;
         
@@ -201,24 +195,6 @@ class NotificationsManager {
         } catch (error) {
             console.error('Error deleting notification:', error);
             Utils.showMessage('حدث خطأ أثناء حذف الإشعار', 'error');
-        }
-    }
-
-    async handleNotificationOpen(notificationId) {
-        try {
-            const snapshot = await this.notificationsRef.child(notificationId).once('value');
-            const notification = snapshot.val();
-            
-            if (notification) {
-                await this.markAsRead(notificationId);
-                
-                // التوجيه حسب نوع الإشعار
-                if (notification.type === 'reply' && notification.mangaId && notification.chapterId) {
-                    window.location.href = `chapter.html?mangaId=${notification.mangaId}&chapterId=${notification.chapterId}#comment-${notification.commentId}`;
-                }
-            }
-        } catch (error) {
-            console.error('Error handling notification open:', error);
         }
     }
     
@@ -249,7 +225,9 @@ class NotificationsManager {
 // جعل الدالة متاحة globally للاستدعاء من الزر
 window.notificationsManager = {
     markAllAsRead: function() {
-        if (window.appInstance && window.appInstance.notificationsManager) {
+        if (window.app && window.app.notificationsManager) {
+            window.app.notificationsManager.markAllAsRead();
+        } else if (window.appInstance && window.appInstance.notificationsManager) {
             window.appInstance.notificationsManager.markAllAsRead();
         }
     }
