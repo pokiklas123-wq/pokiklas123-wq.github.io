@@ -1,4 +1,5 @@
-
+[file name]: navigation.js
+[file content begin]
 class NavigationManager {
     constructor() {
         this.history = [];
@@ -246,3 +247,4 @@ class NavigationManager {
 }
 
 const navigationManager = new NavigationManager();
+[file content end]

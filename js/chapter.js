@@ -88,7 +88,6 @@ class ChapterPage {
                 <h1 class="chapter-title">${this.mangaData.name} - الفصل ${this.chapterNumber}</h1>
                 <div class="chapter-meta">
                     <span>عدد الصور: ${this.chapterData.images?.length || 0}</span>
-                    <span>${this.chapterData.date || ''}</span>
                 </div>
             </div>
             
@@ -175,4 +174,8 @@ let chapterPage;
 
 document.addEventListener('DOMContentLoaded', () => {
     chapterPage = new ChapterPage();
+    // تهيئة مدير التعليقات بعد تهيئة الصفحة
+    if (typeof CommentsManager !== 'undefined') {
+        new CommentsManager(chapterPage);
+    }
 });
