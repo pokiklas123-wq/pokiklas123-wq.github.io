@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -6,6 +7,7 @@
     <title>مانجا أونلاين</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
     <header>
@@ -21,9 +23,9 @@
             <button id="themeToggle" class="btn btn-outline">
                 <i class="fas fa-moon"></i>
             </button>
-            <button id="notificationsBtn" class="btn btn-outline">
+            <button id="notificationsBtn" class="btn btn-outline" style="position: relative;">
                 <i class="fas fa-bell"></i>
-                <span class="notification-badge hidden"></span>
+                <span class="notification-badge hidden">0</span>
             </button>
             <button id="authBtn" class="btn">
                 <i class="fas fa-user"></i>
@@ -82,9 +84,7 @@
         </ul>
         
         <div class="theme-selector">
-        
-         <span>المظهر</span>
-         
+            <span>المظهر</span>
             <div class="theme-option active" data-theme="light">فاتح</div>
             <div class="theme-option" data-theme="dark">مظلم</div>
             <div class="theme-option" data-theme="blue">أزرق</div>
@@ -99,13 +99,14 @@
 
     <div class="container">
         <div class="filters">
-            <button class="filter-btn active" data-filter="latest">الأقدم</button>
+            <button class="filter-btn active" data-filter="latest">الأحدث</button>
             <button class="filter-btn" data-filter="popular">الأكثر مشاهدة</button>
             <button class="filter-btn" data-filter="rating">الأعلى تقييماً</button>
-            <button class="filter-btn" data-filter="oldest">الأحدث</button>
+            <button class="filter-btn" data-filter="oldest">الأقدم</button>
         </div>
         
         <div class="manga-grid" id="mangaGrid">
+            <!-- سيتم إضافة بطاقات المانجا ديناميكياً -->
             <div class="loading">
                 <div class="spinner"></div>
                 <p>جاري تحميل المانجا...</p>
@@ -131,7 +132,7 @@
             <div class="footer-section">
                 <h3>الدعم</h3>
                 <ul class="footer-links">
-                    <li><a href="+213 0562622999">اتصل بنا WatsApp</a></li>
+                    <li><a href="https://wa.me/2130562622999">اتصل بنا WhatsApp</a></li>
                     <li><a href="#">الأسئلة الشائعة</a></li>
                     <li><a href="#">سياسة الخصوصية</a></li>
                     <li><a href="#">شروط الاستخدام</a></li>
