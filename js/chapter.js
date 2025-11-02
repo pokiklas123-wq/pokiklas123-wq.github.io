@@ -154,12 +154,19 @@ class ChapterPage {
         const chapterTitle = this.chapterData.title || `الفصل ${this.chapterNumber}`;
         
         chapterContent.innerHTML = `
-            <div class="chapter-header">
-                <h1 class="chapter-title">${this.mangaData.name} - ${chapterTitle}</h1>
-                <div class="chapter-subtitle">
-                    <span>عدد الصور: ${this.chapterData.images?.length || 0}</span>
-                </div>
-            </div>
+	            <div class="chapter-header">
+	                <h1 class="chapter-title">${this.mangaData.name} - ${chapterTitle}</h1>
+	                <div class="chapter-subtitle">
+	                    <span>عدد الصور: ${this.chapterData.images?.length || 0}</span>
+	                </div>
+	            </div>
+	            
+	            ${this.chapterData.chapter_description ? `
+	                <div class="chapter-description-full">
+	                    <h3>وصف الفصل:</h3>
+	                    <p>${this.chapterData.chapter_description}</p>
+	                </div>
+	            ` : ''}
             
             <div class="chapter-nav">
                 ${prevChapter ? 

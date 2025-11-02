@@ -222,9 +222,9 @@ class CommentsManager {
         } else if (target.classList.contains('like-comment')) {
             this.handleLikeComment(commentId, target);
         } else if (target.classList.contains('delete-comment')) {
-            // منطق حذف التعليق
+            this.handleDeleteComment(commentId);
         } else if (target.classList.contains('delete-reply')) {
-            // منطق حذف الرد
+            this.handleDeleteReply(parentId, commentId);
         }
     }
     
@@ -274,6 +274,11 @@ class CommentsManager {
                 
                 // إرسال إشعار لصاحب التعليق الأصلي
                 // يجب جلب بيانات التعليق الأصلي لمعرفة صاحبه
+	                const { data: originalComment } = await dbManager.getComment(this.mangaId, this.chapterId, commentId);
+	                if (originalComment && originalComment.userId !== user.uid) {
+	                    const chapterLink = `chapter.html?manga=${this.mangaId}&chapter=${this.chapterId}&comment=${commentId}`;
+	                    await dbManager.notifyCommentReply(originalComment.userId, replyData, chapterLink);
+	                }
                 const { data: comment } = await dbManager.getComment(this.mangaId, this.chapterId, commentId);
                 if (comment && comment.userId !== user.uid) {
                     const chapterLink = `chapter.html?manga=${this.mangaId}&chapter=${this.chapterId}#comment-${commentId}`;
@@ -289,7 +294,75 @@ class CommentsManager {
         }
     }
     
-    async handleLikeComment(commentId, button) {
+    async handleDeleteComment(commentId) {
+	        const user = this.auth.currentUser;
+	        if (!user) {
+	            Utils.showMessage('يجب تسجيل الدخول لحذف التعليق.', 'warning');
+	            return;
+	        }
+	        
+	        if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
+	        
+	        try {
+	            const { success, data: comment } = await dbManager.getComment(this.mangaId, this.chapterId, commentId);
+	            
+	            if (success && comment && comment.userId === user.uid) {
+	                const { success: deleteSuccess, error } = await dbManager.deleteComment(this.mangaId, this.chapterId, commentId);
+	                
+	                if (deleteSuccess) {
+	                    Utils.showMessage('تم حذف التعليق بنجاح.', 'success');
+	                    this.loadComments(); // إعادة تحميل التعليقات
+	                } else {
+	                    Utils.showMessage('خطأ في حذف التعليق: ' + error, 'error');
+	                }
+	            } else if (success && comment && comment.userId !== user.uid) {
+	                Utils.showMessage('لا تملك صلاحية حذف هذا التعليق.', 'error');
+	            } else {
+	                Utils.showMessage('التعليق غير موجود.', 'error');
+	            }
+	        } catch (error) {
+	            console.error('Error deleting comment:', error);
+	            Utils.showMessage('حدث خطأ أثناء حذف التعليق.', 'error');
+	        }
+	    }
+	    
+	    async handleDeleteReply(parentId, replyId) {
+	        const user = this.auth.currentUser;
+	        if (!user) {
+	            Utils.showMessage('يجب تسجيل الدخول لحذف الرد.', 'warning');
+	            return;
+	        }
+	        
+	        if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
+	        
+	        try {
+	            // نحتاج لجلب بيانات الرد للتحقق من المالك، لكن بما أن الردود متداخلة، سنعتمد على منطق الحذف في db.js
+	            // وبما أن زر الحذف يظهر فقط للمالك (كما في renderReplies)، سنفترض أن التحقق الأمني يتم في Firebase Rules
+	            // لكن للتحقق من المالك في الواجهة الأمامية:
+	            const replyElement = document.getElementById(`reply-${parentId}-${replyId}`);
+	            if (!replyElement) {
+	                Utils.showMessage('الرد غير موجود.', 'error');
+	                return;
+	            }
+	            
+	            // لا يمكننا التحقق من userId للرد بسهولة هنا بدون جلب التعليق الأصلي كاملاً
+	            // سنعتمد على أن زر الحذف يظهر فقط للمالك
+	            
+	            const { success: deleteSuccess, error } = await dbManager.deleteReply(this.mangaId, this.chapterId, parentId, replyId);
+	            
+	            if (deleteSuccess) {
+	                Utils.showMessage('تم حذف الرد بنجاح.', 'success');
+	                this.loadComments(); // إعادة تحميل التعليقات
+	            } else {
+	                Utils.showMessage('خطأ في حذف الرد: ' + error, 'error');
+	            }
+	        } catch (error) {
+	            console.error('Error deleting reply:', error);
+	            Utils.showMessage('حدث خطأ أثناء حذف الرد.', 'error');
+	        }
+	    }
+	    
+	    async handleLikeComment(commentId, button) {
         const user = this.auth.currentUser;
         if (!user) {
             Utils.showMessage('يجب تسجيل الدخول للإعجاب.', 'warning');

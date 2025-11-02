@@ -28,7 +28,7 @@ class RatingsManager {
             return { success: false, error: 'User not logged in' };
         }
 
-        const { success, newRating, error } = await dbManager.rateManga(mangaId, rating, this.currentUser.uid);
+        const { success, newRating, error } = await dbManager.rateManga(mangaId, this.currentUser.uid, rating);
         
         if (success) {
             Utils.showMessage(`تم تقييم المانجا بنجاح. التقييم الجديد: ${newRating}`, 'success');
