@@ -1,4 +1,4 @@
-// تهيئة Firebase
+// js/firebase-config.js
 const firebaseConfig = {
     apiKey: "AIzaSyBfcjTc-bfiRocYeBSmUrxid6WEVBYvVTg",
     authDomain: "pgfxtool-pro.firebaseapp.com",
@@ -6,18 +6,14 @@ const firebaseConfig = {
     projectId: "pgfxtool-pro",
     storageBucket: "pgfxtool-pro.appspot.com",
     messagingSenderId: "1096122383871",
-    appId: "1:1096122383871:web:your-app-id-here"
+    appId: "1:1096122383871:android:82a42721ccff8294d33bca"
 };
 
-// تهيئة Firebase
+// التهيئة التلقائية
 try {
-    if (!firebase.apps.length) {
+    if (typeof firebase !== 'undefined' && !firebase.apps.length) {
         firebase.initializeApp(firebaseConfig);
     }
-    console.log('Firebase initialized successfully');
 } catch (error) {
     console.error('Firebase initialization error:', error);
 }
-
-const database = firebase.database();
-const auth = firebase.auth();

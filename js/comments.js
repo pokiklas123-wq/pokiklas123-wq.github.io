@@ -1,553 +1,348 @@
+// js/comments.js
 class CommentsManager {
-    constructor() {
-        this.currentChapterId = null;
-        this.currentMangaId = null;
-        this.comments = {};
-        this.isSubmitting = false; // منع الإرسال المزدوج
-        this.setupEventListeners();
+    constructor(chapterPage) {
+        this.chapterPage = chapterPage;
+        this.db = chapterPage.db;
+        this.auth = chapterPage.auth;
+        this.commentsRef = null;
+        this.commentsContainer = document.getElementById('commentsContainer');
+        this.commentForm = document.getElementById('commentForm');
+        this.mangaId = chapterPage.mangaId;
+        this.chapterNumber = chapterPage.chapterNumber;
+
+        console.log('CommentsManager initialized:', { 
+            mangaId: this.mangaId, 
+            chapterNumber: this.chapterNumber 
+        });
+
+        if (this.commentsContainer && this.commentForm && this.mangaId && this.chapterNumber) {
+            this.commentsRef = this.db.ref(`comments/${this.mangaId}/${this.chapterNumber}`);
+            this.setupEventListeners();
+            this.loadComments();
+        } else {
+            console.error('CommentsManager: Missing required elements or IDs');
+        }
     }
 
     setupEventListeners() {
-        // إعداد حدث الإرسال مرة واحدة فقط
-        document.addEventListener('click', (e) => {
-            if ((e.target.id === 'submitComment' || e.target.closest('#submitComment')) && !this.isSubmitting) {
-                this.submitComment();
-            }
-            
-            if (e.target.classList.contains('like-btn') || e.target.closest('.like-btn')) {
-                const commentId = e.target.closest('.like-btn').dataset.commentId;
-                if (commentId) this.likeComment(commentId);
-            }
-            
-            // تعديل التعليق الأصلي
-            if (e.target.classList.contains('edit-comment') || e.target.closest('.edit-comment')) {
-                const commentId = e.target.closest('.edit-comment').dataset.commentId;
-                if (commentId) this.editComment(commentId);
-            }
-            
-            // حذف التعليق الأصلي
-            if (e.target.classList.contains('delete-comment') || e.target.closest('.delete-comment')) {
-                const commentId = e.target.closest('.delete-comment').dataset.commentId;
-                if (commentId) this.deleteComment(commentId);
-            }
-            
-            // الرد على التعليق
-            if (e.target.classList.contains('reply-comment') || e.target.closest('.reply-comment')) {
-                const commentId = e.target.closest('.reply-comment').dataset.commentId;
-                if (commentId) this.showReplyForm(commentId);
-            }
-            
-            // إرسال الرد
-            if (e.target.classList.contains('submit-reply') || e.target.closest('.submit-reply')) {
-                const commentId = e.target.closest('.submit-reply').dataset.commentId;
-                if (commentId && !this.isSubmitting) this.submitReply(commentId);
-            }
-            
-            // إلغاء الرد
-            if (e.target.classList.contains('cancel-reply') || e.target.closest('.cancel-reply')) {
-                this.hideAllReplyForms();
-            }
-            
-            // إظهار/إخفاء الردود
-            if (e.target.classList.contains('toggle-replies') || e.target.closest('.toggle-replies')) {
-                const commentId = e.target.closest('.toggle-replies').dataset.commentId;
-                if (commentId) this.toggleReplies(commentId);
-            }
-
-            // تعديل الرد (جديد)
-            if (e.target.classList.contains('edit-reply') || e.target.closest('.edit-reply')) {
-                const { commentId, replyId } = e.target.closest('.edit-reply').dataset;
-                if (commentId && replyId) this.editReply(commentId, replyId);
-            }
-            
-            // حذف الرد (جديد)
-            if (e.target.classList.contains('delete-reply') || e.target.closest('.delete-reply')) {
-                const { commentId, replyId } = e.target.closest('.delete-reply').dataset;
-                if (commentId && replyId) this.deleteReply(commentId, replyId);
-            }
-        });
+        if (this.commentForm) {
+            this.commentForm.addEventListener('submit', (e) => this.handleCommentSubmit(e));
+        }
+        
+        if (this.commentsContainer) {
+            this.commentsContainer.addEventListener('click', (e) => this.handleCommentActions(e));
+        }
     }
 
-    async submitComment() {
-        if (this.isSubmitting) return;
+    async handleCommentSubmit(e) {
+        e.preventDefault();
         
+        if (!this.auth.currentUser) {
+            Utils.showMessage('يجب تسجيل الدخول للتعليق.', 'warning');
+            window.location.href = 'auth.html';
+            return;
+        }
+
         const commentInput = document.getElementById('commentInput');
         const commentText = commentInput.value.trim();
         
         if (!commentText) {
-            ui.showAuthMessage('يرجى كتابة تعليق قبل الإرسال', 'error');
+            Utils.showMessage('يرجى كتابة تعليق.', 'warning');
             return;
         }
-        
-        if (!authManager.getCurrentUser()) {
-            ui.showAuthMessage('يجب تسجيل الدخول لإضافة تعليق', 'error');
-            ui.toggleAuthModal(true);
-            return;
-        }
-
-        this.isSubmitting = true;
-        const submitBtn = document.getElementById('submitComment');
-        const originalText = submitBtn.textContent;
-        
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'جاري الإرسال...';
 
         try {
-            const user = authManager.getCurrentUser();
-            const commentData = {
-                user: user.displayName || user.email.split('@')[0],
-                text: commentText,
-                likes: 0,
-                likedBy: {},
-                timestamp: Date.now(),
+            const user = this.auth.currentUser;
+            const newComment = {
                 userId: user.uid,
+                userName: user.displayName || 'مستخدم',
+                userAvatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&size=150`,
+                text: commentText,
+                timestamp: Date.now(),
                 replies: {}
             };
 
-            const commentRef = database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments`).push();
-            await commentRef.set(commentData);
-            
+            await this.commentsRef.push(newComment);
             commentInput.value = '';
-            ui.showAuthMessage('تم إرسال التعليق بنجاح', 'success');
-            
-            // لا حاجة لإعادة تحميل كل التعليقات بعد الإرسال، سنقوم بتحديث الواجهة بشكل أبسط
-            // ولكن لإبقاء الكود متوافقاً مع المنطق الحالي، سنبقيها مؤقتاً
-            await this.loadComments(this.currentMangaId, this.currentChapterId);
-            
+            Utils.showMessage('تم إضافة التعليق بنجاح.', 'success');
         } catch (error) {
-            console.error('Error submitting comment:', error);
-            ui.showAuthMessage('حدث خطأ في إرسال التعليق: ' + error.message, 'error');
-        } finally {
-            this.isSubmitting = false;
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
+            console.error('Error adding comment:', error);
+            Utils.showMessage('حدث خطأ أثناء إضافة التعليق.', 'error');
         }
     }
 
-    async loadComments(mangaId, chapterId) {
-        this.currentMangaId = mangaId;
-        this.currentChapterId = chapterId;
+    loadComments() {
+        if (!this.commentsRef) return;
 
-        // إزالة المستمعين القدامى قبل إضافة مستمع جديد لمنع التكرار
-        if (this.commentsRef) {
-            this.commentsRef.off('value');
-        }
-
-        this.commentsRef = database.ref(`manga_list/${mangaId}/chapters/${chapterId}/comments`);
-
-        // استخدام on('value') بدلاً من once('value') لتحديث التعليقات تلقائياً
         this.commentsRef.on('value', (snapshot) => {
             const commentsData = snapshot.val();
-            this.comments = commentsData || {};
-            this.displayComments();
+            this.renderComments(commentsData);
         }, (error) => {
             console.error('Error loading comments:', error);
-            this.comments = {};
-            this.displayComments();
+            Utils.showMessage('حدث خطأ في تحميل التعليقات.', 'error');
         });
     }
 
-    displayComments() {
-        const commentsList = document.getElementById('commentsList');
-        if (!commentsList) return;
+    renderComments(commentsData) {
+        if (!this.commentsContainer) return;
         
-        commentsList.innerHTML = '';
-
-        if (!this.comments || Object.keys(this.comments).length === 0) {
-            commentsList.innerHTML = '<p class="no-comments">لا توجد تعليقات بعد. كن أول من يعلق!</p>';
+        this.commentsContainer.innerHTML = '';
+        
+        if (!commentsData) {
+            this.commentsContainer.innerHTML = '<div class="empty-state"><i class="fas fa-comments"></i><p>لا توجد تعليقات بعد. كن أول من يعلق!</p></div>';
             return;
         }
 
-        const commentsArray = Object.keys(this.comments).map(key => {
-            return { id: key, ...this.comments[key] };
-        });
-
-        commentsArray.sort((a, b) => b.timestamp - a.timestamp);
+        const commentsArray = Object.keys(commentsData).map(key => ({
+            id: key,
+            ...commentsData[key]
+        })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
         commentsArray.forEach(comment => {
-            const commentElement = this.createCommentElement(comment.id, comment);
-            commentsList.appendChild(commentElement);
+            const commentElement = this.createCommentElement(comment);
+            this.commentsContainer.appendChild(commentElement);
         });
+
+        // التمرير إلى تعليق محدد إذا كان هناك hash في الرابط
+        const commentId = window.location.hash.substring(1);
+        if (commentId) {
+            const targetComment = document.getElementById(commentId);
+            if (targetComment) {
+                setTimeout(() => {
+                    targetComment.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetComment.classList.add('highlight');
+                }, 500);
+            }
+        }
     }
 
-    createCommentElement(commentId, comment) {
-        const hasReplies = comment.replies && Object.keys(comment.replies).length > 0;
-        const element = document.createElement('div');
-        element.className = 'comment';
-        element.setAttribute('data-comment-id', commentId); // إضافة معرف التعليق
-        element.innerHTML = `
+    createCommentElement(comment) {
+        const commentEl = document.createElement('div');
+        commentEl.className = 'comment';
+        commentEl.id = `comment-${comment.id}`;
+        
+        const isOwner = this.auth.currentUser && this.auth.currentUser.uid === comment.userId;
+        const timestamp = comment.timestamp ? Utils.formatTimestamp(comment.timestamp) : 'غير معروف';
+
+        commentEl.innerHTML = `
             <div class="comment-header">
-                <span class="comment-user">${comment.user}</span>
-                <span class="comment-time">${this.formatTime(comment.timestamp)}</span>
+                <div class="comment-user">
+                    <img src="${comment.userAvatar}" alt="${comment.userName}" class="user-avatar-small" 
+                         onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(comment.userName)}&size=32'">
+                    <span class="user-name">${comment.userName}</span>
+                </div>
+                <div class="comment-date">${timestamp}</div>
             </div>
-            <div class="comment-text">${comment.text}</div>
+            <div class="comment-content">${comment.text}</div>
             <div class="comment-actions">
-                <button class="comment-action like-btn ${this.hasUserLiked(comment) ? 'liked' : ''}" 
-                        data-comment-id="${commentId}">
-                    <i class="fas fa-heart"></i> 
-                    <span class="like-count">${comment.likes || 0}</span>
-                </button>
-                <button class="comment-action reply-comment" data-comment-id="${commentId}">
-                    <i class="fas fa-reply"></i> رد
-                </button>
-                ${hasReplies ? `
-                    <button class="comment-action toggle-replies" data-comment-id="${commentId}">
-                        <i class="fas fa-comments"></i> الردود (${Object.keys(comment.replies).length})
-                    </button>
-                ` : ''}
-                ${this.canEditComment(comment) ? `
-                    <button class="comment-action edit-comment" data-comment-id="${commentId}">
+                ${isOwner ? `
+                    <button class="action-btn edit-comment" data-id="${comment.id}">
                         <i class="fas fa-edit"></i> تعديل
                     </button>
-                    <button class="comment-action delete-comment" data-comment-id="${commentId}">
+                    <button class="action-btn delete-comment" data-id="${comment.id}">
                         <i class="fas fa-trash"></i> حذف
                     </button>
                 ` : ''}
+                <button class="action-btn reply-comment" data-id="${comment.id}">
+                    <i class="fas fa-reply"></i> رد
+                </button>
             </div>
-            ${hasReplies ? `
-                <div class="comment-replies" id="replies-${commentId}" style="display: none;">
-                    ${this.renderReplies(commentId, comment.replies)}
+            <div class="reply-form" id="reply-form-${comment.id}" style="display: none;">
+                <textarea class="comment-input" placeholder="اكتب ردك هنا..." id="reply-input-${comment.id}"></textarea>
+                <div style="display: flex; gap: 0.5rem; margin-top: 0.5rem;">
+                    <button type="button" class="btn btn-sm submit-reply" data-id="${comment.id}">إرسال الرد</button>
+                    <button type="button" class="btn btn-outline btn-sm cancel-reply" data-id="${comment.id}">إلغاء</button>
                 </div>
-            ` : ''}
-            <div class="reply-form" id="reply-form-${commentId}" style="display: none;">
-                <textarea class="reply-input" placeholder="اكتب ردك..."></textarea>
-                <div class="reply-buttons">
-                    <button class="btn submit-reply" data-comment-id="${commentId}">إرسال الرد</button>
-                    <button class="btn cancel-reply">إلغاء</button>
-                </div>
+            </div>
+            <div class="replies" id="replies-${comment.id}">
+                ${this.renderReplies(comment.replies, comment.id)}
             </div>
         `;
 
-        return element;
+        return commentEl;
     }
 
-    renderReplies(commentId, replies) {
-        if (!replies || Object.keys(replies).length === 0) return '';
+    renderReplies(replies, parentId) {
+        if (!replies) return '';
         
-        const repliesArray = Object.keys(replies).map(key => ({ id: key, ...replies[key] }));
-        repliesArray.sort((a, b) => a.timestamp - b.timestamp);
-        
-        return repliesArray.map(reply => {
-            const canEdit = authManager.getCurrentUser() && reply.userId === authManager.getCurrentUser().uid;
-            return `
-                <div class="reply" data-reply-id="${reply.id}">
-                    <div class="reply-header">
-                        <span class="reply-user">${reply.user}</span>
-                        <span class="reply-time">${this.formatTime(reply.timestamp)}</span>
+        const repliesArray = Object.keys(replies).map(key => ({
+            id: key,
+            ...replies[key]
+        })).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
+        let html = '';
+        repliesArray.forEach(reply => {
+            const isOwner = this.auth.currentUser && this.auth.currentUser.uid === reply.userId;
+            const timestamp = reply.timestamp ? Utils.formatTimestamp(reply.timestamp) : 'غير معروف';
+            
+            html += `
+                <div class="comment reply" id="reply-${parentId}-${reply.id}">
+                    <div class="comment-header">
+                        <div class="comment-user">
+                            <img src="${reply.userAvatar}" alt="${reply.userName}" class="user-avatar-small"
+                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(reply.userName)}&size=32'">
+                            <span class="user-name">${reply.userName}</span>
+                        </div>
+                        <div class="comment-date">${timestamp}</div>
                     </div>
-                    <div class="reply-text">${reply.text}</div>
-                    ${canEdit ? `
-                        <div class="reply-actions">
-                            <button class="reply-action edit-reply" data-comment-id="${commentId}" data-reply-id="${reply.id}">
-                                <i class="fas fa-edit"></i> تعديل
-                            </button>
-                            <button class="reply-action delete-reply" data-comment-id="${commentId}" data-reply-id="${reply.id}">
+                    <div class="comment-content">
+                        ${reply.replyingTo ? `<span class="replying-to">@${reply.replyingTo}</span> ` : ''}
+                        ${reply.text}
+                    </div>
+                    ${isOwner ? `
+                        <div class="comment-actions">
+                            <button class="action-btn delete-reply" data-parent-id="${parentId}" data-id="${reply.id}">
                                 <i class="fas fa-trash"></i> حذف
                             </button>
                         </div>
                     ` : ''}
                 </div>
             `;
-        }).join('');
+        });
+        
+        return html;
     }
 
-    hasUserLiked(comment) {
-        if (!authManager.getCurrentUser() || !comment.likedBy) return false;
-        return comment.likedBy[authManager.getCurrentUser().uid];
+    handleCommentActions(e) {
+        const target = e.target.closest('button');
+        if (!target) return;
+
+        const commentId = target.getAttribute('data-id');
+        const parentId = target.getAttribute('data-parent-id');
+
+        if (target.classList.contains('reply-comment')) {
+            this.toggleReplyForm(commentId);
+        } else if (target.classList.contains('submit-reply')) {
+            this.handleReplySubmit(commentId);
+        } else if (target.classList.contains('cancel-reply')) {
+            this.toggleReplyForm(commentId, false);
+        } else if (target.classList.contains('delete-comment')) {
+            this.deleteComment(commentId);
+        } else if (target.classList.contains('delete-reply')) {
+            this.deleteReply(parentId, commentId);
+        } else if (target.classList.contains('edit-comment')) {
+            this.editComment(commentId);
+        }
     }
 
-    canEditComment(comment) {
-        return authManager.getCurrentUser() && comment.userId === authManager.getCurrentUser().uid;
+    toggleReplyForm(commentId, show = true) {
+        const form = document.getElementById(`reply-form-${commentId}`);
+        if (form) {
+            form.style.display = show ? 'block' : 'none';
+            if (show) {
+                const input = document.getElementById(`reply-input-${commentId}`);
+                if (input) input.focus();
+            }
+        }
     }
 
-    async likeComment(commentId) {
-        if (!authManager.getCurrentUser()) {
-            ui.showAuthMessage('يجب تسجيل الدخول للإعجاب بالتعليق', 'error');
+    async handleReplySubmit(commentId) {
+        if (!this.auth.currentUser) {
+            Utils.showMessage('يجب تسجيل الدخول للرد.', 'warning');
             return;
         }
 
-        const commentRef = database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}`);
+        const input = document.getElementById(`reply-input-${commentId}`);
+        const replyText = input?.value.trim();
         
+        if (!replyText) {
+            Utils.showMessage('يرجى كتابة رد.', 'warning');
+            return;
+        }
+
         try {
-            const snapshot = await commentRef.once('value');
-            const comment = snapshot.val();
-            const userId = authManager.getCurrentUser().uid;
-            const likedBy = comment.likedBy || {};
-            let newLikes = comment.likes || 0;
-            let isLiked = likedBy[userId];
+            const user = this.auth.currentUser;
+            const parentCommentRef = this.commentsRef.child(commentId);
+            const parentSnapshot = await parentCommentRef.once('value');
+            const parentComment = parentSnapshot.val();
 
-            if (isLiked) {
-                newLikes--;
-                delete likedBy[userId];
-            } else {
-                newLikes++;
-                likedBy[userId] = true;
-                
-                // إرسال إشعار للمستخدم صاحب التعليق
-                if (comment.userId && comment.userId !== userId) {
-                    // لا حاجة للانتظار هنا
-                    this.sendLikeNotification(comment.userId, commentId);
-                }
+            const newReply = {
+                userId: user.uid,
+                userName: user.displayName || 'مستخدم',
+                userAvatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&size=150`,
+                text: replyText,
+                replyingTo: parentComment.userName,
+                timestamp: Date.now()
+            };
+
+            const replyRef = parentCommentRef.child('replies').push();
+            await replyRef.set(newReply);
+            
+            input.value = '';
+            this.toggleReplyForm(commentId, false);
+            Utils.showMessage('تم إرسال الرد بنجاح.', 'success');
+
+            // إرسال إشعار لصاحب التعليق الأصلي
+            if (parentComment.userId !== user.uid) {
+                await this.sendReplyNotification(parentComment.userId, commentId, replyRef.key, newReply);
             }
 
-            await commentRef.update({ 
-                likes: newLikes,
-                likedBy: likedBy
-            });
-            
-            // التحديث سيتم تلقائياً بفضل on('value') في loadComments
-            
         } catch (error) {
-            console.error('Error liking comment:', error);
-        }
-    }
-
-    async editComment(commentId) {
-        const comment = this.comments[commentId];
-        if (!comment || !this.canEditComment(comment)) {
-            ui.showAuthMessage('لا يمكنك تعديل هذا التعليق', 'error');
-            return;
-        }
-
-        const newText = prompt('عدل تعليقك:', comment.text);
-        
-        if (newText && newText.trim() !== comment.text) {
-            try {
-                await database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}`).update({
-                    text: newText.trim(),
-                    edited: true,
-                    editTimestamp: Date.now()
-                });
-                
-                ui.showAuthMessage('تم تعديل التعليق بنجاح', 'success');
-            } catch (error) {
-                ui.showAuthMessage('خطأ في تعديل التعليق', 'error');
-            }
+            console.error('Error adding reply:', error);
+            Utils.showMessage('حدث خطأ أثناء إرسال الرد.', 'error');
         }
     }
 
     async deleteComment(commentId) {
-        const comment = this.comments[commentId];
-        if (!comment || !this.canEditComment(comment)) {
-            ui.showAuthMessage('لا يمكنك حذف هذا التعليق', 'error');
-            return;
-        }
-
-        if (confirm('هل أنت متأكد من حذف هذا التعليق؟')) {
-            try {
-                await database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}`).remove();
-                ui.showAuthMessage('تم حذف التعليق بنجاح', 'success');
-            } catch (error) {
-                ui.showAuthMessage('خطأ في حذف التعليق', 'error');
-            }
-        }
-    }
-
-    // وظيفة جديدة لتعديل الرد
-    async editReply(commentId, replyId) {
-        const comment = this.comments[commentId];
-        const reply = comment?.replies?.[replyId];
+        if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
         
-        if (!reply || !authManager.getCurrentUser() || reply.userId !== authManager.getCurrentUser().uid) {
-            ui.showAuthMessage('لا يمكنك تعديل هذا الرد', 'error');
-            return;
-        }
-
-        const newText = prompt('عدل ردك:', reply.text);
-        
-        if (newText && newText.trim() !== reply.text) {
-            try {
-                await database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}/replies/${replyId}`).update({
-                    text: newText.trim(),
-                    edited: true,
-                    editTimestamp: Date.now()
-                });
-                
-                ui.showAuthMessage('تم تعديل الرد بنجاح', 'success');
-            } catch (error) {
-                ui.showAuthMessage('خطأ في تعديل الرد', 'error');
-            }
-        }
-    }
-
-    // وظيفة جديدة لحذف الرد
-    async deleteReply(commentId, replyId) {
-        const comment = this.comments[commentId];
-        const reply = comment?.replies?.[replyId];
-        
-        if (!reply || !authManager.getCurrentUser() || reply.userId !== authManager.getCurrentUser().uid) {
-            ui.showAuthMessage('لا يمكنك حذف هذا الرد', 'error');
-            return;
-        }
-
-        if (confirm('هل أنت متأكد من حذف هذا الرد؟')) {
-            try {
-                await database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}/replies/${replyId}`).remove();
-                ui.showAuthMessage('تم حذف الرد بنجاح', 'success');
-            } catch (error) {
-                ui.showAuthMessage('خطأ في حذف الرد', 'error');
-            }
-        }
-    }
-
-    showReplyForm(commentId) {
-        if (!authManager.getCurrentUser()) {
-            ui.showAuthMessage('يجب تسجيل الدخول للرد على تعليق', 'error');
-            ui.toggleAuthModal(true);
-            return;
-        }
-
-        this.hideAllReplyForms();
-        
-        const replyForm = document.getElementById(`reply-form-${commentId}`);
-        if (replyForm) {
-            replyForm.style.display = 'block';
-        }
-    }
-
-    hideAllReplyForms() {
-        document.querySelectorAll('.reply-form').forEach(form => {
-            form.style.display = 'none';
-        });
-    }
-    
-    toggleReplies(commentId) {
-        const repliesContainer = document.getElementById(`replies-${commentId}`);
-        if (repliesContainer) {
-            repliesContainer.style.display = repliesContainer.style.display === 'none' ? 'block' : 'none';
-        }
-    }
-
-    async submitReply(commentId) {
-        if (this.isSubmitting) return;
-        
-        const replyForm = document.getElementById(`reply-form-${commentId}`);
-        const replyInput = replyForm.querySelector('.reply-input');
-        const replyText = replyInput.value.trim();
-        
-        if (!replyText) {
-            ui.showAuthMessage('يرجى كتابة رد قبل الإرسال', 'error');
-            return;
-        }
-        
-        if (!authManager.getCurrentUser()) {
-            // هذا الشرط يجب أن يكون قد تم التحقق منه في showReplyForm، ولكن للتأكد
-            ui.showAuthMessage('يجب تسجيل الدخول لإضافة رد', 'error');
-            ui.toggleAuthModal(true);
-            return;
-        }
-
-        this.isSubmitting = true;
-        const submitBtn = replyForm.querySelector('.submit-reply');
-        const originalText = submitBtn.textContent;
-        
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'جاري الإرسال...';
-
         try {
-            const user = authManager.getCurrentUser();
-            const replyData = {
-                user: user.displayName || user.email.split('@')[0],
-                text: replyText,
-                timestamp: Date.now(),
-                userId: user.uid
-            };
-
-            const replyRef = database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}/replies`).push();
-            await replyRef.set(replyData);
-            
-            // إرسال إشعار للمستخدم صاحب التعليق الأصلي
-            const originalComment = this.comments[commentId];
-            if (originalComment && originalComment.userId && originalComment.userId !== user.uid) {
-                // لا حاجة للانتظار هنا
-                this.sendReplyNotification(originalComment.userId, commentId, replyText);
-            }
-            
-            replyInput.value = '';
-            this.hideAllReplyForms();
-            ui.showAuthMessage('تم إرسال الرد بنجاح', 'success');
-            
-            // التحديث سيتم تلقائياً بفضل on('value') في loadComments
-            
+            await this.commentsRef.child(commentId).remove();
+            Utils.showMessage('تم حذف التعليق بنجاح.', 'success');
         } catch (error) {
-            console.error('Error submitting reply:', error);
-            ui.showAuthMessage('حدث خطأ في إرسال الرد: ' + error.message, 'error');
-        } finally {
-            this.isSubmitting = false;
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
+            console.error('Error deleting comment:', error);
+            Utils.showMessage('حدث خطأ أثناء حذف التعليق.', 'error');
         }
     }
 
-    async sendLikeNotification(targetUserId, commentId) {
-        if (!targetUserId || targetUserId === authManager.getCurrentUser().uid) return;
+    async deleteReply(parentId, replyId) {
+        if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
         
         try {
-            const notificationRef = database.ref(`notifications/${targetUserId}`).push();
-            await notificationRef.set({
-                type: 'like',
-                fromUser: authManager.getCurrentUser().displayName || authManager.getCurrentUser().email,
-                fromUserId: authManager.getCurrentUser().uid,
-                commentId: commentId,
-                mangaId: this.currentMangaId,
-                chapterId: this.currentChapterId,
-                timestamp: Date.now(),
-                read: false
+            await this.commentsRef.child(parentId).child('replies').child(replyId).remove();
+            Utils.showMessage('تم حذف الرد بنجاح.', 'success');
+        } catch (error) {
+            console.error('Error deleting reply:', error);
+            Utils.showMessage('حدث خطأ أثناء حذف الرد.', 'error');
+        }
+    }
+
+    editComment(commentId) {
+        const commentElement = document.getElementById(`comment-${commentId}`);
+        const contentElement = commentElement.querySelector('.comment-content');
+        const currentText = contentElement.textContent;
+        
+        const newText = prompt('تعديل التعليق:', currentText);
+        if (newText && newText !== currentText) {
+            this.commentsRef.child(commentId).update({ 
+                text: newText,
+                edited: true,
+                editTimestamp: Date.now()
             });
-            console.log('تم إرسال إشعار إعجاب إلى:', targetUserId);
-        } catch (error) {
-            console.error('Error sending like notification:', error);
         }
     }
 
-    async sendReplyNotification(targetUserId, commentId, replyText) {
-        if (!targetUserId || targetUserId === authManager.getCurrentUser().uid) return;
-        
+    async sendReplyNotification(parentCommentUserId, commentId, replyId, replyData) {
         try {
-            // نحتاج إلى جلب تفاصيل التعليق الأصلي لتضمينها في الإشعار
-            const commentRef = database.ref(`manga_list/${this.currentMangaId}/chapters/${this.currentChapterId}/comments/${commentId}`);
-            const commentSnapshot = await commentRef.once('value');
-            const comment = commentSnapshot.val();
+            const notificationRef = this.db.ref(`notifications/${parentCommentUserId}`).push();
             
-            if (!comment) return; // التعليق الأصلي غير موجود
-
-            const notificationRef = database.ref(`notifications/${targetUserId}`).push();
-            await notificationRef.set({
+            const notification = {
                 type: 'reply',
-                fromUser: authManager.getCurrentUser().displayName || authManager.getCurrentUser().email,
-                fromUserId: authManager.getCurrentUser().uid,
+                senderId: this.auth.currentUser.uid,
+                senderName: this.auth.currentUser.displayName || 'مستخدم',
+                mangaId: this.mangaId,
+                chapterId: this.chapterNumber,
                 commentId: commentId,
-                mangaId: this.currentMangaId,
-                chapterId: this.currentChapterId,
-                replyText: replyText.substring(0, 100),
-                mangaTitle: mangaManager.currentManga?.title || 'مانجا غير معروفة', // نحتاج إلى جلب اسم المانجا
-                chapterTitle: mangaManager.currentChapter?.title || 'فصل غير معروف', // نحتاج إلى جلب اسم الفصل
+                replyId: replyId,
+                text: `رد ${this.auth.currentUser.displayName || 'مستخدم'} على تعليقك: "${replyData.text.substring(0, 100)}${replyData.text.length > 100 ? '...' : ''}"`,
                 timestamp: Date.now(),
                 read: false
-            });
-            console.log('تم إرسال إشعار رد إلى:', targetUserId);
+            };
+            
+            await notificationRef.set(notification);
+            console.log('تم إرسال الإشعار بنجاح إلى:', parentCommentUserId);
         } catch (error) {
-            console.error('Error sending reply notification:', error);
+            console.error('Error sending notification:', error);
         }
-    }
-
-    formatTime(timestamp) {
-        if (!timestamp) return 'منذ وقت';
-        
-        const date = new Date(timestamp);
-        const now = new Date();
-        const diffMs = now - date;
-        const diffMins = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMins / 60);
-        const diffDays = Math.floor(diffHours / 24);
-        
-        if (diffMins < 1) return 'الآن';
-        if (diffMins < 60) return `منذ ${diffMins} دقيقة`;
-        if (diffHours < 24) return `منذ ${diffHours} ساعة`;
-        if (diffDays < 7) return `منذ ${diffDays} يوم`;
-        
-        return date.toLocaleDateString('ar-SA');
     }
 }
-
-const commentsManager = new CommentsManager();
