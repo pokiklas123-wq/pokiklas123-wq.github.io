@@ -215,7 +215,8 @@ class DatabaseManager {
         try {
             const commentRef = this.database.ref(`comments/${mangaId}/${chapterId}`).push();
             const commentId = commentRef.key;
-            
+            const { success, data: comments, error } = await dbManager.getComments(this.mangaId, this.chapterId);
+        
             const commentData = {
                 userId: userId,
                 displayName: displayName,
