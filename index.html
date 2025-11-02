@@ -68,8 +68,17 @@
             <h3>التنقل</h3>
             <ul class="categories-list">
                 <li id="drawerHomeBtn">
-                    <i class="fas fa-home"></i> الصفحة الرئيسية
-                </li>
+	                    <i class="fas fa-home"></i> الصفحة الرئيسية
+	                </li>
+	                <li id="drawerRatingsBtn">
+	                    <i class="fas fa-star"></i> التقييمات
+	                </li>
+	                <li id="drawerCommentsBtn">
+	                    <i class="fas fa-comments"></i> التعليقات
+	                </li>
+	                <li id="drawerNotificationsBtn">
+	                    <i class="fas fa-bell"></i> الإشعارات
+	                </li>
             </ul>
         </div>
 
@@ -80,12 +89,7 @@
             </div>
         </div>
 
-        <div class="drawer-section">
-            <h3>الإشعارات</h3>
-            <div id="notificationsList">
-                <p class="no-notifications">لا توجد إشعارات</p>
-            </div>
-        </div>
+	        <!-- تم نقل قسم الإشعارات إلى صفحة منفصلة -->
 
         <div class="drawer-section">
             <h3>المظهر</h3>
@@ -141,21 +145,45 @@
             </div>
         </div>
 
-        <!-- صفحة عرض الفصل -->
-        <div id="chapterPage" class="page">
-            <button class="btn back-btn" id="backToManga">
-                <i class="fas fa-arrow-right"></i> العودة للمانجا
-            </button>
-            <div class="chapter-container">
-                <div id="loadingChapter" class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>جاري تحميل الفصل...</p>
-                </div>
-                <div id="chapterContent" class="chapter-content">
-                    <!-- سيتم ملؤه ديناميكياً من manga.js -->
-                </div>
-            </div>
-        </div>
+	        <!-- صفحة عرض الفصل -->
+	        <div id="chapterPage" class="page">
+	            <button class="btn back-btn" id="backToManga">
+	                <i class="fas fa-arrow-right"></i> العودة للمانجا
+	            </button>
+	            <div class="chapter-container">
+	                <div id="loadingChapter" class="loading">
+	                    <div class="loading-spinner"></div>
+	                    <p>جاري تحميل الفصل...</p>
+	                </div>
+	                <div id="chapterContent" class="chapter-content">
+	                    <!-- سيتم ملؤه ديناميكياً من manga.js -->
+	                </div>
+	            </div>
+	        </div>
+	
+	        <!-- صفحة التقييمات -->
+	        <div id="ratingsPage" class="page">
+	            <h2 class="page-title">تقييماتي</h2>
+	            <div id="userRatingsContent">
+	                <!-- سيتم ملؤه ديناميكياً من ratings.js -->
+	            </div>
+	        </div>
+	
+	        <!-- صفحة التعليقات -->
+	        <div id="commentsPage" class="page">
+	            <h2 class="page-title">تعليقاتي</h2>
+	            <div id="userCommentsContent">
+	                <!-- سيتم ملؤه ديناميكياً من comments.js -->
+	            </div>
+	        </div>
+	
+	        <!-- صفحة الإشعارات -->
+	        <div id="notificationsPage" class="page">
+	            <h2 class="page-title">الإشعارات</h2>
+	            <div id="notificationsContent">
+	                <!-- سيتم ملؤه ديناميكياً من notifications.js -->
+	            </div>
+	        </div>
     </div>
 
     <!-- نافذة تسجيل الدخول -->
