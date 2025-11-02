@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مانجا كول - تسجيل الدخول / إنشاء حساب</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <!-- خطوط عربية -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <!-- ملفات التهيئة والوحدات الأساسية -->
+    <script src="firebase-config.js"></script>
+    <script src="utils.js"></script>
+    
+    <!-- ملفات المصادقة -->
+    <script type="module" src="auth.js"></script>
+    <script type="module" src="auth-page.js"></script>
+</head>
+<body>
+    <main class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <a href="index.html" class="auth-logo">مانجا كول</a>
+                <h1 id="authTitle">تسجيل الدخول</h1>
+                <p id="authSubtitle">أدخل بياناتك للوصول إلى حسابك</p>
+            </div>
+            
+            <div class="form-message" id="formMessage"></div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">تسجيل الدخول</button>
+                <button class="auth-tab" data-tab="register">إنشاء حساب</button>
+            </div>
+            
+            <!-- نموذج تسجيل الدخول -->
+            <form id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <label for="loginEmail" class="form-label">البريد الإلكتروني</label>
+                    <input type="email" id="loginEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword" class="form-label">كلمة السر</label>
+                    <input type="password" id="loginPassword" class="form-input" required>
+                </div>
+                <div class="form-group text-center">
+                    <a href="#" id="forgotPasswordLink" class="text-secondary">نسيت كلمة السر؟</a>
+                </div>
+                <button type="submit" class="auth-btn" id="loginBtn">
+                    <span class="btn-text">تسجيل الدخول</span>
+                    <div class="spinner hidden"></div>
+                </button>
+            </form>
+            
+            <!-- نموذج إنشاء حساب -->
+            <form id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label for="registerName" class="form-label">اسم المستخدم</label>
+                    <input type="text" id="registerName" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail" class="form-label">البريد الإلكتروني</label>
+                    <input type="email" id="registerEmail" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword" class="form-label">كلمة السر</label>
+                    <input type="password" id="registerPassword" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerConfirmPassword" class="form-label">تأكيد كلمة السر</label>
+                    <input type="password" id="registerConfirmPassword" class="form-input" required>
+                </div>
+                <button type="submit" class="auth-btn" id="registerBtn">
+                    <span class="btn-text">إنشاء حساب</span>
+                    <div class="spinner hidden"></div>
+                </button>
+            </form>
+            
+            <!-- نموذج إعادة تعيين كلمة السر -->
+            <form id="resetPasswordForm" class="auth-form">
+                <div class="form-group">
+                    <label for="resetEmail" class="form-label">البريد الإلكتروني</label>
+                    <input type="email" id="resetEmail" class="form-input" required>
+                </div>
+                <button type="submit" class="auth-btn" id="resetPasswordBtn">
+                    <span class="btn-text">إرسال رابط إعادة التعيين</span>
+                    <div class="spinner hidden"></div>
+                </button>
+                <div class="form-group text-center mt-2">
+                    <a href="#" class="text-secondary back-to-login">العودة لتسجيل الدخول</a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="back-home">
+            <a href="index.html" class="btn btn-outline">
+                <i class="fas fa-arrow-right"></i>
+                العودة للصفحة الرئيسية
+            </a>
+        </div>
+    </main>
+</body>
+</html>
