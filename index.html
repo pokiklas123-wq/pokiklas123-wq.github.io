@@ -3,132 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مانجا كول - الصفحة الرئيسية</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <!-- خطوط عربية -->
+    <title>مانجا - manus | موقع متكامل للمانجا العربية</title>
+    <meta name="description" content="موقع مانجا متكامل لعرض وقراءة المانجا العربية بأفضل تجربة مستخدم">
+    <meta name="keywords" content="مانجا, مانغا, قصص مصورة, مانجا عربية, قراءة مانجا">
+    
+    <!-- الروابط -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/components.css">
+    <link rel="stylesheet" href="styles/responsive.css">
     
-    <!-- Firebase SDKs - استخدام الإصدار 8.10.0 المتوافق مع الكود -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <!-- ملفات التهيئة والوحدات الأساسية -->
-    <script src="firebase-config.js"></script>
-    <script src="utils.js"></script>
-    
-    <!-- ملف التطبيق الرئيسي - يجب أن يكون type="module" لاستخدام import/export -->
-    <script type="module" src="app.js"></script>
+    <script>
+        // معالجة إعادة التوجيه من 404.html
+        (function() {
+            const redirectPath = sessionStorage.redirect;
+            if (redirectPath && redirectPath !== location.pathname) {
+                sessionStorage.removeItem('redirect');
+                
+                const hash = redirectPath.replace('/manga/', 'manga/').replace('/chapter/', '/chapter/');
+                if (hash.includes('manga/')) {
+                    window.location.hash = hash;
+                }
+            }
+        })();
+    </script>
 </head>
 <body>
+    <!-- الهيدر -->
     <header>
-        <a href="index.html" class="logo">مانجا كول</a>
-        
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="ابحث عن مانجا...">
-            <div class="search-results">
-                <!-- نتائج البحث ستظهر هنا -->
-            </div>
+        <button class="btn menu-btn" id="menuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo">
+            <i class="fas fa-book-open"></i>
+            <h1>مانجا - manus</h1>
         </div>
-        
-        <div class="header-actions">
-            <button class="btn btn-outline" id="themeToggle">
-                <i class="fas fa-sun"></i> <!-- سيتم تحديثه بواسطة JS -->
-            </button>
-            <button class="btn btn-outline" id="notificationsBtn" style="position: relative;">
-                <i class="fas fa-bell"></i>
-                <span>الإشعارات</span>
-                <!-- شارة الإشعارات ستضاف بواسطة JS -->
-            </button>
-            <button class="btn" id="authBtn">
-                <i class="fas fa-user"></i>
-                <span>تسجيل الدخول</span>
-            </button>
-            <button class="btn btn-outline" id="drawerToggle">
-                <i class="fas fa-bars"></i>
+        <div class="nav-buttons">
+            <button class="btn search-btn" id="searchBtn">
+                <i class="fas fa-search"></i>
             </button>
         </div>
     </header>
-    
-    <main class="container">
-        <section class="filters">
-            <button class="filter-btn active" data-filter="latest">الأحدث</button>
-            <button class="filter-btn" data-filter="popular">الأكثر شعبية</button>
-            <button class="filter-btn" data-filter="rating">الأعلى تقييماً</button>
-            <button class="filter-btn" data-filter="oldest">الأقدم</button>
-        </section>
-        
-        <section class="manga-grid" id="mangaGrid">
-            <!-- بطاقات المانجا سيتم تحميلها بواسطة JS -->
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>جاري تحميل المانجا...</p>
-            </div>
-        </section>
-    </main>
-    
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>مانجا كول</h3>
-                <p>أفضل موقع لقراءة المانجا والمانهوا والمانها باللغة العربية.</p>
-            </div>
-            <div class="footer-section">
-                <h3>روابط سريعة</h3>
-                <ul class="footer-links">
-                    <li><a href="index.html">الرئيسية</a></li>
-                    <li><a href="notifications.html">الإشعارات</a></li>
-                    <li><a href="auth.html">تسجيل الدخول</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>تواصل معنا</h3>
-                <ul class="footer-links">
-                    <li><a href="#">البريد الإلكتروني</a></li>
-                    <li><a href="#">فيسبوك</a></li>
-                    <li><a href="#">تويتر</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            &copy; 2024 مانجا كول. جميع الحقوق محفوظة.
-        </div>
-    </footer>
-    
-    <!-- الدرج الجانبي (Drawer) -->
-    <div class="drawer-overlay"></div>
-    <div class="drawer">
-        <div class="drawer-header">
-            <h3 class="drawer-title">القائمة</h3>
-            <button class="drawer-close"><i class="fas fa-times"></i></button>
-        </div>
-        
-        <div class="user-info hidden" id="userInfo">
-            <img src="https://ui-avatars.com/api/?name=User&background=4ECDC4&color=fff&size=150" alt="Avatar" class="user-avatar">
-            <div class="user-details">
-                <div class="user-name">اسم المستخدم</div>
-                <div class="user-email">user@example.com</div>
-            </div>
-        </div>
-        
-        <ul class="drawer-menu">
-            <li class="drawer-menu-item"><a href="index.html" class="drawer-menu-link"><i class="fas fa-home"></i> الرئيسية</a></li>
-            <li class="drawer-menu-item"><a href="notifications.html" class="drawer-menu-link" id="notificationsDrawerBtn"><i class="fas fa-bell"></i> الإشعارات</a></li>
-            <li class="drawer-menu-item"><a href="auth.html" class="drawer-menu-link"><i class="fas fa-user"></i> الملف الشخصي / تسجيل الدخول</a></li>
-        </ul>
-        
-        <div class="theme-selector">
-            <span>الثيم:</span>
-            <div class="theme-option" data-theme="dark">داكن</div>
-            <div class="theme-option" data-theme="light">فاتح</div>
-            <div class="theme-option" data-theme="blue">أزرق</div>
-        </div>
-        
-        <button class="btn btn-outline hidden" id="logoutBtn">
-            <i class="fas fa-sign-out-alt"></i>
-            تسجيل الخروج
+
+    <!-- شريط البحث -->
+    <div class="search-container" id="searchContainer">
+        <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن مانجا...">
+        <button class="search-close" id="closeSearch">
+            <i class="fas fa-times"></i>
         </button>
     </div>
+
+    <!-- القائمة الجانبية -->
+    <div class="overlay" id="overlay"></div>
+    <div class="drawer" id="drawer">
+        <div class="drawer-header">
+            <h2>القائمة</h2>
+            <button class="drawer-close" id="closeDrawer">
+                <i class="fas fa-times"></i>
+            </button>
+         </div>
+        
+        <div class="drawer-section">
+            <h3>التنقل</h3>
+            <ul class="categories-list">
+                <li id="drawerHomeBtn">
+                    <i class="fas fa-home"></i> الصفحة الرئيسية
+                </li>
+            </ul>
+        </div>
+
+        <div class="drawer-section">
+            <h3>الحساب</h3>
+            <div id="userSection">
+                <button class="btn drawer-login-btn" id="drawerLoginBtn">تسجيل الدخول</button>
+            </div>
+        </div>
+
+        <div class="drawer-section">
+            <h3>الإشعارات</h3>
+            <div id="notificationsList">
+                <p class="no-notifications">لا توجد إشعارات</p>
+            </div>
+        </div>
+
+        <div class="drawer-section">
+            <h3>المظهر</h3>
+            <div class="theme-switcher">
+                <button class="theme-btn active" data-theme="dark">الداكن</button>
+                <button class="theme-btn" data-theme="light">الفاتح</button>
+                <button class="theme-btn" data-theme="colored">الملون</button>
+            </div>
+        </div>
+
+        <div class="drawer-section">
+            <h3>التصنيفات</h3>
+            <ul class="categories-list">
+                <li data-sort="newest">
+                    <i class="fas fa-clock"></i> الأحدث
+                </li>
+                <li data-sort="popular">
+                    <i class="fas fa-fire"></i> الشائع
+                </li>
+                <li data-sort="oldest">
+                    <i class="fas fa-history"></i> الأقدم
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- المحتوى الرئيسي -->
+    <div class="container">
+        <!-- الصفحة الرئيسية -->
+        <div id="homePage" class="page active">
+            <h2 class="page-title">أحدث المانجا</h2>
+            <div id="loadingHome" class="loading">
+                <div class="loading-spinner"></div>
+                <p>جاري تحميل المانجا...</p>
+            </div>
+            <div id="mangaGrid" class="manga-grid"></div>
+            <div id="noMangaMessage" class="status-message status-info">
+                لا توجد مانجا متاحة حالياً.
+            </div>
+        </div>
+
+        <!-- صفحة تفاصيل المانجا -->
+        <div id="mangaDetailPage" class="page">
+            <button class="btn back-btn" id="backToHome">
+                <i class="fas fa-arrow-right"></i> العودة للرئيسية
+            </button>
+            <div id="loadingDetail" class="loading">
+                <div class="loading-spinner"></div>
+                <p>جاري تحميل التفاصيل...</p>
+            </div>
+            <div id="mangaDetailContent" class="manga-detail-content">
+                <!-- سيتم ملؤه ديناميكياً من manga.js -->
+            </div>
+        </div>
+
+        <!-- صفحة عرض الفصل -->
+        <div id="chapterPage" class="page">
+            <button class="btn back-btn" id="backToManga">
+                <i class="fas fa-arrow-right"></i> العودة للمانجا
+            </button>
+            <div class="chapter-container">
+                <div id="loadingChapter" class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>جاري تحميل الفصل...</p>
+                </div>
+                <div id="chapterContent" class="chapter-content">
+                    <!-- سيتم ملؤه ديناميكياً من manga.js -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة تسجيل الدخول -->
+    <div class="auth-modal" id="authModal">
+        <div class="auth-modal-content">
+            <button class="close-modal" id="closeAuthModal">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2>تسجيل الدخول</h2>
+            <div class="auth-form">
+                <input type="text" class="auth-input" id="displayName" placeholder="اسم المستخدم (إجباري)">
+                <input type="email" class="auth-input" id="loginEmail" placeholder="البريد الإلكتروني">
+                <input type="password" class="auth-input" id="loginPassword" placeholder="كلمة المرور">
+                <div class="auth-buttons">
+                    <button class="btn auth-login-btn" id="loginSubmit">تسجيل الدخول</button>
+                    <button class="btn auth-signup-btn" id="signupSubmit">إنشاء حساب</button>
+                </div>
+                <div id="authMessage" class="auth-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- السكريبتات -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/manga.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/ratings.js"></script>
+    <script src="js/navigation.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

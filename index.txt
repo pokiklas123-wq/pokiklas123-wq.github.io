@@ -1,0 +1,14 @@
+index.html
+manga/
+index.html
+manga_id_1/
+index.html
+chapter/
+
+
+
+manga_id_2/
+index.html
+chapter/
+chapter_1/
+index.html
