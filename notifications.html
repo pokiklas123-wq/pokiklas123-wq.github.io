@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>الإشعارات - مانجا أونلاين</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
     <style>
         .notifications-container {
             max-width: 800px;
@@ -92,10 +92,10 @@
             <i class="fas fa-bars"></i>
         </button>
         <a href="index.html" class="logo">مانجا أونلاين</a>
-        <div class="search-container">
+  <!--  <div class="search-container">
             <input type="text" class="search-input" placeholder="ابحث عن مانجا...">
             <div class="search-results"></div>
-        </div>
+        </div>-->
         <div class="header-actions">
             <button id="themeToggle" class="btn btn-outline">
                 <i class="fas fa-moon"></i>
@@ -182,7 +182,7 @@
             </div>
             
             <div class="mark-all-read">
-                <button class="btn btn-outline" id="markAllReadBtn">
+                <button class="btn btn-outline" onclick="notificationsManager.markAllAsRead()">
                     <i class="fas fa-check-double"></i>
                     تعيين الكل كمقروء
                 </button>
@@ -197,13 +197,13 @@
         </div>
     </div>
 
-    <script src="firebase-config.js"></script>
+    <script src="js/firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="utils.js"></script>
-    <script src="app.js"></script>
-    <script src="notifications.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/notifications.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // تأكد من تهيئة التطبيق

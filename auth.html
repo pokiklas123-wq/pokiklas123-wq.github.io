@@ -3,106 +3,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مانجا كول - تسجيل الدخول / إنشاء حساب</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <!-- خطوط عربية -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
-    <!-- ملفات التهيئة والوحدات الأساسية -->
-    <script src="firebase-config.js"></script>
-    <script src="utils.js"></script>
-    
-    <!-- ملفات المصادقة -->
-    <script type="module" src="auth.js"></script>
-    <script type="module" src="auth-page.js"></script>
+    <title>تسجيل الدخول - مانجا أونلاين</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .auth-card {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .auth-logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        .auth-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+        .auth-subtitle {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 2px solid transparent;
+        }
+        .auth-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        .auth-form {
+            display: none;
+        }
+        .auth-form.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            background: var(--bg-color);
+            color: var(--text-color);
+            transition: var(--transition);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+        .auth-btn:hover {
+            background: var(--secondary-color);
+        }
+        .auth-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .auth-divider {
+            text-align: center;
+            margin: 1.5rem 0;
+            position: relative;
+        }
+        .auth-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: rgba(0,0,0,0.1);
+        }
+        .auth-divider span {
+            background: var(--card-bg);
+            padding: 0 1rem;
+            color: #666;
+        }
+        .social-auth {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .social-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: var(--border-radius);
+            background: var(--bg-color);
+            color: var(--text-color);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .social-btn:hover {
+            background: rgba(0,0,0,0.05);
+        }
+        .auth-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        .auth-link {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        .auth-link:hover {
+            text-decoration: underline;
+        }
+        .form-message {
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            text-align: center;
+            display: none;
+        }
+        .form-message.success {
+            background: rgba(39, 174, 96, 0.1);
+            color: #27ae60;
+            border: 1px solid #27ae60;
+            display: block;
+        }
+        .form-message.error {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+            display: block;
+        }
+        .back-home {
+            text-align: center;
+            margin-top: 2rem;
+        }
+    </style>
 </head>
 <body>
-    <main class="auth-container">
-        <div class="auth-card">
-            <div class="auth-header">
-                <a href="index.html" class="auth-logo">مانجا كول</a>
-                <h1 id="authTitle">تسجيل الدخول</h1>
-                <p id="authSubtitle">أدخل بياناتك للوصول إلى حسابك</p>
-            </div>
-            
-            <div class="form-message" id="formMessage"></div>
-            
-            <div class="auth-tabs">
-                <button class="auth-tab active" data-tab="login">تسجيل الدخول</button>
-                <button class="auth-tab" data-tab="register">إنشاء حساب</button>
-            </div>
-            
-            <!-- نموذج تسجيل الدخول -->
-            <form id="loginForm" class="auth-form active">
-                <div class="form-group">
-                    <label for="loginEmail" class="form-label">البريد الإلكتروني</label>
-                    <input type="email" id="loginEmail" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label for="loginPassword" class="form-label">كلمة السر</label>
-                    <input type="password" id="loginPassword" class="form-input" required>
-                </div>
-                <div class="form-group text-center">
-                    <a href="#" id="forgotPasswordLink" class="text-secondary">نسيت كلمة السر؟</a>
-                </div>
-                <button type="submit" class="auth-btn" id="loginBtn">
-                    <span class="btn-text">تسجيل الدخول</span>
-                    <div class="spinner hidden"></div>
-                </button>
-            </form>
-            
-            <!-- نموذج إنشاء حساب -->
-            <form id="registerForm" class="auth-form">
-                <div class="form-group">
-                    <label for="registerName" class="form-label">اسم المستخدم</label>
-                    <input type="text" id="registerName" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label for="registerEmail" class="form-label">البريد الإلكتروني</label>
-                    <input type="email" id="registerEmail" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label for="registerPassword" class="form-label">كلمة السر</label>
-                    <input type="password" id="registerPassword" class="form-input" required>
-                </div>
-                <div class="form-group">
-                    <label for="registerConfirmPassword" class="form-label">تأكيد كلمة السر</label>
-                    <input type="password" id="registerConfirmPassword" class="form-input" required>
-                </div>
-                <button type="submit" class="auth-btn" id="registerBtn">
-                    <span class="btn-text">إنشاء حساب</span>
-                    <div class="spinner hidden"></div>
-                </button>
-            </form>
-            
-            <!-- نموذج إعادة تعيين كلمة السر -->
-            <form id="resetPasswordForm" class="auth-form">
-                <div class="form-group">
-                    <label for="resetEmail" class="form-label">البريد الإلكتروني</label>
-                    <input type="email" id="resetEmail" class="form-input" required>
-                </div>
-                <button type="submit" class="auth-btn" id="resetPasswordBtn">
-                    <span class="btn-text">إرسال رابط إعادة التعيين</span>
-                    <div class="spinner hidden"></div>
-                </button>
-                <div class="form-group text-center mt-2">
-                    <a href="#" class="text-secondary back-to-login">العودة لتسجيل الدخول</a>
-                </div>
-            </form>
-        </div>
-        
-        <div class="back-home">
+    <!-- Header -->
+    <header>
+        <button id="drawerToggle" class="btn btn-outline">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a href="index.html" class="logo">مانجا أونلاين</a>
+        <div class="header-actions">
+            <button id="themeToggle" class="btn btn-outline">
+                <i class="fas fa-moon"></i>
+            </button>
             <a href="index.html" class="btn btn-outline">
-                <i class="fas fa-arrow-right"></i>
-                العودة للصفحة الرئيسية
+                <i class="fas fa-home"></i>
+                الرئيسية
             </a>
         </div>
-    </main>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <div class="auth-logo">مانجا أونلاين</div>
+                    <h1 class="auth-title" id="authTitle">تسجيل الدخول</h1>
+                    <p class="auth-subtitle" id="authSubtitle">أدخل بياناتك للوصول إلى حسابك</p>
+                </div>
+                
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">تسجيل الدخول</button>
+                    <button class="auth-tab" data-tab="register">إنشاء حساب</button>
+                </div>
+                
+                <!-- نموذج تسجيل الدخول -->
+                <form class="auth-form active" id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label" for="loginEmail">البريد الإلكتروني</label>
+                        <input type="email" class="form-input" id="loginEmail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="loginPassword">كلمة السر</label>
+                        <input type="password" class="form-input" id="loginPassword" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="auth-btn" id="loginBtn">
+                            <span class="btn-text">تسجيل الدخول</span>
+                            <div class="spinner" style="display: none;"></div>
+                        </button>
+                    </div>
+                    
+                    <div class="auth-footer">
+                        <a href="#" class="auth-link" id="forgotPasswordLink">نسيت كلمة السر؟</a>
+                    </div>
+                </form>
+                
+                <!-- نموذج إنشاء حساب -->
+                <form class="auth-form" id="registerForm">
+                    <div class="form-group">
+                        <label class="form-label" for="registerName">الاسم الكامل</label>
+                        <input type="text" class="form-input" id="registerName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="registerEmail">البريد الإلكتروني</label>
+                        <input type="email" class="form-input" id="registerEmail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="registerPassword">كلمة السر</label>
+                        <input type="password" class="form-input" id="registerPassword" required minlength="6">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="registerConfirmPassword">تأكيد كلمة السر</label>
+                        <input type="password" class="form-input" id="registerConfirmPassword" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="auth-btn" id="registerBtn">
+                            <span class="btn-text">إنشاء حساب</span>
+                            <div class="spinner" style="display: none;"></div>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- نموذج إعادة تعيين كلمة السر -->
+                <form class="auth-form" id="resetPasswordForm">
+                    <div class="form-group">
+                        <label class="form-label" for="resetEmail">البريد الإلكتروني</label>
+                        <input type="email" class="form-input" id="resetEmail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="auth-btn" id="resetPasswordBtn">
+                            <span class="btn-text">إرسال رابط التعيين</span>
+                            <div class="spinner" style="display: none;"></div>
+                        </button>
+                    </div>
+                    
+                    <div class="auth-footer">
+                        <a href="#" class="auth-link back-to-login">العودة لتسجيل الدخول</a>
+                    </div>
+                </form>
+                
+                <!-- رسائل النموذج -->
+                <div class="form-message" id="formMessage"></div>
+            </div>
+            
+            <div class="back-home">
+                <a href="index.html" class="btn btn-outline">
+                    <i class="fas fa-arrow-right"></i>
+                    العودة للصفحة الرئيسية
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/auth-page.js"></script>
 </body>
 </html>
