@@ -314,12 +314,10 @@ class MangaApp {
     createMangaCard(manga) {
         const card = document.createElement('a');
 
-	        const latestChapter = this.getLatestChapter(manga);
-	        const latestChapterNumber = latestChapter ? latestChapter.replace('الفصل ', '') : null;
-        card.href = latestChapterNumber ? `chapter.html?manga=${manga.id}&chapter=${latestChapterNumber}` : `manga.html?id=${manga.id}`;
+        const latestChapter = this.getLatestChapter(manga);
+        const latestChapterNumber = latestChapter ? latestChapter.replace('الفصل ', '') : null;
+        card.href = `manga.html?id=${manga.id}`; // البطاقة توجه إلى صفحة معلومات المانجا
         card.className = 'manga-card';
-        
-
         
         card.innerHTML = `
             <div class="manga-image-container">
@@ -328,10 +326,29 @@ class MangaApp {
             </div>
             <div class="manga-info">
                 <div class="manga-title">${manga.name}</div>
-                <div class="latest-chapter">${latestChapter || 'لا توجد فصول'}</div>
+                <div class="latest-chapter-link" data-manga-id="${manga.id}" data-chapter-number="${latestChapterNumber}">
+                    <i class="fas fa-book-open"></i>
+                    <span>${latestChapter || 'لا توجد فصول'}</span>
+                </div>
             </div>
         `;
         
+        card.addEventListener('click', (e) => {
+            // إذا تم النقر على رابط الفصل، نمنع التوجيه إلى صفحة المانجا ونوجه إلى الفصل مباشرة
+            const chapterLink = e.target.closest('.latest-chapter-link');
+            if (chapterLink) {
+                e.preventDefault();
+                const mangaId = chapterLink.getAttribute('data-manga-id');
+                const chapterNumber = chapterLink.getAttribute('data-chapter-number');
+                if (mangaId && chapterNumber && chapterNumber !== 'null') {
+                    window.location.href = `chapter.html?manga=${mangaId}&chapter=${chapterNumber}`;
+                } else {
+                    window.location.href = `manga.html?id=${mangaId}`;
+                }
+            }
+            // إذا لم يتم النقر على رابط الفصل، سيتم التوجيه الافتراضي لـ card.href (صفحة المانجا)
+        });
+
         return card;
     }
     
@@ -343,12 +360,17 @@ class MangaApp {
         if (chapterKeys.length > 0) {
             // استخراج أرقام الفصول وفرزها
             const chapterNumbers = chapterKeys
-                .map(key => parseFloat(key.replace('chapter_', '')))
-                .filter(num => !isNaN(num) && num > 0);
+                .map(key => {
+                    const num = parseFloat(key.replace('chapter_', ''));
+                    return { key, num };
+                })
+                .filter(item => !isNaN(item.num) && item.num > 0);
             
             if (chapterNumbers.length > 0) {
-                const maxChapter = Math.max(...chapterNumbers);
-                return `الفصل ${maxChapter}`;
+                // فرز الأرقام تنازليًا
+                chapterNumbers.sort((a, b) => b.num - a.num);
+                const latestChapterNum = chapterNumbers[0].num;
+                return `الفصل ${latestChapterNum}`;
             }
         }
         
@@ -370,61 +392,50 @@ class MangaApp {
     }
     
     handleSearch(query) {
-        const searchResults = document.querySelector('.search-results');
-        if (!searchResults) return;
+        const searchResultsContainer = document.querySelector('.search-results');
+        if (!searchResultsContainer) return;
         
-        if (!query.trim()) {
+        if (query.length < 2) {
             this.hideSearchResults();
             return;
         }
         
+        const lowerCaseQuery = query.toLowerCase();
         const results = this.mangaList.filter(manga => 
-            manga.name.toLowerCase().includes(query.toLowerCase())
+            manga.name.toLowerCase().includes(lowerCaseQuery)
         );
         
         this.displaySearchResults(results);
     }
     
     displaySearchResults(results) {
-        const searchResults = document.querySelector('.search-results');
-        if (!searchResults) return;
+        const searchResultsContainer = document.querySelector('.search-results');
+        if (!searchResultsContainer) return;
         
-        searchResults.innerHTML = '';
+        searchResultsContainer.innerHTML = '';
         
         if (results.length === 0) {
-            searchResults.innerHTML = '<div class="search-result-item">لا توجد نتائج</div>';
+            searchResultsContainer.innerHTML = '<div class="search-item no-results">لا توجد نتائج</div>';
         } else {
-            results.slice(0, 5).forEach(manga => {
+            results.forEach(manga => {
                 const item = document.createElement('a');
                 item.href = `manga.html?id=${manga.id}`;
-                item.className = 'search-result-item';
-                
+                item.className = 'search-item';
                 item.innerHTML = `
-                    <img src="${manga.thumbnail}" alt="${manga.name}" 
-                         onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA0MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAiIGhlaWdodD0iNTAiIGZpbGw9IiMxRTI5M0IiLz48dGV4dCB4PSIyMCIgeT0iMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNFMjRGNDIiIGZvbnQtc2l6ZT0iOCI+TWFuZ2E8L3RleHQ+PC9zdmc+'">
-                    <div>
-                        <div class="search-result-title">${manga.name}</div>
-                        <div class="search-result-meta">
-                            <span>${Utils.formatNumber(manga.views || 0)} مشاهدة</span>
-                        </div>
-                    </div>
+                    <img src="${manga.thumbnail}" alt="${manga.name}">
+                    <span>${manga.name}</span>
                 `;
-                
-                item.addEventListener('click', () => {
-                    this.hideSearchResults();
-                });
-                
-                searchResults.appendChild(item);
+                searchResultsContainer.appendChild(item);
             });
         }
         
-        searchResults.style.display = 'block';
+        searchResultsContainer.style.display = 'block';
     }
     
     hideSearchResults() {
-        const searchResults = document.querySelector('.search-results');
-        if (searchResults) {
-            searchResults.style.display = 'none';
+        const searchResultsContainer = document.querySelector('.search-results');
+        if (searchResultsContainer) {
+            searchResultsContainer.style.display = 'none';
         }
     }
     
@@ -469,17 +480,12 @@ class MangaApp {
     async signOut() {
         try {
             await this.auth.signOut();
-            this.closeDrawer();
             Utils.showMessage('تم تسجيل الخروج بنجاح', 'success');
-            // إعادة تحميل الصفحة الرئيسية بعد تسجيل الخروج
-            if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
-                this.loadMangaData(); // إعادة تحميل بيانات المانجا
-            } else {
-                window.location.href = 'index.html';
-            }
+            // إعادة تحميل الصفحة أو التوجيه إلى الصفحة الرئيسية
+            window.location.href = 'index.html';
         } catch (error) {
             console.error('Error signing out:', error);
-            Utils.showMessage('حدث خطأ في تسجيل الخروج', 'error');
+            Utils.showMessage('حدث خطأ أثناء تسجيل الخروج', 'error');
         }
     }
     
@@ -490,7 +496,6 @@ class MangaApp {
                 <div class="empty-state">
                     <i class="fas fa-exclamation-triangle"></i>
                     <p>${message}</p>
-                    <button class="btn mt-2" onclick="app.loadMangaData()">إعادة المحاولة</button>
                 </div>
             `;
         }
@@ -498,10 +503,4 @@ class MangaApp {
 }
 
 // تهيئة التطبيق عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 بدء تحميل التطبيق...');
-    // التأكد من أن app يتم تهيئته مرة واحدة فقط
-    if (typeof window.app === 'undefined') {
-        new MangaApp();
-    }
-});
+new MangaApp();

@@ -46,14 +46,14 @@ class MangaPage {
         
         if (drawerToggle) drawerToggle.addEventListener('click', () => this.openDrawer());
         if (drawerClose) drawerClose.addEventListener('click', () => this.closeDrawer());
-	        if (drawerOverlay) drawerOverlay.addEventListener('click', () => this.closeDrawer());
-	        
-	        const sortNewest = document.getElementById('sortNewest');
-	        const sortOldest = document.getElementById('sortOldest');
-	        
-	        if (sortNewest) sortNewest.addEventListener('click', (e) => this.handleSort(e.target));
-	        if (sortOldest) sortOldest.addEventListener('click', (e) => this.handleSort(e.target));
-	    }
+        if (drawerOverlay) drawerOverlay.addEventListener('click', () => this.closeDrawer());
+        
+        const sortNewest = document.getElementById('sortNewest');
+        const sortOldest = document.getElementById('sortOldest');
+        
+        if (sortNewest) sortNewest.addEventListener('click', (e) => this.handleSort(e.target));
+        if (sortOldest) sortOldest.addEventListener('click', (e) => this.handleSort(e.target));
+    }
     
     setupTheme() {
         const themeToggle = document.getElementById('themeToggle');
@@ -187,29 +187,29 @@ class MangaPage {
                         </div>
                     </div>
                     
-<div class="manga-description">
-	                        <p>${this.mangaData.description || 'لا يوجد وصف متاح لهذه المانجا.'}</p>
-	                    </div>
-	                    
-	                    <div class="chapter-description-section" id="chapterDescriptionSection" style="display: none;">
-	                        <h3 class="text-secondary mb-1">وصف الفصل الأخير:</h3>
-	                        <p id="chapterDescriptionText"></p>
-	                    </div>
+                    <div class="manga-description">
+                        <p>${this.mangaData.description || 'لا يوجد وصف متاح لهذه المانجا.'}</p>
+                    </div>
+                    
+                    <div class="chapter-description-section" id="chapterDescriptionSection" style="display: none;">
+                        <h3 class="text-secondary mb-1">وصف الفصل الأخير:</h3>
+                        <p id="chapterDescriptionText"></p>
+                    </div>
                 </div>
             </div>
             
-<div class="chapters-section">
-	                <div class="chapters-header">
-	                    <h2>الفصول</h2>
-	                    <div class="sort-options">
-	                        <button id="sortNewest" class="btn btn-sm active" data-sort="desc">الأحدث</button>
-	                        <button id="sortOldest" class="btn btn-sm" data-sort="asc">الأقدم</button>
-	                    </div>
-	                </div>
-	                <div class="chapters-list" id="chaptersList">
-	                    ${chaptersListHTML}
-	                </div>
-	            </div>
+            <div class="chapters-section">
+                <div class="chapters-header">
+                    <h2>الفصول</h2>
+                    <div class="sort-options">
+                        <button id="sortNewest" class="btn btn-sm active" data-sort="desc">الأحدث</button>
+                        <button id="sortOldest" class="btn btn-sm" data-sort="asc">الأقدم</button>
+                    </div>
+                </div>
+                <div class="chapters-list" id="chaptersList">
+                    ${chaptersListHTML}
+                </div>
+            </div>
         `;
     }
     
@@ -256,78 +256,78 @@ class MangaPage {
         starsContainer.innerHTML = this.renderStars(rating);
     }
     
-	    renderChapters(chaptersArray) {
-	        if (chaptersArray.length === 0) return '<div class="empty-state"><p>لا توجد فصول متاحة بعد</p></div>';
-	        
-	        return chaptersArray.map(chapter => `
-	            <a href="chapter.html?manga=${this.mangaId}&chapter=${chapter.number}" class="chapter-item">
-	                <div class="chapter-info">
-	                    <span class="chapter-number">${chapter.title}</span>
-	                </div>
-	                <span class="btn btn-outline">
-	                    <i class="fas fa-book-open"></i>
-	                    اقرأ الآن
-	                </span>
-	            </a>
-	        `).join('');
-	    }
-	    
-	    prepareChaptersList() {
-	        if (!this.mangaData.chapters) return '<div class="empty-state"><p>لا توجد فصول متاحة بعد</p></div>';
-	        
-	        const chaptersArray = Object.keys(this.mangaData.chapters)
-	            .map(key => {
-	                const chapterNum = key.replace('chapter_', '');
-	                return {
-	                    number: chapterNum,
-	                    key: key,
-	                    title: this.mangaData.chapters[key].title || `الفصل ${chapterNum}`,
-	                    chapter_description: this.mangaData.chapters[key].chapter_description || '' // إضافة الوصف
-	                };
-	            })
-	            .sort((a, b) => parseFloat(b.number) - parseFloat(a.number)); // فرز تنازلي (افتراضي)
-	            
-	        // عرض وصف الفصل الأخير (الأول في القائمة المفرزة)
-	        if (chaptersArray.length > 0) {
-	            const latestChapter = chaptersArray[0];
-	            const description = latestChapter.chapter_description || 'لا يوجد وصف لهذا الفصل.';
-	            
-	            const descSection = document.getElementById('chapterDescriptionSection');
-	            const descText = document.getElementById('chapterDescriptionText');
-	            
-	            if (descSection && descText) {
-	                descText.textContent = description;
-	                descSection.style.display = 'block';
-	            }
-	        }
-	        
-	        this.chaptersArray = chaptersArray; // حفظ القائمة للفرز
-	        return this.renderChapters(chaptersArray);
-	    }
-	    
-	    handleSort(button) {
-	        const sortType = button.getAttribute('data-sort');
-	        const chaptersListEl = document.getElementById('chaptersList');
-	        
-	        if (!this.chaptersArray || !chaptersListEl) return;
-	        
-	        // تحديث حالة الأزرار
-	        document.getElementById('sortNewest').classList.remove('active');
-	        document.getElementById('sortOldest').classList.remove('active');
-	        button.classList.add('active');
-	        
-	        let sortedArray = [...this.chaptersArray];
-	        
-	        if (sortType === 'desc') {
-	            // الأحدث (رقم الفصل تنازلي)
-	            sortedArray.sort((a, b) => parseFloat(b.number) - parseFloat(a.number));
-	        } else if (sortType === 'asc') {
-	            // الأقدم (رقم الفصل تصاعدي)
-	            sortedArray.sort((a, b) => parseFloat(a.number) - parseFloat(b.number));
-	        }
-	        
-	        chaptersListEl.innerHTML = this.renderChapters(sortedArray);
-	    }
+    renderChapters(chaptersArray) {
+        if (chaptersArray.length === 0) return '<div class="empty-state"><p>لا توجد فصول متاحة بعد</p></div>';
+        
+        return chaptersArray.map(chapter => `
+            <a href="chapter.html?manga=${this.mangaId}&chapter=${chapter.number}" class="chapter-item">
+                <div class="chapter-info">
+                    <span class="chapter-number">${chapter.title}</span>
+                </div>
+                <span class="btn btn-outline">
+                    <i class="fas fa-book-open"></i>
+                    اقرأ الآن
+                </span>
+            </a>
+        `).join('');
+    }
+    
+    prepareChaptersList() {
+        if (!this.mangaData.chapters) return '<div class="empty-state"><p>لا توجد فصول متاحة بعد</p></div>';
+        
+        const chaptersArray = Object.keys(this.mangaData.chapters)
+            .map(key => {
+                const chapterNum = key.replace('chapter_', '');
+                return {
+                    number: parseFloat(chapterNum), // تحويل إلى رقم
+                    key: key,
+                    title: this.mangaData.chapters[key].title || `الفصل ${chapterNum}`,
+                    chapter_description: this.mangaData.chapters[key].chapter_description || '' // إضافة الوصف
+                };
+            })
+            .sort((a, b) => b.number - a.number); // فرز تنازلي (افتراضي)
+            
+        // عرض وصف الفصل الأخير (الأول في القائمة المفرزة)
+        if (chaptersArray.length > 0) {
+            const latestChapter = chaptersArray[0];
+            const description = latestChapter.chapter_description || 'لا يوجد وصف لهذا الفصل.';
+            
+            const descSection = document.getElementById('chapterDescriptionSection');
+            const descText = document.getElementById('chapterDescriptionText');
+            
+            if (descSection && descText) {
+                descText.textContent = description;
+                descSection.style.display = 'block';
+            }
+        }
+        
+        this.chaptersArray = chaptersArray; // حفظ القائمة للفرز
+        return this.renderChapters(chaptersArray);
+    }
+    
+    handleSort(button) {
+        const sortType = button.getAttribute('data-sort');
+        const chaptersListEl = document.getElementById('chaptersList');
+        
+        if (!this.chaptersArray || !chaptersListEl) return;
+        
+        // تحديث حالة الأزرار
+        document.getElementById('sortNewest').classList.remove('active');
+        document.getElementById('sortOldest').classList.remove('active');
+        button.classList.add('active');
+        
+        let sortedArray = [...this.chaptersArray];
+        
+        if (sortType === 'desc') {
+            // الأحدث (رقم الفصل تنازلي)
+            sortedArray.sort((a, b) => b.number - a.number);
+        } else if (sortType === 'asc') {
+            // الأقدم (رقم الفصل تصاعدي)
+            sortedArray.sort((a, b) => a.number - b.number);
+        }
+        
+        chaptersListEl.innerHTML = this.renderChapters(sortedArray);
+    }
     
     showError(message) {
         const mangaDetailContainer = document.getElementById('mangaDetailContainer');
@@ -343,6 +343,13 @@ class MangaPage {
     }
 }
 
+// تهيئة الصفحة عند تحميلها
+// يجب أن يتم استدعاء هذا بعد تحميل firebase-config.js و utils.js
 document.addEventListener('DOMContentLoaded', () => {
+    // التأكد من أن Utils موجود
+    if (typeof Utils === 'undefined') {
+        console.error("Utils class is not defined. Ensure utils.js is loaded before manga.js.");
+        return;
+    }
     new MangaPage();
 });
