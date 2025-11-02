@@ -280,7 +280,7 @@ class MangaApp {
         switch (this.currentFilter) {
             case 'latest':
                 // افتراض أن المانجا مرتبة حسب وقت الإضافة أو التحديث
-                filteredManga.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+                filteredManga.sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0));
                 break;
             case 'popular':
                 filteredManga.sort((a, b) => (b.views || 0) - (a.views || 0));
@@ -313,10 +313,13 @@ class MangaApp {
     
     createMangaCard(manga) {
         const card = document.createElement('a');
-        card.href = `manga.html?id=${manga.id}`;
+
+	        const latestChapter = this.getLatestChapter(manga);
+	        const latestChapterNumber = latestChapter ? latestChapter.replace('الفصل ', '') : null;
+        card.href = latestChapterNumber ? `chapter.html?manga=${manga.id}&chapter=${latestChapterNumber}` : `manga.html?id=${manga.id}`;
         card.className = 'manga-card';
         
-        const latestChapter = this.getLatestChapter(manga);
+
         
         card.innerHTML = `
             <div class="manga-image-container">

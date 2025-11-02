@@ -72,7 +72,20 @@ class DatabaseManager {
         }
     }
     
-    // جلب بيانات المستخدم
+    // تحديث وقت آخر تحديث للمانجا
+	    async updateMangaUpdateTime(mangaId) {
+	        try {
+	            await this.database.ref(`manga_list/${mangaId}`).update({
+	                updatedAt: firebase.database.ServerValue.TIMESTAMP
+	            });
+	            return { success: true };
+	        } catch (error) {
+	            console.error(`Error updating manga update time for ${mangaId}:`, error);
+	            return { success: false, error: error.message };
+	        }
+	    }
+	    
+	    // جلب بيانات المستخدم
     async getUserData(userId) {
         try {
             const snapshot = await this.database.ref('users/' + userId).once('value');
@@ -157,7 +170,24 @@ class DatabaseManager {
         }
     }
     
-    // جلب التعليقات لفصل معين
+    // جلب تعليق محدد
+	    async getComment(mangaId, chapterId, commentId) {
+	        try {
+	            const snapshot = await this.database.ref(`comments/${mangaId}/${chapterId}/${commentId}`).once('value');
+	            const comment = snapshot.val();
+	            
+	            if (comment) {
+	                comment.id = commentId;
+	            }
+	            
+	            return { success: true, data: comment };
+	        } catch (error) {
+	            console.error(`Error getting comment ${commentId}:`, error);
+	            return { success: false, error: error.message };
+	        }
+	    }
+	    
+	    // جلب التعليقات لفصل معين
     async getComments(mangaId, chapterId) {
         try {
             const snapshot = await this.database.ref(`comments/${mangaId}/${chapterId}`).once('value');
@@ -196,6 +226,9 @@ class DatabaseManager {
             };
             
             await commentRef.set(commentData);
+	            
+	            // تحديث وقت آخر تحديث للمانجا
+	            await this.updateMangaUpdateTime(mangaId);
             
             return { success: true, commentId: commentId, commentData: commentData };
         } catch (error) {
@@ -218,6 +251,9 @@ class DatabaseManager {
             };
             
             await replyRef.set(replyData);
+	            
+	            // تحديث وقت آخر تحديث للمانجا
+	            await this.updateMangaUpdateTime(mangaId);
             
             return { success: true, replyId: replyId, replyData: replyData };
         } catch (error) {
@@ -288,7 +324,30 @@ class DatabaseManager {
         }
     }
     
-    // إضافة/تحديث تقييم المانجا
+    // حذف تعليق
+	    async deleteComment(mangaId, chapterId, commentId) {
+	        try {
+	            await this.database.ref(`comments/${mangaId}/${chapterId}/${commentId}`).remove();
+	            // يمكن إضافة منطق لحذف الإعجابات المرتبطة بالتعليق لاحقاً
+	            return { success: true };
+	        } catch (error) {
+	            console.error(`Error deleting comment ${commentId}:`, error);
+	            return { success: false, error: error.message };
+	        }
+	    }
+	    
+	    // حذف رد
+	    async deleteReply(mangaId, chapterId, commentId, replyId) {
+	        try {
+	            await this.database.ref(`comments/${mangaId}/${chapterId}/${commentId}/replies/${replyId}`).remove();
+	            return { success: true };
+	        } catch (error) {
+	            console.error(`Error deleting reply ${replyId}:`, error);
+	            return { success: false, error: error.message };
+	        }
+	    }
+	    
+	    // إضافة/تحديث تقييم المانجا
     async rateManga(mangaId, userId, rating) {
         try {
             if (rating < 1 || rating > 5) {
@@ -302,9 +361,11 @@ class DatabaseManager {
             
             // تحديث متوسط التقييم في بيانات المانجا نفسها
             const { average } = await this.getMangaRatings(mangaId);
-            await this.database.ref(`manga_list/${mangaId}`).update({
-                rating: parseFloat(average)
-            });
+// التحقق من أن average ليس NaN قبل التحديث
+	            const finalRating = isNaN(parseFloat(average)) ? 0 : parseFloat(average);
+	            await this.database.ref(`manga_list/${mangaId}`).update({
+	                rating: finalRating
+	            });
             
             return { success: true, newRating: parseFloat(average) };
         } catch (error) {
