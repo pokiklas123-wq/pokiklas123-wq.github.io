@@ -14,17 +14,17 @@ class NotificationsManager {
             }
         });
         
-        // مستمع للنقر على الإشعارات في القائمة الجانبية
-        document.getElementById('notificationsList').addEventListener('click', (e) => {
-            const notificationElement = e.target.closest('.notification');
-            if (notificationElement) {
-                const notificationId = notificationElement.dataset.notificationId;
-                const notification = this.notifications[notificationId];
-                if (notification) {
-                    this.handleNotificationClick(notificationId, notification);
-                }
-            }
-        });
+	        // مستمع للنقر على الإشعارات في صفحة الإشعارات
+	        document.addEventListener('click', (e) => {
+	            const notificationElement = e.target.closest('.notification-action');
+	            if (notificationElement) {
+	                const notificationId = notificationElement.dataset.notificationId;
+	                const notification = this.notifications[notificationId];
+	                if (notification) {
+	                    this.handleNotificationClick(notificationId, notification);
+	                }
+	            }
+	        });
     }
 
     listenForNotifications() {
@@ -51,31 +51,36 @@ class NotificationsManager {
         });
     }
 
-    displayNotifications() {
-        const notificationsList = document.getElementById('notificationsList');
-        if (!notificationsList) return;
-
-        notificationsList.innerHTML = '';
-
-        const notificationsArray = Object.keys(this.notifications).map(key => {
-            return { id: key, ...this.notifications[key] };
-        });
-
-        if (notificationsArray.length === 0) {
-            notificationsList.innerHTML = '<p class="no-notifications">لا توجد إشعارات</p>';
-            return;
-        }
-
-        // ترتيب الإشعارات من الأحدث إلى الأقدم
-        notificationsArray.sort((a, b) => b.timestamp - a.timestamp);
-
-        notificationsArray.forEach(notification => {
-            const notificationElement = this.createNotificationElement(notification);
-            notificationsList.appendChild(notificationElement);
-        });
-
-        console.log('تم عرض الإشعارات:', notificationsArray.length);
-    }
+	    displayNotifications() {
+	        const notificationsContent = document.getElementById('notificationsContent');
+	        if (!notificationsContent) return;
+	
+	        notificationsContent.innerHTML = '';
+	
+	        const notificationsArray = Object.keys(this.notifications).map(key => {
+	            return { id: key, ...this.notifications[key] };
+	        });
+	
+	        if (notificationsArray.length === 0) {
+	            notificationsContent.innerHTML = '<p class="status-info">لا توجد إشعارات حالياً.</p>';
+	            return;
+	        }
+	
+	        // ترتيب الإشعارات من الأحدث إلى الأقدم
+	        notificationsArray.sort((a, b) => b.timestamp - a.timestamp);
+	
+	        const listContainer = document.createElement('div');
+	        listContainer.className = 'notifications-list';
+	
+	        notificationsArray.forEach(notification => {
+	            const notificationElement = this.createNotificationElement(notification);
+	            listContainer.appendChild(notificationElement);
+	        });
+	
+	        notificationsContent.appendChild(listContainer);
+	
+	        console.log('تم عرض الإشعارات في صفحة الإشعارات:', notificationsArray.length);
+	    }
 
     createNotificationElement(notification) {
         const element = document.createElement('div');
@@ -110,9 +115,9 @@ class NotificationsManager {
                     <span class="notification-time">${this.formatTime(notification.timestamp)}</span>
                 </div>
             </div>
-            <button class="notification-action" data-notification-id="${notification.id}">
-                <i class="fas fa-arrow-left"></i>
-            </button>
+	            <button class="notification-action btn btn-secondary" data-notification-id="${notification.id}">
+	                <i class="fas fa-arrow-left"></i> عرض
+	            </button>
         `;
 
         return element;
@@ -140,8 +145,8 @@ class NotificationsManager {
                     manga.chapters[notification.chapterId]
                 );
                 
-                // 3. إغلاق القائمة الجانبية
-                ui.closeDrawer();
+	                // 3. الانتقال إلى الصفحة المطلوبة (تم الانتقال بالفعل ضمن showChapter)
+	                // 4. التمرير إلى التعليق المحدد
                 
                 // 4. التمرير إلى التعليق المحدد
                 if (notification.commentId) {
@@ -200,11 +205,11 @@ class NotificationsManager {
         if (this.notificationsRef) {
             this.notificationsRef.off('value');
         }
-        this.notifications = {};
-        const notificationsList = document.getElementById('notificationsList');
-        if (notificationsList) {
-            notificationsList.innerHTML = '<p class="no-notifications">لا توجد إشعارات</p>';
-        }
+	        this.notifications = {};
+	        const notificationsContent = document.getElementById('notificationsContent');
+	        if (notificationsContent) {
+	            notificationsContent.innerHTML = '<p class="status-info">لا توجد إشعارات حالياً.</p>';
+	        }
     }
 }
 

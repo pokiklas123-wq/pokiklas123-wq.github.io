@@ -7,8 +7,8 @@ class App {
         try {
             this.setupEventListeners();
             
-            // تحميل حالة التنقل أولاً
-            navigationManager.loadState();
+	            // تحميل حالة التنقل أولاً (تم نقل loadStateFromURL إلى loadInitialData)
+	            // navigationManager.loadState();
             
             // ثم تحميل البيانات
             await this.loadInitialData();
@@ -20,9 +20,9 @@ class App {
     }
 
     setupEventListeners() {
-        document.getElementById('backToHome').addEventListener('click', () => {
-            navigationManager.goBack();
-        });
+	        document.getElementById('backToHome').addEventListener('click', () => {
+	            navigationManager.navigateTo('homePage');
+	        });
 
         document.getElementById('backToManga').addEventListener('click', () => {
             navigationManager.goBack();
@@ -74,12 +74,8 @@ class App {
             // تحميل بيانات المانجا أولاً
             await mangaManager.loadMangaList();
             
-            // إذا كان هناك رابط مباشر، انتظر قليلاً ثم حمّله
-            setTimeout(() => {
-                if (window.location.hash && window.location.hash !== '#') {
-                    navigationManager.loadStateFromURL();
-                }
-            }, 500);
+	            // بعد تحميل البيانات، قم بتحميل حالة التنقل من الرابط
+	            navigationManager.loadStateFromURL();
             
             if (authManager.getCurrentUser()) {
                 await ratingsManager.loadUserRatings();
