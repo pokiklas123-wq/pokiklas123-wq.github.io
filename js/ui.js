@@ -11,6 +11,60 @@ class UI {
     }
 
     setupEventListeners() {
+        // البحث - الإصلاح الرئيسي هنا
+        const searchBtn = document.getElementById('searchBtn');
+        const closeSearch = document.getElementById('closeSearch');
+        
+        if (searchBtn) {
+            searchBtn.addEventListener('click', () => {
+                this.toggleSearch();
+            });
+        }
+        
+        if (closeSearch) {
+            closeSearch.addEventListener('click', () => {
+                this.hideSearch();
+            });
+        }
+
+        // إغلاق البحث بالزر ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.hideSearch();
+            }
+        });
+
+        // البحث أثناء الكتابة
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.handleSearch(e.target.value);
+            });
+        }
+
+        // بقية المستمعين للأحداث...
+        const menuBtn = document.getElementById('menuBtn');
+        if (menuBtn) {
+            menuBtn.addEventListener('click', () => {
+                this.toggleDrawer(true);
+            });
+        }
+
+        const closeDrawer = document.getElementById('closeDrawer');
+        if (closeDrawer) {
+            closeDrawer.addEventListener('click', () => {
+                this.toggleDrawer(false);
+            });
+        }
+
+        const overlay = document.getElementById('overlay');
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                this.toggleDrawer(false);
+                this.hideSearch();
+            });
+        }
+
         // تبديل السمات
         document.querySelectorAll('.theme-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -19,33 +73,13 @@ class UI {
             });
         });
 
-        // القائمة الجانبية
-        document.getElementById('menuBtn').addEventListener('click', () => {
-            this.toggleDrawer(true);
-        });
-
-        document.getElementById('closeDrawer').addEventListener('click', () => {
-            this.toggleDrawer(false);
-        });
-
-        document.getElementById('overlay').addEventListener('click', () => {
-            this.toggleDrawer(false);
-            this.hideSearch();
-        });
-
-        // البحث
-        document.getElementById('searchBtn').addEventListener('click', () => {
-            this.toggleSearch();
-        });
-
-        document.getElementById('closeSearch').addEventListener('click', () => {
-            this.hideSearch();
-        });
-
         // إغلاق نافذة التسجيل
-        document.getElementById('closeAuthModal').addEventListener('click', () => {
-            this.toggleAuthModal(false);
-        });
+        const closeAuthModal = document.getElementById('closeAuthModal');
+        if (closeAuthModal) {
+            closeAuthModal.addEventListener('click', () => {
+                this.toggleAuthModal(false);
+            });
+        }
 
         // منع إرسال النموذج عند الضغط على إنتر
         document.addEventListener('keypress', (e) => {
@@ -56,22 +90,7 @@ class UI {
     }
 
     setupSearch() {
-        const searchInput = document.getElementById('searchInput');
-        const closeSearch = document.getElementById('closeSearch');
-        
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
-                this.handleSearch(e.target.value);
-            });
-        }
-        
-        if (closeSearch) {
-            closeSearch.addEventListener('click', () => {
-                this.hideSearch();
-                if (searchInput) searchInput.value = '';
-                this.handleSearch('');
-            });
-        }
+        // تم نقل المنطق إلى setupEventListeners
     }
 
     handleSearch(searchTerm) {
@@ -103,6 +122,26 @@ class UI {
         }
     }
 
+    toggleSearch() {
+        const searchContainer = document.getElementById('searchContainer');
+        if (searchContainer) {
+            searchContainer.classList.toggle('active');
+            if (searchContainer.classList.contains('active')) {
+                document.getElementById('searchInput').focus();
+            }
+        }
+    }
+
+    hideSearch() {
+        const searchContainer = document.getElementById('searchContainer');
+        if (searchContainer) {
+            searchContainer.classList.remove('active');
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) searchInput.value = '';
+            this.handleSearch('');
+        }
+    }
+
     switchTheme(theme) {
         this.currentTheme = theme;
         document.documentElement.setAttribute('data-theme', theme);
@@ -131,8 +170,8 @@ class UI {
     closeDrawer() {
         const drawer = document.getElementById('drawer');
         const overlay = document.getElementById('overlay');
-        drawer.classList.remove('open');
-        overlay.classList.remove('active');
+        if (drawer) drawer.classList.remove('open');
+        if (overlay) overlay.classList.remove('active');
     }
 
     toggleDrawer(show) {
@@ -140,29 +179,11 @@ class UI {
         const overlay = document.getElementById('overlay');
         
         if (show) {
-            drawer.classList.add('open');
-            overlay.classList.add('active');
+            if (drawer) drawer.classList.add('open');
+            if (overlay) overlay.classList.add('active');
         } else {
-            drawer.classList.remove('open');
-            overlay.classList.remove('active');
-        }
-    }
-
-    toggleSearch() {
-        const searchContainer = document.getElementById('searchContainer');
-        if (searchContainer) {
-            searchContainer.style.display = searchContainer.style.display === 'block' ? 'none' : 'block';
-            
-            if (searchContainer.style.display === 'block') {
-                document.getElementById('searchInput').focus();
-            }
-        }
-    }
-
-    hideSearch() {
-        const searchContainer = document.getElementById('searchContainer');
-        if (searchContainer) {
-            searchContainer.style.display = 'none';
+            if (drawer) drawer.classList.remove('open');
+            if (overlay) overlay.classList.remove('active');
         }
     }
 
