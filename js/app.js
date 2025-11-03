@@ -3,7 +3,7 @@ class MangaApp {
     constructor() {
         this.currentUser = null;
         this.mangaList = [];
-        this.currentFilter = 'oldest';
+        this.currentFilter = 'latest';
         this.isInitialized = false;
         
         this.init();
@@ -82,7 +82,7 @@ class MangaApp {
         console.log('🔧 جاري إعداد الأحداث...');
         
         this.setupDrawer();
-        this.setupTheme();
+        // this.setupTheme();
         this.setupFilters();
         this.setupSearch();
         this.setupAuthButtons();
@@ -317,6 +317,7 @@ class MangaApp {
         
         switch (this.currentFilter) {
             case 'latest':
+                filteredManga.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
                 break;
             case 'popular':
                 filteredManga.sort((a, b) => (b.views || 0) - (a.views || 0));
@@ -325,7 +326,7 @@ class MangaApp {
                 filteredManga.sort((a, b) => (b.rating || 0) - (a.rating || 0));
                 break;
             case 'oldest':
-                filteredManga = [...mangaArray].reverse();
+                filteredManga.sort((a, b) => (a.updatedAt || 0) - (b.updatedAt || 0));
                 break;
         }
         
@@ -346,121 +347,171 @@ class MangaApp {
             mangaGrid.appendChild(card);
         });
     }
+    /***/
     
-    createMangaCard(manga) {
-        const card = document.createElement('div');
-        card.className = 'manga-card loading';
-        
-        const latestChapter = this.getLatestChapter(manga);
-        
-        card.innerHTML = `
-            <div class="shimmer-container"></div>
-            <div class="manga-thumbnail-container">
-                <img src="${manga.thumbnail}" alt="${manga.name}" class="manga-thumbnail"
-                     onload="this.parentElement.parentElement.classList.remove('loading')"
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDE4MCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMyMjMzNDQiLz48dGV4dCB4PSI5MCIgeT0iMTI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIj5NYW5nYTwvdGV4dD48L3N2Zz4='">
-                ${latestChapter ? `<div class="chapter-badge">${latestChapter}</div>` : ''}
+    // دالة لإنشاء بطاقة مانجا
+createMangaCard(manga) {
+    // إنشاء عنصر div جديد للبطاقة
+    const card = document.createElement('div');
+    // تعيين كلاس للبطاقة مع وضعية التحميل
+    card.className = 'manga-card loading';
+    
+    // الحصول على أحدث فصل للمانجا
+    const latestChapter = this.getLatestChapter(manga);
+    
+    // بناء محتوى HTML للبطاقة
+    card.innerHTML = `
+        <div class="shimmer-container"></div>
+        <div class="manga-thumbnail-container">
+            <img src="${manga.thumbnail}" alt="${manga.name}" class="manga-thumbnail"
+                 onload="this.parentElement.parentElement.classList.remove('loading')"
+                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDE4MCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjE4MCIgaGVpZ2h0PSIyNTAiIGZpbGw9IiMyMjMzNDQiLz48dGV4dCB4PSI5MCIgeT0iMTI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSJ3aGl0ZSIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjEyIj5NYW5nYTwvdGV4dD48L3N2Zz4='">
+            ${latestChapter ? `<div class="chapter-badge">${latestChapter}</div>` : ''}
+        </div>
+        <div class="manga-info">
+            <div class="manga-title">${manga.name}</div>
+            <div class="manga-meta">
+                <!-- تعديل هنا: إضافة أيقونة العين بدلاً من الإيموجي -->
+                <span><i class="fas fa-eye"></i> ${Utils.formatNumber(manga.views || 0)}</span>
+                <span class="rating">
+                    <i class="fas fa-star"></i>
+                    <span>${manga.rating || 0}</span>
+                </span>
             </div>
-            <div class="manga-info">
-                <div class="manga-title">${manga.name}</div>
-                <div class="manga-meta">
-                    <span>${manga.views || 0} مشاهدة</span>
-                    <span class="rating">
-                        <i class="fas fa-star"></i>
-                        <span>${manga.rating || 0}</span>
-                    </span>
-                </div>
-            </div>
-        `;
-        
-        card.addEventListener('click', () => {
-            window.location.href = `manga.html?id=${manga.id}`;
-        });
-        
-        return card;
+        </div>
+    `;
+    
+    // إضافة حدث النقر للبطاقة للانتقال إلى صفحة المانجا
+    card.addEventListener('click', () => {
+        window.location.href = `manga.html?id=${manga.id}`;
+    });
+    
+    // إرجاع البطاقة المنشأة
+    return card;
+}
+
+// دالة للحصول على أحدث فصل للمانجا
+getLatestChapter(manga) {
+    // التحقق من وجود فصول للمانجا
+    if (!manga.chapters) return null;
+    
+    // استخراج أرقام الفصول من المانجا
+    const chapterNumbers = Object.keys(manga.chapters)
+        // تحويل أسماء الفصول إلى أرقام
+        .map(key => parseInt(key.replace('chapter_', '')))
+        // تصفية الأرقام غير الصحيحة والأصفار
+        .filter(num => !isNaN(num) && num > 0);
+    
+    // التحقق من وجود فصول صالحة
+    if (chapterNumbers.length > 0) {
+        // إيجاد أكبر رقم فصل
+        const maxChapter = Math.max(...chapterNumbers);
+        // إرجاع نص الفصل
+        return `الفصل ${maxChapter}`;
     }
     
-    getLatestChapter(manga) {
-        if (!manga.chapters) return null;
-        
-        const chapterNumbers = Object.keys(manga.chapters)
-            .map(key => parseInt(key.replace('chapter_', '')))
-            .filter(num => !isNaN(num) && num > 0);
-        
-        if (chapterNumbers.length > 0) {
-            const maxChapter = Math.max(...chapterNumbers);
-            return `الفصل ${maxChapter}`;
-        }
-        
-        return null;
-    }
+    // إرجاع null إذا لم توجد فصول
+    return null;
+}
+
+// دالة لتطبيق الفلتر على المانجا
+applyFilter(filter) {
+    // حفظ الفلتر الحالي
+    this.currentFilter = filter;
+    // عرض المانجا بعد التصفية
+    this.displayManga(this.mangaList);
     
-    applyFilter(filter) {
-        this.currentFilter = filter;
-        this.displayManga(this.mangaList);
-        
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        filterBtns.forEach(btn => {
-            if (btn.getAttribute('data-filter') === filter) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-    }
-    
-    handleSearch(query) {
-        const searchResults = document.querySelector('.search-results');
-        if (!searchResults) return;
-        
-        if (!query.trim()) {
-            this.hideSearchResults();
-            return;
-        }
-        
-        const results = this.mangaList.filter(manga => 
-            manga.name.toLowerCase().includes(query.toLowerCase())
-        );
-        
-        this.displaySearchResults(results);
-    }
-    
-    displaySearchResults(results) {
-        const searchResults = document.querySelector('.search-results');
-        if (!searchResults) return;
-        
-        searchResults.innerHTML = '';
-        
-        if (results.length === 0) {
-            searchResults.innerHTML = '<div class="search-result-item">لا توجد نتائج</div>';
+    // الحصول على جميع أزرار الفلتر
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    // تحديث حالة الأزرار (نشط/غير نشط)
+    filterBtns.forEach(btn => {
+        if (btn.getAttribute('data-filter') === filter) {
+            // إضافة كلاس active للزر المحدد
+            btn.classList.add('active');
         } else {
-            results.slice(0, 5).forEach(manga => {
-                const item = document.createElement('div');
-                item.className = 'search-result-item';
-                
-                item.innerHTML = `
-                    <img src="${manga.thumbnail}" alt="${manga.name}" 
-                         onerror="this.style.display='none'">
-                    <div>
-                        <div class="search-result-title">${manga.name}</div>
-                        <div class="search-result-meta">
-                            <span>${manga.views || 0} مشاهدة</span>
-                        </div>
-                    </div>
-                `;
-                
-                item.addEventListener('click', () => {
-                    window.location.href = `manga.html?id=${manga.id}`;
-                    this.hideSearchResults();
-                });
-                
-                searchResults.appendChild(item);
-            });
+            // إزالة كلاس active من الأزرار الأخرى
+            btn.classList.remove('active');
         }
-        
-        searchResults.style.display = 'block';
+    });
+}
+
+// دالة للتعامل مع عملية البحث
+handleSearch(query) {
+    // الحصول على عنصر نتائج البحث
+    const searchResults = document.querySelector('.search-results');
+    // الخروج إذا لم يوجد عنصر نتائج البحث
+    if (!searchResults) return;
+    
+    // التحقق إذا كان نص البحث فارغاً
+    if (!query.trim()) {
+        // إخفاء نتائج البحث إذا كان البحث فارغاً
+        this.hideSearchResults();
+        return;
     }
     
+    // تصفية قائمة المانجا بناءً على نص البحث
+    const results = this.mangaList.filter(manga => 
+        // البحث في اسم المانجا (باستخدام حالة الأحرف الصغيرة للمقارنة)
+        manga.name.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    // عرض نتائج البحث
+    this.displaySearchResults(results);
+}
+
+// دالة لعرض نتائج البحث
+displaySearchResults(results) {
+    // الحصول على عنصر نتائج البحث
+    const searchResults = document.querySelector('.search-results');
+    // الخروج إذا لم يوجد عنصر نتائج البحث
+    if (!searchResults) return;
+    
+    // تفريغ محتوى نتائج البحث السابقة
+    searchResults.innerHTML = '';
+    
+    // التحقق إذا كانت هناك نتائج
+    if (results.length === 0) {
+        // عرض رسالة عدم وجود نتائج
+        searchResults.innerHTML = '<div class="search-result-item">لا توجد نتائج</div>';
+    } else {
+        // عرض أول 5 نتائج فقط
+        results.slice(0, 5).forEach(manga => {
+            // إنشاء عنصر لكل نتيجة بحث
+            const item = document.createElement('div');
+            // إضافة كلاس لعنصر نتيجة البحث
+            item.className = 'search-result-item';
+            
+            // بناء محتوى HTML لعنصر نتيجة البحث
+            item.innerHTML = `
+                <img src="${manga.thumbnail}" alt="${manga.name}" 
+                     onerror="this.style.display='none'">
+                <div>
+                    <div class="search-result-title">${manga.name}</div>
+                    <div class="search-result-meta">
+                        <!-- تعديل هنا: إضافة أيقونة العين بدلاً من الإيموجي -->
+                        <span><i class="fas fa-eye"></i> ${Utils.formatNumber(manga.views || 0)}</span>
+                    </div>
+                </div>
+            `;
+            
+            // إضافة حدث النقر للعنصر للانتقال إلى صفحة المانجا
+            item.addEventListener('click', () => {
+                window.location.href = `manga.html?id=${manga.id}`;
+                // إخفاء نتائج البحث بعد النقر
+                this.hideSearchResults();
+            });
+            
+            // إضافة عنصر نتيجة البحث إلى قائمة النتائج
+            searchResults.appendChild(item);
+        });
+    }
+    
+    // عرض عنصر نتائج البحث
+    searchResults.style.display = 'block';
+}
+    
+    
+    /*****/
     hideSearchResults() {
         const searchResults = document.querySelector('.search-results');
         if (searchResults) {

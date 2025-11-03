@@ -100,12 +100,12 @@ class Utils {
     
     static loadTheme() {
         try {
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
             return savedTheme;
         } catch (error) {
             console.error('Error loading theme:', error);
-            return 'light';
+            return 'dark';
         }
     }
     
@@ -120,11 +120,11 @@ class Utils {
     
     static getThemeIcon(theme) {
         const icons = {
-            'light': 'fa-moon',
+            // 'light': 'fa-moon',
             'dark': 'fa-sun',
             'blue': 'fa-palette'
         };
-        return icons[theme] || icons.light;
+        return icons[theme] || icons.dark;
     }
     
     static async sleep(ms) {
