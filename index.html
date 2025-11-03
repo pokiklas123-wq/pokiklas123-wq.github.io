@@ -1,41 +1,24 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جديد المانجا | موقع متكامل للمانجا العربية</title>
+    <meta name="description" content="موقع مانجا متكامل لعرض وقراءة المانجا العربية بأفضل تجربة مستخدم">
+    <meta name="keywords" content="مانجا, مانغا, قصص مصورة, مانجا عربية, قراءة مانجا">
     
-    <title>إبحث عن مانجا 🔍</title>
+    <!-- الروابط -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
- <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="css/components.css">
-
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
     <header>
         <button id="drawerToggle" class="btn btn-outline">
             <i class="fas fa-bars"></i>
         </button>
-        <a href="index.html" class="logo">مانجا أونلاين</a>
-        
-        
-        
-        
-        
-        
-        
-        <div class="nav-buttons">
-            <button class="btn search-btn" id="searchBtn">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-
-        
-        
-        
-        
-        
-        
+        <a href="index.html" class="logo">جديد المانجا</a>
         
         <div class="header-actions">
             <button id="themeToggle" class="btn btn-outline">
@@ -50,24 +33,21 @@
                 <span>تسجيل الدخول</span>
             </button>
         </div>
+        
+        <div class="nav-buttons">
+            <button class="btn search-btn" id="searchBtn">
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
     </header>
 
-
-
- 
- 
- 
-<!-- شريط البحث -->
+    <!-- شريط البحث -->
     <div class="search-container" id="searchContainer">
         <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن مانجا...">
         <button class="search-close" id="closeSearch">
             <i class="fas fa-times"></i>
         </button>
     </div>
- 
- 
-
-
 
     <div class="drawer">
         <div class="drawer-header">
@@ -118,7 +98,7 @@
             </li>
         </ul>
         
-        <div class="theme-selector">
+       <div class="theme-selector">
             <span>المظهر</span>
             <div class="theme-option active" data-theme="light">فاتح</div>
             <div class="theme-option" data-theme="dark">مظلم</div>
@@ -157,7 +137,7 @@
     <footer>
         <div class="footer-content">
             <div class="footer-section">
-                <h3>مانجا أونلاين</h3>
+                <h3>جديد المانجا</h3>
                 <p>أفضل موقع لقراءة المانجا العربية. استمتع بأفضل القصص المصورة من مختلف الأنواع.</p>
             </div>
             <div class="footer-section">
@@ -180,17 +160,24 @@
             </div>
         </div>
         <div class="copyright">
-            &copy; 2023 مانجا أونلاين. جميع الحقوق محفوظة.
+            &copy; 2023 جديد المانجا. جميع الحقوق محفوظة.
         </div>
     </footer>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
+    <!-- السكريبتات -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
     <script src="js/firebase-config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/manga.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/ratings.js"></script>
+    <script src="js/navigation.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/notifications.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/notifications.js"></script>
 </body>
 </html>

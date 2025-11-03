@@ -49,6 +49,52 @@
             line-height: 1.6;
             margin-bottom: 1.5rem;
         }
+        
+        /* أنماط نظام التقييم */
+        .rating-section {
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+        }
+        
+        .star-rating {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+            direction: ltr;
+        }
+        
+        .star-rating i {
+            font-size: 1.5rem;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .star-rating i:hover {
+            transform: scale(1.2);
+        }
+        
+        .star-rating i.active {
+            color: #ffc107;
+        }
+        
+        .rating-text, .average-rating {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+        
+        .average-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+        }
+        
         .chapters-section {
             margin-top: 2rem;
         }
@@ -112,10 +158,6 @@
             <i class="fas fa-bars"></i>
         </button>
         <a href="index.html" class="logo">مانجا أونلاين</a>
-       <!--<div class="search-container">
-            <input type="text" class="search-input" placeholder="ابحث عن مانجا...">
-            <div class="search-results"></div>
-        </div>-->
         <div class="header-actions">
             <button id="themeToggle" class="btn btn-outline">
                 <i class="fas fa-moon"></i>
@@ -166,13 +208,14 @@
         
         <div class="theme-selector">
             <span>المظهر</span>
-            <div class="theme-option active" data-theme="light">فاتح</div>
+            <!-- تم إخفاء زر فاتح -->
             <div class="theme-option" data-theme="dark">مظلم</div>
             <div class="theme-option" data-theme="blue">أزرق</div>
         </div>
-        <span>تسجيل الخروج</span>
+        
         <button id="logoutBtn" class="btn btn-outline hidden">
             <i class="fas fa-sign-out-alt"></i>
+            تسجيل الخروج
         </button>
     </div>
     <div class="drawer-overlay"></div>
