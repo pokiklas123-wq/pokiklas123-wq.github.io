@@ -74,6 +74,19 @@ body {
     line-height: 1.6;
 }
 
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: var(--transition);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
 /* Header - النسخة الأساسية */
 header {
     background-color: var(--secondary-color);
