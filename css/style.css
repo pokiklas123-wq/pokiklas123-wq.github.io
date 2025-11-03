@@ -503,7 +503,7 @@ footer {
 
 .empty-state p {
     margin-bottom: 1.5rem;
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 /* Notification Badge */
@@ -692,7 +692,7 @@ footer {
     border-radius: 8px;
     background: var(--bg-color);
     color: var(--text-color);
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 .search-close {
@@ -831,7 +831,10 @@ footer {
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    /*مضاف جديد */
+    width: 100%;
+    /**/
+    height: 100px;
 }
 
 .manga-card-enhanced:hover {
@@ -846,7 +849,7 @@ footer {
 
 .manga-thumbnail-enhanced {
     width: 100%;
-    height: 200px;
+    height: 100%;
     object-fit: cover;
     display: block;
     transition: transform 0.3s ease;
@@ -864,7 +867,7 @@ footer {
 }
 
 .manga-title-enhanced {
-    font-size: 1rem;
+    font-size: 0.8rem;
     margin-bottom: 5px;
     font-weight: 700;
     color: var(--text-color);
@@ -1068,7 +1071,7 @@ footer {
 }
 
 .chapter-description {
-    font-size: 1rem;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     line-height: 1.6;
 }
@@ -1129,7 +1132,7 @@ footer {
     margin-bottom: 15px;
     resize: vertical;
     min-height: 100px;
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 .comments-list {
@@ -1312,7 +1315,7 @@ footer {
     border: 1px solid var(--border-color);
     background: var(--bg-color);
     color: var(--text-color);
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 .auth-buttons {
@@ -1443,7 +1446,7 @@ footer {
     }
     
     .manga-thumbnail-enhanced {
-        height: 180px;
+        height: 100%;
     }
     
     .manga-detail-title {
@@ -1564,7 +1567,7 @@ footer {
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1rem;
+    font-size: 0.8rem;
     flex-shrink: 0;
 }
 
@@ -1641,58 +1644,39 @@ footer {
 /* تحسينات إضافية للاستجابة */
 @media (min-width: 768px) {
     .manga-thumbnail-enhanced {
-        height: 250px;
+        height: 100%;
     }
 }
 
 @media (min-width: 1024px) {
     .manga-thumbnail-enhanced {
-        height: 280px;
+        height: 100%;
     }
 }
-[file content end]
 
-
-.rating-section {
-    margin: 1.5rem 0;
-    padding: 1rem;
-    background: var(--card-bg);
-    border-radius: var(--border-radius);
+.seo-content h1 {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
 }
 
-.star-rating {
-    display: flex;
-    gap: 0.5rem;
-    margin: 0.5rem 0;
-    direction: ltr; /* النجوم من اليسار لليمين */
+.seo-content h2 {
+    font-size: 1.4rem;
+    color: var(--accent-color);
+    margin: 1.5rem 0 1rem 0;
 }
 
-.star-rating i {
-    font-size: 1.5rem;
-    color: #ffc107;
-    cursor: pointer;
-    transition: all 0.2s ease;
+.seo-content p {
+    line-height: 1.8;
+    margin-bottom: 1rem;
 }
 
-.star-rating i:hover {
-    transform: scale(1.2);
+.seo-content ul, .seo-content ol {
+    margin: 1rem 0;
+    padding-right: 1.5rem;
 }
 
-.star-rating i.active {
-    color: #ffc107;
-}
-
-.rating-text, .average-rating {
-    margin-top: 0.5rem;
-    font-size: 0.9rem;
-    color: var(--text-color);
-}
-
-.average-rating {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(0,0,0,0.1);
+.seo-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
 }

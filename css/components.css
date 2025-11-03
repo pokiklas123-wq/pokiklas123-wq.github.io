@@ -9,7 +9,7 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 2px 20px rgba(26, 115, 232, 0.2);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
 }
 
@@ -79,7 +79,7 @@ header {
     border-radius: 8px;
     background: var(--bg-color);
     color: var(--text-color);
-    font-size: 1rem;
+    font-size: 0.8rem;
     margin-left: 10px;
 }
 
@@ -208,7 +208,7 @@ header {
 /* بطاقات المانجا */
 .manga-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1, 1fr)); /* تصغير حجم البطاقة */
+    grid-template-columns: repeat(auto-fill, minmax(10px, 1fr)); /* تصغير حجم البطاقة */
     gap: 20px;
 }
 .manga-grid {
@@ -224,20 +224,20 @@ header {
         gap: 1rem;
     }
 
-.manga-card {
+ .manga-card {
     background: var(--card-bg);
     border-radius: 12px;
     overflow: hidden;
     transition: all 0.3s ease;
     cursor: pointer;
     border: 1px solid var(--border-color);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-    position: relative; /* لإضافة تفاصيل فوق الصورة */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    position: relative; 
 }
 
 .manga-card:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5); /* تغيير لون الظل */
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5); /* تغيير لون الظل */
     border-color: var(--accent-color);
 }
 
@@ -247,7 +247,7 @@ header {
 
 .manga-thumbnail {
     width: 100%;
-    height: 300px;
+    height: 100%;
     object-fit: cover;
     display: block;
     transition: transform 0.3s ease;
@@ -257,16 +257,16 @@ header {
     padding: 10px 15px; /* تقليل الحشو */
     background: var(--card-bg);
     position: relative;
-    z-index: 10;
+    z-index: 20;
 }
 
 .manga-title {
-    font-size: 1rem; /* تصغير الخط قليلاً */
+    font-size: 0.8rem; /* تصغير الخط قليلاً */
     margin-bottom: 5px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-weight: 700;
+    font-weight: 400;
     color: var(--text-color);
 }
 .manga-rating {
@@ -276,6 +276,7 @@ header {
     gap: 8px;
     font-size: 0.9rem;
 }
+
 
 .stars {
     color: gold;
@@ -454,7 +455,7 @@ header {
 }
 
 .chapter-description {
-    font-size: 1rem;
+    font-size: 0.8rem;
     color: #aaa;
     line-height: 1.6;
 }
@@ -515,7 +516,7 @@ header {
     margin-bottom: 15px;
     resize: vertical;
     min-height: 100px;
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 .comments-list {
@@ -698,7 +699,7 @@ header {
     border: 1px solid var(--border-color);
     background: var(--bg-color);
     color: var(--text-color);
-    font-size: 1rem;
+    font-size: 0.8rem;
 }
 
 .auth-buttons {
@@ -948,7 +949,7 @@ header {
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1rem;
+    font-size: 0.8rem;
     flex-shrink: 0;
 }
 
