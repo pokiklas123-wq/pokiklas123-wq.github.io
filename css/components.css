@@ -54,7 +54,6 @@ header {
     box-shadow: 0 6px 16px rgba(26, 115, 232, 0.4);
 }
 
-
 /* شريط البحث */
 .search-container {
     position: fixed;
@@ -66,6 +65,11 @@ header {
     border-bottom: 1px solid var(--border-color);
     z-index: 1100;
     display: none;
+    align-items: center;
+}
+
+.search-container.active {
+    display: flex;
 }
 
 .search-input {
@@ -76,19 +80,19 @@ header {
     background: var(--bg-color);
     color: var(--text-color);
     font-size: 1rem;
+    margin-left: 10px;
 }
 
 .search-close {
-    position: absolute;
-    left: 2.5rem;
-    top: 50%;
-    transform: translateY(-50%);
     background: none;
     border: none;
     color: var(--accent-color);
     cursor: pointer;
     font-size: 1.2rem;
+    padding: 5px;
 }
+
+
 /* القائمة الجانبية */
 .overlay {
     position: fixed;
