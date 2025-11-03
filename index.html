@@ -3,27 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>جديد المانجا | موقع متكامل للمانجا العربية</title>
-    <meta name="description" content="موقع مانجا متكامل لعرض وقراءة المانجا العربية بأفضل تجربة مستخدم">
-    <meta name="keywords" content="مانجا, مانغا, قصص مصورة, مانجا عربية, قراءة مانجا">
+    
+    <!-- SEO الأساسي -->
+    <title>جديد المانجا | أفضل موقع لقراءة المانجا العربية مجاناً</title>
+    <meta name="description" content="موقع جديد المانجا - منصة متكاملة لقراءة المانجا العربية والمانغا المترجمة مجاناً. آلاف السلاسل المصورة بأفضل جودة وترجمة عربية.">
+    <meta name="keywords" content="مانجا, مانغا, قصص مصورة, مانجا عربية, قراءة مانجا, manga arabic, مانجا اونلاين, مانغا مترجمة, موقع مانجا, قراءة مانجا مجانا">
+    <meta name="author" content="جديد المانجا">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="جديد المانجا | أفضل موقع لقراءة المانجا العربية مجاناً">
+    <meta property="og:description" content="اقرأ أفضل المانجا العربية والمانغا المترجمة مجاناً على موقع جديد المانجا. آلاف السلاسل المصورة بتحديث يومي.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pokiklas123-wq.github.io/">
+    <meta property="og:image" content="https://pokiklas123-wq.github.io/images/og-image.jpg">
+    <meta property="og:site_name" content="جديد المانجا">
+    <meta property="og:locale" content="ar_AR">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="جديد المانجا | أفضل موقع لقراءة المانجا العربية">
+    <meta name="twitter:description" content="اقرأ المانجا العربية مجاناً على موقع جديد المانجا. آلاف السلاسل المصورة بأفضل جودة.">
+    <meta name="twitter:image" content="https://pokiklas123-wq.github.io/images/og-image.jpg">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://pokiklas123-wq.github.io/">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "جديد المانجا",
+        "url": "https://pokiklas123-wq.github.io/",
+        "description": "موقع متكامل لقراءة المانجا العربية والمانغا المترجمة مجاناً",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://pokiklas123-wq.github.io/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "جديد المانجا",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://pokiklas123-wq.github.io/images/logo.png"
+            }
+        }
+    }
+    </script>
+    
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="T4xp7a3-2XFFTweKUoIDPPE-OvQgtwpbGrHT-8nYCds" />
     
     <!-- الروابط -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        /* تنسيق قسم محتوى SEO */
+        .seo-content-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+
+        .seo-text-content h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .seo-text-content h2 {
+            color: var(--accent-color);
+            font-size: 1.5rem;
+            margin: 2rem 0 1rem 0;
+            border-right: 4px solid var(--primary-color);
+            padding-right: 1rem;
+        }
+
+        .seo-text-content h3 {
+            color: var(--text-color);
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.5rem 0;
+        }
+
+        .seo-text-content p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+            font-size: 1.1rem;
+        }
+
+        /* شبكة الميزات */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(74, 144, 226, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+
+        .feature-item i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .feature-item h3 {
+            margin: 0.5rem 0;
+            color: var(--primary-color);
+        }
+
+        /* قائمة أنواع المانجا */
+        .manga-types-list {
+            list-style: none;
+            padding: 0;
+            margin: 1.5rem 0;
+        }
+
+        .manga-types-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            font-size: 1.1rem;
+        }
+
+        .manga-types-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* خطوات الاستخدام */
+        .usage-steps {
+            margin: 1.5rem 0;
+            padding-right: 1.5rem;
+        }
+
+        .usage-steps li {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(39, 174, 96, 0.1);
+            border-radius: 8px;
+            border-right: 4px solid #27ae60;
+        }
+
+        /* قسم الدعوة للإجراء */
+        .cta-section {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 12px;
+            margin: 2rem 0;
+        }
+
+        .cta-section h3 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+        }
+
+        /* تنسيق الشعار */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .logo-text {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .seo-content-section {
+                padding: 1rem;
+                margin: 1rem 0;
+            }
+            
+            .seo-text-content h1 {
+                font-size: 1.5rem;
+            }
+            
+            .seo-text-content h2 {
+                font-size: 1.3rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .logo-img {
+                width: 32px;
+                height: 32px;
+            }
+            .logo-text {
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
     <header>
         <button id="drawerToggle" class="btn btn-outline">
             <i class="fas fa-bars"></i>
         </button>
-        <a href="index.html" class="logo">جديد المانجا</a>
+        
+        <!-- شعار الموقع -->
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img">
+            <span class="logo-text">جديد المانجا</span>
+        </a>
         
         <div class="header-actions">
-            <button id="themeToggle" class="btn btn-outline">
-                <i class="fas fa-moon"></i>
-            </button>
             <button id="notificationsBtn" class="btn btn-outline" style="position: relative;">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge hidden">0</span>
@@ -98,7 +321,7 @@
             </li>
         </ul>
         
-       <div class="theme-selector">
+       <div class="theme-selector" style="display: none;">
             <span>المظهر</span>
             <div class="theme-option active" data-theme="light">فاتح</div>
             <div class="theme-option" data-theme="dark">مظلم</div>
@@ -115,6 +338,7 @@
     <!-- هاته oldest و latest لا تلمسه لئنه في القاعدة بلمقلوب -->
     
 <div class="container">
+    <!-- الفلاتر وشبكة المانجا أولاً -->
     <div class="filters">
         <button class="filter-btn active" data-filter="oldest">الأحدث</button>
         <button class="filter-btn" data-filter="popular">الأكثر مشاهدة</button>
@@ -130,6 +354,61 @@
         <span class="loading-text">جاري التحميل</span>
         <div class="loading-progress">
             <div class="spinner"></div>
+        </div>
+    </div>
+
+    <!-- قسم محتوى SEO في الأسفل -->
+    <div class="seo-content-section">
+        <div class="seo-text-content">
+            <h1>موقع جديد المانجا - أفضل منصة لقراءة المانجا العربية مجاناً</h1>
+            
+            <p>مرحبا بكم في <strong>موقع جديد المانجا</strong>، المنصة العربية المتكاملة لقراءة <strong>المانجا والمانغا</strong> مجاناً. نقدم لكم آلاف السلاسل المصورة المترجمة إلى العربية بأفضل جودة ممكنة وتحديثات يومية.</p>
+            
+            <h2>لماذا تختار موقع جديد المانجا؟</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-book-open"></i>
+                    <h3>أكبر مكتبة مانجا عربية</h3>
+                    <p>آلاف السلاسل المتنوعة من مختلف الأنواع والتصنيفات</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-free-code-camp"></i>
+                    <h3>مجاني بالكامل</h3>
+                    <p>لا توجد رسوم اشتراك أو مدفوعات، كل المحتوى مجاني</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>متوافق مع جميع الأجهزة</h3>
+                    <p>تجربة قراءة سلسة على الجوال، التابلت، والكمبيوتر</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-sync"></i>
+                    <h3>تحديثات يومية</h3>
+                    <p>فصول جديدة تضاف باستمرار مع أحدث الإصدارات</p>
+                </div>
+            </div>
+            
+            <h2>أنواع المانجا المتاحة</h2>
+            <ul class="manga-types-list">
+                <li>📚 <strong>مانجا أكشن ومغامرات</strong> - قصص مليئة بالإثارة والتشويق</li>
+                <li>💕 <strong>مانجا رومانسية ودراما</strong> - حكايات عاطفية مؤثرة</li>
+                <li>😄 <strong>مانجا كوميدية وترفيهية</strong> - مواقف مضحكة ومسلية</li>
+                <li>🔮 <strong>مانجا خيال علمي وفانتازيا</strong> - عوالم خيالية ساحرة</li>
+                <li>⚽ <strong>مانجا رياضية وحياتية</strong> - قصص واقعية ملهمة</li>
+            </ul>
+            
+            <h2>كيفية استخدام الموقع</h2>
+            <ol class="usage-steps">
+                <li>تصفح المكتبة الغنية من الصفحة الرئيسية</li>
+                <li>استخدم خاصية البحث المتقدمة للعثور على مانجا محددة</li>
+                <li>اختر المانجا المفضلة لديك من بين آلاف السلاسل</li>
+                <li>ابدأ قراءة الفصول المتاحة مجاناً وبأفضل جودة</li>
+            </ol>
+            
+            <div class="cta-section">
+                <h3>ابدأ رحلة قراءة المانجا الآن!</h3>
+                <p>انضم إلى آلاف القراء الذين يستمتعون بقراءة المانجا العربية على موقعنا. اكتشف عالماً من القصص المصورة المثيرة.</p>
+            </div>
         </div>
     </div>
 </div>
@@ -160,7 +439,7 @@
             </div>
         </div>
         <div class="copyright">
-            &copy; 2023 جديد المانجا. جميع الحقوق محفوظة.
+            &copy; 2024 جديد المانجا. جميع الحقوق محفوظة.
         </div>
     </footer>
 

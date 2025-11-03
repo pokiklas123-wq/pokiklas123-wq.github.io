@@ -1,13 +1,35 @@
-[file name]: 404.html
-[file content begin]
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="utf-8">
-    <title>Redirecting...</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/components.css">
-    <link rel="stylesheet" href="styles/responsive.css">
+    <title>الصفحة غير موجودة | جديد المانجا</title>
+    <meta name="description" content="الصفحة التي تبحث عنها غير موجودة. عد إلى الصفحة الرئيسية لموقع جديد المانجا.">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .error-container {
+            max-width: 600px;
+            margin: 100px auto;
+            text-align: center;
+            padding: 2rem;
+        }
+        .error-icon {
+            font-size: 4rem;
+            color: #e74c3c;
+            margin-bottom: 1rem;
+        }
+        .error-title {
+            font-size: 2rem;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+        .error-message {
+            font-size: 1.1rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+    </style>
     <script>
         // معالجة إعادة التوجيه المتقدمة لـ GitHub Pages
         (function() {
@@ -19,18 +41,28 @@
                 sessionStorage.setItem('redirectPath', path);
             }
             
-            // التوجيه إلى الصفحة الرئيسية
-            window.location.href = '/';
+            // التوجيه إلى الصفحة الرئيسية بعد 5 ثوان
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 5000);
         })();
     </script>
 </head>
 <body>
-    <div style="padding: 40px; text-align: center; font-family: 'Tajawal', sans-serif;">
-        <h1 style="color: var(--accent-color); margin-bottom: 20px;">جاري التوجيه...</h1>
-        <p style="color: var(--text-color); font-size: 1.1rem;">
-            إذا لم يتم توجيهك تلقائياً، <a href="/" style="color: var(--accent-light);">اضغط هنا</a>.
+    <div class="error-container">
+        <div class="error-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <h1 class="error-title">الصفحة غير موجودة</h1>
+        <p class="error-message">
+            عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها.
+            <br>
+            سيتم توجيهك تلقائياً إلى الصفحة الرئيسية خلال 5 ثوان.
         </p>
+        <a href="/" class="btn btn-primary">
+            <i class="fas fa-home"></i>
+            العودة إلى الصفحة الرئيسية
+        </a>
     </div>
 </body>
 </html>
-[file content end]

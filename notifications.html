@@ -3,10 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>الإشعارات - مانجا أونلاين</title>
+    
+    <!-- SEO الأساسي -->
+    <title>الإشعارات | جديد المانجا - أفضل موقع لقراءة المانجا العربية</title>
+    <meta name="description" content="إشعارات موقع جديد المانجا - تابع آخر التحديثات والإشعارات المتعلقة بمانجاك المفضلة.">
+    <meta name="keywords" content="إشعارات مانجا, تنبيهات مانجا, مانجا عربية, manga arabic">
+    <meta name="author" content="جديد المانجا">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="الإشعارات | جديد المانجا">
+    <meta property="og:description" content="تابع آخر الإشعارات والتحديثات على موقع جديد المانجا">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pokiklas123-wq.github.io/notifications.html">
+    <meta property="og:image" content="https://pokiklas123-wq.github.io/images/og-image.jpg">
+    <meta property="og:site_name" content="جديد المانجا">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://pokiklas123-wq.github.io/notifications.html">
+    
+    <title>الإشعارات - جديد المانجا</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
+        /* تنسيق الشعار */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .logo-text {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .logo-img {
+                width: 32px;
+                height: 32px;
+            }
+            .logo-text {
+                font-size: 1rem;
+            }
+        }
+
         .notifications-container {
             max-width: 800px;
             margin: 0 auto;
@@ -91,15 +142,14 @@
         <button id="drawerToggle" class="btn btn-outline">
             <i class="fas fa-bars"></i>
         </button>
-        <a href="index.html" class="logo">مانجا أونلاين</a>
-  <!--  <div class="search-container">
-            <input type="text" class="search-input" placeholder="ابحث عن مانجا...">
-            <div class="search-results"></div>
-        </div>-->
+        
+        <!-- شعار الموقع -->
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img">
+            <span class="logo-text">جديد المانجا</span>
+        </a>
+        
         <div class="header-actions">
-            <button id="themeToggle" class="btn btn-outline">
-                <i class="fas fa-moon"></i>
-            </button>
             <button id="notificationsBtn" class="btn btn-outline">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge hidden"></span>
@@ -161,9 +211,9 @@
             </li>
         </ul>
         
-        <div class="theme-selector">
-            <div class="theme-option active" data-theme="light">فاتح</div>
-            <div class="theme-option" data-theme="dark">مظلم</div>
+        <div class="theme-selector" style="display: none;">
+            <!-- تم إزالة خيار الوضع الفاتح -->
+            <div class="theme-option active" data-theme="dark">مظلم</div>
             <div class="theme-option" data-theme="blue">أزرق</div>
         </div>
         

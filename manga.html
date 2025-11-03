@@ -3,10 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO الأساسي -->
+    <title>تفاصيل المانجا | جديد المانجا - أفضل موقع لقراءة المانجا العربية</title>
+    <meta name="description" content="اقرأ أفضل المانجا العربية والمانغا المترجمة مجاناً على موقع جديد المانجا. آلاف السلاسل المصورة بتحديث يومي.">
+    <meta name="keywords" content="مانجا, مانغا, قراءة مانجا, مانجا عربية, manga arabic, قصص مصورة">
+    <meta name="author" content="جديد المانجا">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="تفاصيل المانجا | جديد المانجا">
+    <meta property="og:description" content="اقرأ أفضل المانجا العربية والمانغا المترجمة مجاناً على موقع جديد المانجا">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://pokiklas123-wq.github.io/manga.html">
+    <meta property="og:image" content="https://pokiklas123-wq.github.io/images/og-image.jpg">
+    <meta property="og:site_name" content="جديد المانجا">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://pokiklas123-wq.github.io/manga.html">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "قراءة المانجا العربية مجاناً على موقع جديد المانجا",
+        "description": "استمتع بقراءة أفضل المانجا العربية والمانغا المترجمة على موقع جديد المانجا",
+        "author": {
+            "@type": "Organization",
+            "name": "جديد المانجا"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "جديد المانجا",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://pokiklas123-wq.github.io/images/logo.png"
+            }
+        },
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "https://pokiklas123-wq.github.io/manga.html"
+        }
+    }
+    </script>
+    
     <title>تفاصيل المانجا</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
+        /* تنسيق الشعار */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .logo-text {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .logo-img {
+                width: 32px;
+                height: 32px;
+            }
+            .logo-text {
+                font-size: 1rem;
+            }
+        }
+
         .manga-detail {
             margin-bottom: 2rem;
         }
@@ -157,11 +234,14 @@
         <button id="drawerToggle" class="btn btn-outline">
             <i class="fas fa-bars"></i>
         </button>
-        <a href="index.html" class="logo">مانجا أونلاين</a>
+        
+        <!-- شعار الموقع -->
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img">
+            <span class="logo-text">جديد المانجا</span>
+        </a>
+        
         <div class="header-actions">
-            <button id="themeToggle" class="btn btn-outline">
-                <i class="fas fa-moon"></i>
-            </button>
             <button id="notificationsBtn" class="btn btn-outline">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge hidden"></span>
@@ -206,10 +286,9 @@
             </li>
         </ul>
         
-        <div class="theme-selector">
-            <span>المظهر</span>
-            <!-- تم إخفاء زر فاتح -->
-            <div class="theme-option" data-theme="dark">مظلم</div>
+        <div class="theme-selector" style="display: none;">
+            <!-- تم إزالة خيار الوضع الفاتح -->
+            <div class="theme-option active" data-theme="dark">مظلم</div>
             <div class="theme-option" data-theme="blue">أزرق</div>
         </div>
         
