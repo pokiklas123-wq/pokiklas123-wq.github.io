@@ -277,34 +277,3 @@
         transition-duration: 0.01ms !important;
     }
 }
-/* تحسينات لشاشات سطح المكتب الكبيرة (لتصحيح مشكلة البحث والأزرار) */
-@media (min-width: 1024px) {
-    /* تصحيح مشكلة ظهور حقل البحث في "مكان غريب" */
-    .search-container {
-        /* التأكد من أن التمركز نسبي داخل شريط التنقل */
-        position: relative;
-        /* زيادة العرض قليلاً على الشاشات الكبيرة */
-        max-width: 500px;
-    }
-
-    /* إخفاء الأزرار التي يجب أن تكون مخفية على سطح المكتب */
-    /* بناءً على التقرير، نفترض وجود فئة مثل .hidden-on-desktop */
-    .hidden-on-desktop {
-        display: none !important;
-    }
-
-    /* إذا كان هناك زر بحث يظهر كأيقونة على الجوال ويجب أن يختفي على سطح المكتب */
-    .search-icon-mobile {
-        display: none !important;
-    }
-
-    /* إذا كان هناك زر قائمة (Drawer Toggle) يظهر على الجوال ويجب أن يختفي على سطح المكتب */
-    #drawerToggle {
-        display: none !important;
-    }
-
-    /* إعادة تنسيق شريط الإجراءات في الرأس ليتناسب مع سطح المكتب */
-    .header-actions {
-        gap: 1rem;
-    }
-}

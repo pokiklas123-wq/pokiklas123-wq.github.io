@@ -12,7 +12,14 @@
     --blur-bg: rgba(13, 17, 23, 0.8);
 }
 
-/* تم إزالة الوضع الفاتح */
+:root[data-theme="dark"] {
+    --bg-color: #000000;
+    --text-color: #333333;
+    --card-bg: #000055;
+    --border-color: #e0e0e0;
+    --hover-color: #f0f0f0;
+    --blur-bg: rgba(255, 255, 255, 0.9);
+}
 
 :root[data-theme="colored"] {
     --bg-color: #0f172a;

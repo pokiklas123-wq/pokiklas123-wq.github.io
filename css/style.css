@@ -1,30 +1,6 @@
-[file name]: style.css
-[file content begin]
-/* css/style.css - الملف الرئيسي للتنسيقات العامة والسمات */
+/* css/style.css - الثيمات المعدلة بدون تضارب */
 :root {
-    /* Professional Light Theme (Default) */
-    --primary-color: #007bff;
-    --secondary-color: #343a40;
-    --accent-color: #dc3545;
-    --light-color: #f8f9fa;
-    --dark-color: #212529;
-    --text-color: #212529;
-    --text-secondary: #6c757d;
-    --bg-color: #ffffff;
-    --card-bg: #ffffff;
-    --border-color: #dee2e6;
-    --border-radius: 10px;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --transition: all 0.3s ease;
-    --blur-bg: rgba(255, 255, 255, 0.9);
-    --hover-color: rgba(0, 123, 255, 0.1);
-    --success-color: #28a745;
-    --error-color: #dc3545;
-    --primary-color-rgb: 0, 123, 255;
-}
-
-[data-theme="dark"] {
-    /* Professional Dark Theme */
+    /* الثيم الداكن (الإفتراضي) */
     --primary-color: #009688;
     --secondary-color: #1a1a1a;
     --accent-color: #ff5252;
@@ -38,28 +14,220 @@
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
     --blur-bg: rgba(30, 30, 30, 0.9);
     --hover-color: rgba(0, 150, 136, 0.2);
+    --success-color: #28a745;
+    --error-color: #dc3545;
     --primary-color-rgb: 0, 150, 136;
 }
 
 [data-theme="blue"] {
-    /* Professional Dark Blue Theme */
+    /* الثيم الأزرق الداكن */
     --primary-color: #3498db;
-    --secondary-color: #2c3e50;
+    --secondary-color: #1e2a3a;
     --accent-color: #e74c3c;
     --light-color: #ecf0f1;
     --dark-color: #2c3e50;
     --text-color: #ecf0f1;
     --text-secondary: #bdc3c7;
-    --bg-color: #1a2b3c;
-    --card-bg: #243447;
-    --border-color: #34495e;
-    --shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --blur-bg: rgba(36, 52, 71, 0.9);
+    --bg-color: #15202b;
+    --card-bg: #1c2e3f;
+    --border-color: #2c3e50;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+    --blur-bg: rgba(28, 46, 63, 0.9);
     --hover-color: rgba(52, 152, 219, 0.2);
     --primary-color-rgb: 52, 152, 219;
 }
 
-* {
+/* إزالة الثيم الفاتح تماماً */
+[data-theme="light"] {
+    display: none !important;
+}
+
+/* تنسيقات الشعار لجميع الثيمات */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.logo-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.logo-text {
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--primary-color);
+}
+
+/* تنسيق الهيدر لجميع الثيمات */
+header {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    padding: 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* تنسيق محتوى SEO لجميع الثيمات */
+.seo-content-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.seo-text-content h2 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.seo-text-content p {
+    line-height: 1.6;
+    color: var(--text-color);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.seo-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.seo-feature {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.seo-feature i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.seo-feature span {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+/* تنسيق الفوتر لجميع الثيمات */
+footer {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    padding: 2rem 1rem;
+    margin-top: 3rem;
+}
+
+.footer-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 0.9rem;
+}
+
+.footer-links a:hover {
+    color: var(--text-color);
+}
+
+.copyright {
+    color: var(--text-secondary);
+}
+
+/* تنسيق محول الثيمات */
+.theme-selector {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+.theme-selector span {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.theme-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 0.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.theme-option:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.theme-option.active {
+    border-color: var(--accent-color);
+    background: var(--accent-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+}
+
+.theme-option i {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.theme-option span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* أيقونات خاصة بكل ثيم */
+.theme-option[data-theme="dark"] i {
+    color: #f39c12;
+}
+
+.theme-option[data-theme="blue"] i {
+    color: #3498db;
+}
+
+.theme-option.active[data-theme="dark"] i,
+.theme-option.active[data-theme="blue"] i {
+    color: white;
+}
+
+/* باقي التنسيقات تبقى كما هي */
+
+ {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -74,41 +242,7 @@ body {
     line-height: 1.6;
 }
 
-img {
-    max-width: 100%;
-    height: auto;
-}
 
-body {
-    background-color: var(--bg-color);
-    color: var(--text-color);
-    transition: var(--transition);
-    min-height: 100vh;
-    line-height: 1.6;
-}
-
-/* Header - النسخة الأساسية */
-header {
-    background-color: var(--secondary-color);
-    color: white;
-    padding: 1rem;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: var(--shadow);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-}
-
-.logo {
-    font-size: 1.25rem;
-    font-weight: bold;
-    color: white;
-    text-decoration: none;
-    white-space: nowrap;
-}
 
 .search-container {
     flex: 1;
@@ -334,13 +468,13 @@ header {
     text-align: center;
 }
 
-.theme-selector {
+/*.theme-selector {
     display: flex;
     gap: 0.5rem;
     margin-bottom: 1rem;
-}
+}*/
 
-.theme-option {
+/*.theme-option {
     flex: 1;
     padding: 0.75rem 0.5rem;
     border-radius: var(--border-radius);
@@ -349,15 +483,15 @@ header {
     border: 2px solid rgba(0, 0, 0, 0.1);
     transition: var(--transition);
     font-size: 0.9rem;
-}
-
+}*/
+/*
 .theme-option.active {
     background-color: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
     box-shadow: 0 2px 4px rgba(var(--primary-color-rgb), 0.4);
 }
-
+*/
 /* Main Content */
 .container {
     max-width: 1200px;
@@ -516,7 +650,7 @@ footer {
 
 .empty-state p {
     margin-bottom: 1.5rem;
-    font-size: 0.8rem;
+    font-size: 1rem;
 }
 
 /* Notification Badge */
@@ -705,7 +839,7 @@ footer {
     border-radius: 8px;
     background: var(--bg-color);
     color: var(--text-color);
-    font-size: 0.8rem;
+    font-size: 1rem;
 }
 
 .search-close {
@@ -844,10 +978,7 @@ footer {
     position: relative;
     display: flex;
     flex-direction: column;
-    /*مضاف جديد */
-    width: 100%;
-    /**/
-    height: 100px;
+    height: 100%;
 }
 
 .manga-card-enhanced:hover {
@@ -862,7 +993,7 @@ footer {
 
 .manga-thumbnail-enhanced {
     width: 100%;
-    height: 100%;
+    height: 200px;
     object-fit: cover;
     display: block;
     transition: transform 0.3s ease;
@@ -880,7 +1011,7 @@ footer {
 }
 
 .manga-title-enhanced {
-    font-size: 0.8rem;
+    font-size: 1rem;
     margin-bottom: 5px;
     font-weight: 700;
     color: var(--text-color);
@@ -1084,7 +1215,7 @@ footer {
 }
 
 .chapter-description {
-    font-size: 0.8rem;
+    font-size: 1rem;
     color: var(--text-secondary);
     line-height: 1.6;
 }
@@ -1145,7 +1276,7 @@ footer {
     margin-bottom: 15px;
     resize: vertical;
     min-height: 100px;
-    font-size: 0.8rem;
+    font-size: 1rem;
 }
 
 .comments-list {
@@ -1328,7 +1459,7 @@ footer {
     border: 1px solid var(--border-color);
     background: var(--bg-color);
     color: var(--text-color);
-    font-size: 0.8rem;
+    font-size: 1rem;
 }
 
 .auth-buttons {
@@ -1459,7 +1590,7 @@ footer {
     }
     
     .manga-thumbnail-enhanced {
-        height: 100%;
+        height: 180px;
     }
     
     .manga-detail-title {
@@ -1580,7 +1711,7 @@ footer {
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 0.8rem;
+    font-size: 1rem;
     flex-shrink: 0;
 }
 
@@ -1657,39 +1788,17 @@ footer {
 /* تحسينات إضافية للاستجابة */
 @media (min-width: 768px) {
     .manga-thumbnail-enhanced {
-        height: 100%;
+        height: 250px;
     }
 }
 
 @media (min-width: 1024px) {
     .manga-thumbnail-enhanced {
-        height: 100%;
+        height: 280px;
     }
 }
 
-.seo-content h1 {
-    font-size: 1.8rem;
-    color: var(--primary-color);
-    margin-bottom: 1rem;
-}
 
-.seo-content h2 {
-    font-size: 1.4rem;
-    color: var(--accent-color);
-    margin: 1.5rem 0 1rem 0;
-}
+/*/*/
 
-.seo-content p {
-    line-height: 1.8;
-    margin-bottom: 1rem;
-}
 
-.seo-content ul, .seo-content ol {
-    margin: 1rem 0;
-    padding-right: 1.5rem;
-}
-
-.seo-content li {
-    margin-bottom: 0.5rem;
-    line-height: 1.6;
-}
