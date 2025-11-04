@@ -1,0 +1,400 @@
+/* manga.css - تنسيقات المانغا التفصيلية */
+/* تنسيق محتوى SEO لجميع الثيمات */
+.seo-content-section {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.seo-text-content h2 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.seo-text-content p {
+    line-height: 1.6;
+    color: var(--text-color);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.seo-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.seo-feature {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-color);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.seo-feature i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.seo-feature span {
+    font-size: 0.9rem;
+    color: var(--text-color);
+}
+
+/* صفحة تفاصيل المانجا */
+.manga-detail-content {
+    display: none;
+}
+
+.manga-detail {
+    display: flex;
+    gap: 35px;
+    margin-bottom: 35px;
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .manga-detail {
+        flex-direction: row;
+    }
+}
+
+.manga-detail-thumbnail {
+    flex: 0 0 300px;
+}
+
+.manga-detail-thumbnail img {
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+}
+
+.manga-detail-info {
+    flex: 1;
+}
+
+.manga-detail-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: var(--accent-color);
+}
+
+.manga-detail-meta {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+}
+
+.manga-detail-description {
+    line-height: 1.8;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+}
+
+/* نظام التقييم */
+.rating-section {
+    margin: 20px 0;
+    padding: 20px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.rating-stars-enhanced {
+    display: flex;
+    gap: 5px;
+    direction: ltr;
+    margin: 10px 0;
+}
+
+.rating-star {
+    font-size: 1.5rem;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.rating-star:hover,
+.rating-star.active {
+    color: gold;
+    transform: scale(1.2);
+}
+
+/* الفصول */
+.chapters-list {
+    background: var(--card-bg);
+    border-radius: 15px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+}
+
+.chapters-list h3 {
+    margin-bottom: 20px;
+    color: var(--accent-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 12px;
+    font-size: 1.5rem;
+}
+
+.chapter-item {
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    margin-bottom: 8px;
+}
+
+.chapter-item:hover {
+    background: var(--hover-color);
+    transform: translateX(-5px);
+}
+
+.chapter-likes {
+    color: var(--accent-color);
+    margin-left: 15px;
+    font-size: 0.9rem;
+}
+
+.no-chapters {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 20px;
+}
+
+/* صفحة الفصل */
+.chapter-content {
+    display: none;
+}
+
+.chapter-header {
+    text-align: center;
+    margin-bottom: 35px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.chapter-title {
+    font-size: 2rem;
+    color: var(--accent-color);
+    margin-bottom: 15px;
+}
+
+.chapter-subtitle {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.chapter-description {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.manga-pages {
+    margin-bottom: 45px;
+}
+
+.manga-page {
+    width: 100%;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.no-pages {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+/* التعليقات */
+.comments-section {
+    margin-top: 45px;
+}
+
+.comments-section h3 {
+    margin-bottom: 25px;
+    color: var(--accent-color);
+    font-size: 1.5rem;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 12px;
+}
+
+.comment-form {
+    margin-bottom: 35px;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.comment-input {
+    width: 100%;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    color: var(--text-color);
+    margin-bottom: 15px;
+    resize: vertical;
+    min-height: 100px;
+    font-size: 1rem;
+}
+
+.comments-list {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 25px;
+    border: 1px solid var(--border-color);
+}
+
+.comment {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.comment:last-child {
+    border-bottom: none;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+.comment-user {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.comment-time {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.comment-text {
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 20px;
+}
+
+.comment-action {
+    background: none;
+    border: none;
+    color: var(--primary-color);
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s ease;
+}
+
+.comment-action:hover {
+    color: var(--accent-color);
+}
+
+.comment-action.liked {
+    color: var(--accent-color);
+}
+
+/* الردود */
+.comment-replies {
+    margin-top: 15px;
+    margin-right: 20px;
+}
+
+.reply {
+    margin: 10px 0;
+    padding: 10px;
+    background: var(--hover-color);
+    border-radius: 8px;
+    border-right: 3px solid var(--accent-color);
+}
+
+.reply-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+}
+
+.reply-user {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.reply-time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.reply-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.reply-form {
+    margin-top: 10px;
+    padding: 10px;
+    background: var(--card-bg);
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.reply-input {
+    width: 100%;
+    min-height: 60px;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    resize: vertical;
+    font-size: 0.9rem;
+}
+
+.reply-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.submit-reply, .cancel-reply {
+    flex: 1;
+    padding: 8px;
+    font-size: 0.9rem;
+}
+
+.no-comments {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
