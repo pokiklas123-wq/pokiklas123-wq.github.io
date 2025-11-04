@@ -98,7 +98,7 @@ class Utils {
         }
     }
     
-    static loadTheme() {
+  /*  static loadTheme() {
         try {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.documentElement.setAttribute('data-theme', savedTheme);
@@ -107,7 +107,7 @@ class Utils {
             console.error('Error loading theme:', error);
             return 'dark';
         }
-    }
+    }*/
     
     static saveTheme(theme) {
         try {
@@ -157,4 +157,108 @@ class Utils {
         }
         return num.toString();
     }
+    
+    
+    
+    
+    // js/utils.js - الدالة المعدلة
+static loadTheme() {
+    try {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        // تحديد الثيم النشط في الواجهة
+        setTimeout(() => {
+            const themeOptions = document.querySelectorAll('.theme-option');
+            themeOptions.forEach(option => {
+                option.classList.remove('active');
+                if (option.getAttribute('data-theme') === savedTheme) {
+                    option.classList.add('active');
+                }
+            });
+        }, 100);
+        
+        return savedTheme;
+    } catch (error) {
+        console.error('Error loading theme:', error);
+        return 'dark';
+    }
+}
+
+// دالة جديدة لتبديل الثيم
+static switchTheme(theme) {
+    try {
+        this.saveTheme(theme);
+        
+        // تحديث جميع الصفحات المفتوحة
+        if (typeof window.updateTheme === 'function') {
+            window.updateTheme(theme);
+        }
+        
+        Utils.showMessage(`تم التبديل إلى الوضع ${theme === 'dark' ? 'الأسود' : 'الأزرق'}`, 'success');
+    } catch (error) {
+        console.error('Error switching theme:', error);
+        Utils.showMessage('حدث خطأ في تبديل الثيم', 'error');
+    }
+}
+
+/*2'/*********/
+
+
+// إضافة إلى utils.js - دالة تحميل الثيم المحسن
+static initializeTheme() {
+    try {
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        console.log('جاري تحميل الثيم:', savedTheme);
+        
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        // تحديث الأزرار في الواجهة
+        const themeOptions = document.querySelectorAll('.theme-option');
+        themeOptions.forEach(option => {
+            option.classList.remove('active');
+            if (option.getAttribute('data-theme') === savedTheme) {
+                option.classList.add('active');
+                console.log('تم تفعيل ثيم:', savedTheme);
+            }
+        });
+        
+        return savedTheme;
+    } catch (error) {
+        console.error('Error initializing theme:', error);
+        document.documentElement.setAttribute('data-theme', 'dark');
+        return 'dark';
+    }
+}
+
+// دالة تبديل الثيم المحسنة
+static switchTheme(theme) {
+    try {
+        console.log('جاري تبديل الثيم إلى:', theme);
+        
+        // تطبيق الثيم
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        
+        // تحديث الواجهة
+        const themeOptions = document.querySelectorAll('.theme-option');
+        themeOptions.forEach(option => {
+            option.classList.remove('active');
+            if (option.getAttribute('data-theme') === theme) {
+                option.classList.add('active');
+            }
+        });
+        
+        // إظهار رسالة نجاح
+        const message = theme === 'dark' ? 'تم التبديل إلى الوضع الأسود' : 'تم التبديل إلى الوضع الأزرق';
+        this.showMessage(message, 'success');
+        
+        console.log('تم تبديل الثيم بنجاح:', theme);
+    } catch (error) {
+        console.error('Error switching theme:', error);
+        this.showMessage('حدث خطأ في تبديل الثيم', 'error');
+    }
+}
+
+
 }

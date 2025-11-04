@@ -5,7 +5,8 @@ class MangaApp {
         this.mangaList = [];
         this.currentFilter = 'latest';
         this.isInitialized = false;
-        
+        Utils.loadTheme();
+        this.setupUI();
         this.init();
     }
     
@@ -17,9 +18,9 @@ class MangaApp {
         
         this.loadMangaData();
         
-        Utils.loadTheme();
         
-        this.setupUI();
+        
+        
         
             if (document.readyState === 'loading') {
             
@@ -82,7 +83,7 @@ class MangaApp {
         console.log('🔧 جاري إعداد الأحداث...');
         
         this.setupDrawer();
-        // this.setupTheme();
+        this.setupTheme();
         this.setupFilters();
         this.setupSearch();
         this.setupAuthButtons();
@@ -534,8 +535,8 @@ displaySearchResults(results) {
     }
     
     toggleTheme() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'dark' : 'blue';
         this.changeTheme(newTheme);
     }
     
@@ -544,7 +545,7 @@ displaySearchResults(results) {
         
         const icon = document.querySelector('#themeToggle i');
         if (icon) {
-            icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            icon.className = theme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
         }
         
         const themeOptions = document.querySelectorAll('.theme-option');
