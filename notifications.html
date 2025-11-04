@@ -25,6 +25,7 @@
     <title>الإشعارات - جديد المانجا</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+
     <style>
         /* تنسيق الشعار */
         .logo {
@@ -33,6 +34,11 @@
             gap: 0.5rem;
             text-decoration: none;
             color: inherit;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            transform: translateY(-2px);
         }
 
         .logo-img {
@@ -40,12 +46,105 @@
             height: 40px;
             border-radius: 8px;
             object-fit: cover;
+            border: 2px solid var(--primary-color);
         }
 
         .logo-text {
             font-weight: bold;
             font-size: 1.2rem;
             color: var(--primary-color);
+        }
+
+        /* تحسين تنسيق الهيدر */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-actions .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .header-actions .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        /* شريط عنوان الصفحة */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
+            background-size: cover;
+        }
+
+        .page-header-content {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .page-title {
+            flex: 1;
+        }
+
+        .page-title h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .page-title p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .unread-badge {
+            background: #ff4757;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: bold;
+            margin-right: 1rem;
         }
 
         @media (max-width: 768px) {
@@ -56,34 +155,68 @@
             .logo-text {
                 font-size: 1rem;
             }
+            .header-actions .btn span {
+                display: none;
+            }
+            .header-actions .btn {
+                padding: 0.5rem;
+            }
+            .page-header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            .page-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.25rem;
+            }
+            .page-title h1 {
+                font-size: 1.5rem;
+            }
+            .page-title p {
+                font-size: 1rem;
+            }
         }
 
         .notifications-container {
             max-width: 800px;
             margin: 0 auto;
-        }
-        .notifications-header {
-            margin-bottom: 2rem;
-            text-align: center;
+            padding: 0 1rem;
         }
         .notifications-list {
             background: var(--card-bg);
             border-radius: var(--border-radius);
             overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .notification-item {
             padding: 1.5rem;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--border-color);
             transition: var(--transition);
+            position: relative;
         }
         .notification-item:hover {
-            background: rgba(0,0,0,0.05);
+            background: rgba(var(--primary-color-rgb), 0.05);
+            transform: translateX(-5px);
         }
         .notification-item:last-child {
             border-bottom: none;
         }
         .notification-item.unread {
             background: rgba(74, 144, 226, 0.1);
+            border-right: 4px solid var(--primary-color);
+        }
+        .notification-item.unread::before {
+            content: "";
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 8px;
+            height: 8px;
+            background: var(--primary-color);
+            border-radius: 50%;
         }
         .notification-header {
             display: flex;
@@ -105,10 +238,12 @@
         .notification-content {
             margin-bottom: 0.5rem;
             line-height: 1.5;
+            color: var(--text-color);
         }
         .notification-actions {
             display: flex;
             gap: 1rem;
+            margin-top: 1rem;
         }
         .action-btn {
             background: none;
@@ -119,10 +254,25 @@
             display: flex;
             align-items: center;
             gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+        .action-btn:hover {
+            background: rgba(var(--primary-color-rgb), 0.1);
         }
         .mark-all-read {
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
             text-align: left;
+        }
+        .mark-all-read .btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+        .mark-all-read .btn:hover {
+            transform: translateY(-2px);
         }
         .empty-notifications {
             text-align: center;
@@ -133,6 +283,16 @@
             font-size: 4rem;
             margin-bottom: 1rem;
             color: #ccc;
+        }
+        .empty-notifications p {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* تحسين التنسيق العام */
+        .container {
+            padding-top: 0;
+            padding-bottom: 2rem;
         }
     </style>
 </head>
@@ -150,16 +310,31 @@
         </a>
         
         <div class="header-actions">
-            <button id="notificationsBtn" class="btn btn-outline">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge hidden"></span>
-            </button>
+            <!-- زر الصفحة الرئيسية فقط -->
+            <a href="index.html" class="btn btn-outline">
+                <i class="fas fa-home"></i>
+                <span>الرئيسية</span>
+            </a>
+            
             <button id="authBtn" class="btn">
                 <i class="fas fa-user"></i>
                 <span>تسجيل الدخول</span>
             </button>
         </div>
     </header>
+
+    <!-- شريط عنوان الصفحة -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div class="page-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div class="page-title">
+                <h1>الإشعارات <span id="unreadNotificationsCount" class="unread-badge"></span></h1>
+                <p>تابع آخر التحديثات والإشعارات من موقع جديد المانجا</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Drawer -->
     <div class="drawer">
@@ -227,10 +402,6 @@
     <!-- Main Content -->
     <div class="container">
         <div class="notifications-container">
-            <div class="notifications-header">
-                <h1>الإشعارات <span id="unreadNotificationsCount"></span></h1>
-            </div>
-            
             <div class="mark-all-read">
                 <button class="btn btn-outline" onclick="notificationsManager.markAllAsRead()">
                     <i class="fas fa-check-double"></i>
@@ -241,7 +412,8 @@
             <div class="notifications-list" id="notificationsList">
                 <div class="empty-notifications">
                     <i class="fas fa-bell-slash"></i>
-                    <p>لا توجد إشعارات</p>
+                    <p>لا توجد إشعارات حالياً</p>
+                    <p class="text-muted">سيظهر هنا أي إشعارات جديدة تتلقاها</p>
                 </div>
             </div>
         </div>
@@ -251,6 +423,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+ 
     <script src="js/utils.js"></script>
     <script src="js/app.js"></script>
     <script src="js/notifications.js"></script>

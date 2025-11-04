@@ -1,0 +1,21 @@
+مشروعك/
+├── images/
+│   ├── logo.png              (شعار الموقع - 40x40 بكسل)
+│   ├── favicon.ico           (الأيقونة الصغيرة)
+│   ├── apple-touch-icon.png  (أيقونة iOS)
+│   └── og-image.jpg          (صورة مشاركات السوشيال ميديا - 1200x630 بكسل)
+├── css/
+│   ├── style.css
+│   └── components.css
+├── js/
+│   ├── firebase-config.js
+│   ├── app.js
+│   └── ...
+├── sitemap.xml
+├── robots.txt
+├── 404.html
+├── index.html
+├── manga.html
+├── chapter.html
+├── auth.html
+└── notifications.html
