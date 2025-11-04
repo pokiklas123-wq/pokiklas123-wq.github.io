@@ -30,6 +30,12 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="https://pokiklas123-wq.github.io">
     
+    <!-- Preload للموارد المهمة -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" as="style">
+    <link rel="preload" href="css/style.css" as="style">
+    <link rel="preload" href="css/components.css" as="style">
+    <link rel="preload" href="images/logo.png" as="image">
+    
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
@@ -61,13 +67,27 @@
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="T4xp7a3-2XFFTweKUoIDPPE-OvQgtwpbGrHT-8nYCds" />
     
-    <!-- الروابط -->
+    <!-- الخطوط -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Font Awesome المخفف -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" />
+    
+    <!-- CSS -->
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/style.css">
     
     <style>
+        /* تحسينات الأداء */
+        .lazy-image {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .lazy-image.loaded {
+            opacity: 1;
+        }
+        
         /* تنسيق مختصر لقسم SEO */
         .seo-content-section {
             background: var(--card-bg);
@@ -194,6 +214,7 @@
             transition: all 0.3s ease;
         }
 
+        /* تحسينات للأداء على الجوال */
         @media (max-width: 768px) {
             .seo-content-section {
                 padding: 1rem;
@@ -241,29 +262,29 @@
 </head>
 <body>
     <header>
-        <button id="drawerToggle" class="btn btn-outline">
+        <button id="drawerToggle" class="btn btn-outline" aria-label="فتح القائمة">
             <i class="fas fa-bars"></i>
         </button>
         
         <!-- شعار الموقع -->
         <a href="index.html" class="logo">
-            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img">
+            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img" loading="lazy" width="40" height="40">
             <span class="logo-text">جديد المانجا</span>
         </a>
         
         <div class="header-actions">
-            <button id="notificationsBtn" class="btn btn-outline" style="position: relative;">
+            <button id="notificationsBtn" class="btn btn-outline" style="position: relative;" aria-label="الإشعارات">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge hidden">0</span>
             </button>
-            <button id="authBtn" class="btn">
+            <button id="authBtn" class="btn" aria-label="تسجيل الدخول">
                 <i class="fas fa-user"></i>
                 <span>تسجيل الدخول</span>
             </button>
         </div>
         
         <div class="nav-buttons">
-            <button class="btn search-btn" id="searchBtn">
+            <button class="btn search-btn" id="searchBtn" aria-label="بحث">
                 <i class="fas fa-search"></i>
             </button>
         </div>
@@ -272,7 +293,7 @@
     <!-- شريط البحث -->
     <div class="search-container" id="searchContainer">
         <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن مانجا...">
-        <button class="search-close" id="closeSearch">
+        <button class="search-close" id="closeSearch" aria-label="إغلاق البحث">
             <i class="fas fa-times"></i>
         </button>
     </div>
@@ -280,13 +301,13 @@
     <div class="drawer">
         <div class="drawer-header">
             <h2 class="drawer-title">القائمة</h2>
-            <button class="drawer-close">
+            <button class="drawer-close" aria-label="إغلاق القائمة">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         
         <div id="userInfo" class="user-info hidden">
-            <img src="" alt="صورة المستخدم" class="user-avatar">
+            <img src="" alt="صورة المستخدم" class="user-avatar" loading="lazy" width="50" height="50">
             <div class="user-details">
                 <div class="user-name">مستخدم</div>
                 <div class="user-email">user@example.com</div>
@@ -449,58 +470,86 @@
         </div>
     </footer>
 
-    <!-- السكريبتات -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <!-- السكريبتات مع defer لتحسين الأداء -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js" defer></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
 
-    <script src="js/firebase-config.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/manga.js"></script>
-    <script src="js/comments.js"></script>
-    <script src="js/ratings.js"></script>
-    <script src="js/navigation.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/notifications.js"></script>
+    <script src="js/firebase-config.js" defer></script>
+    <script src="js/ui.js" defer></script>
+    <script src="js/auth.js" defer></script>
+    <script src="js/manga.js" defer></script>
+    <script src="js/comments.js" defer></script>
+    <script src="js/ratings.js" defer></script>
+    <script src="js/navigation.js" defer></script>
+    <script src="js/utils.js" defer></script>
+    <script src="js/app.js" defer></script>
+    <script src="js/notifications.js" defer></script>
 
-    <script>
-        // كود JavaScript للتحكم في أقسام الفلاتر
+    <!-- كود التحميل البطيء للصور -->
+    <script defer>
+        class LazyLoader {
+            constructor() {
+                this.images = document.querySelectorAll('img[data-src]');
+                this.init();
+            }
+
+            init() {
+                if ('IntersectionObserver' in window) {
+                    this.setupIntersectionObserver();
+                } else {
+                    this.loadImagesImmediately();
+                }
+            }
+
+            setupIntersectionObserver() {
+                const imageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            this.loadImage(entry.target);
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                });
+
+                this.images.forEach(img => imageObserver.observe(img));
+            }
+
+            loadImage(img) {
+                img.src = img.dataset.src;
+                img.classList.add('loaded');
+                img.removeAttribute('data-src');
+            }
+
+            loadImagesImmediately() {
+                this.images.forEach(img => this.loadImage(img));
+            }
+        }
+
+        // تهيئة النظام عندما يصبح DOM جاهزاً
         document.addEventListener('DOMContentLoaded', function() {
-            // اختيار جميع أقسام الفلاتر
+            new LazyLoader();
+            
+            // كود التحكم في أقسام الفلاتر
             const filterHeaders = document.querySelectorAll('.filter-header');
             
-            // إضافة حدث النقر لكل قسم
             filterHeaders.forEach(header => {
                 header.addEventListener('click', function() {
                     const filterType = this.getAttribute('data-filter');
                     
-                    // إزالة النشاط من جميع الأقسام
                     filterHeaders.forEach(h => h.classList.remove('active'));
-                    
-                    // إضافة النشاط للقسم المختار
                     this.classList.add('active');
                     
-                    // تنفيذ عملية التصفية
                     filterManga(filterType);
                 });
             });
             
             function filterManga(filterType) {
-                console.log('تصفية المانجا حسب:', filterType);
-                
-                // هنا يمكنك إضافة كود التصفية الحقيقي
                 const mangaGrid = document.getElementById('mangaGrid');
-                
-                // إخفاء المحتوى مؤقتاً
                 mangaGrid.style.opacity = '0.5';
                 
-                // محاكاة تحميل البيانات
                 setTimeout(() => {
                     mangaGrid.style.opacity = '1';
-                    
-                    // سيتم استدعاء دورة تحميل المانجا حسب التصفية
                     if (window.app && typeof window.app.loadManga === 'function') {
                         window.app.loadManga(filterType);
                     }
@@ -509,4 +558,4 @@
         });
     </script>
 </body>
-</html> 
+</html>
