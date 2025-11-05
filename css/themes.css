@@ -1,9 +1,10 @@
-/* themes.css - الثيمات والمتغيرات */
+/* themes.css - الثيمات والمتغيرات المحدثة */
 :root {
     /* الثيم الداكن (الإفتراضي) */
     --primary-color: #009688;
     --secondary-color: #1a1a1a;
-    --accent-color: #ff5252;
+    --accent-color: #009688; /* تغيير من الأحمر إلى نفس primary-color */
+    --accent-light: #4db6ac; /* لون أخضر فاتح متناسق */
     --light-color: #f8f9fa;
     --dark-color: #212529;
     --text-color: #f8f9fa;
@@ -17,13 +18,16 @@
     --success-color: #28a745;
     --error-color: #dc3545;
     --primary-color-rgb: 0, 150, 136;
+    --border-radius: 8px;
+    --transition: all 0.3s ease;
 }
 
 [data-theme="blue"] {
     /* الثيم الأزرق الداكن */
     --primary-color: #3498db;
     --secondary-color: #1e2a3a;
-    --accent-color: #e74c3c;
+    --accent-color: #3498db; /* تغيير من الأحمر إلى نفس primary-color */
+    --accent-light: #5dade2; /* لون أزرق فاتح متناسق */
     --light-color: #ecf0f1;
     --dark-color: #2c3e50;
     --text-color: #ecf0f1;
@@ -37,10 +41,7 @@
     --primary-color-rgb: 52, 152, 219;
 }
 
-/* إزالة الثيم الفاتح تماماً */
-[data-theme="light"] {
-    display: none !important;
-}
+/* تم إزالة الثيم الفاتح بالكامل بناءً على طلب المستخدم */
 
 /* تنسيق محول الثيمات */
 .theme-selector {
@@ -60,7 +61,7 @@
 
 .theme-options {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr; /* عمودان فقط (داكن وأزرق) */
     gap: 0.75rem;
 }
 
@@ -104,12 +105,9 @@
 
 /* أيقونات خاصة بكل ثيم */
 .theme-option[data-theme="dark"] i {
-    color: #f39c12;
+    color: #009688; /* تغيير إلى اللون الأخضر المزرق */
 }
 
-.theme-option[data-theme="blue"] i {
-    color: #3498db;
-}
 
 .theme-option.active[data-theme="dark"] i,
 .theme-option.active[data-theme="blue"] i {

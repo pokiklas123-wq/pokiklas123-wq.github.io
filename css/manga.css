@@ -1,5 +1,112 @@
-/* manga.css - تنسيقات المانغا التفصيلية */
-/* تنسيق محتوى SEO لجميع الثيمات */
+/* manga.css - تنسيقات المانغا المحدثة كلياً */
+/* شبكة المانغا المحسنة */
+.manga-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* تصغير حجم البطاقة */
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+/* بطاقات المانغا المحسنة */
+.manga-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.manga-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 30px rgba(var(--primary-color-rgb), 0.3);
+    border-color: var(--accent-color);
+}
+
+.manga-card:hover .manga-thumbnail {
+    transform: scale(1.05);
+}
+
+.manga-thumbnail {
+    width: 100%;
+    height: 220px; /* زيادة الارتفاع قليلاً ليتناسب مع العرض الجديد */
+    object-fit: cover;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+.manga-info {
+    padding: 10px 15px;
+    background: var(--blur-bg);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--border-color);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.manga-title {
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+    font-weight: 700;
+    color: var(--text-color);
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.8em;
+}
+
+.manga-rating {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.stars {
+    color: gold;
+    display: flex;
+    gap: 2px;
+}
+
+.manga-views {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.latest-chapter {
+    background: var(--accent-color);
+    color: white;
+    padding: 4px 8px;
+    margin-top: 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+}
+
+.latest-chapter:hover {
+    background: var(--primary-color);
+}
+
+/* محتوى SEO */
 .seo-content-section {
     background: var(--card-bg);
     border-radius: 12px;
@@ -113,7 +220,7 @@
     border: 1px solid var(--border-color);
 }
 
-.rating-stars-enhanced {
+.rating-stars {
     display: flex;
     gap: 5px;
     direction: ltr;
@@ -397,4 +504,159 @@
     padding: 40px;
     color: var(--text-secondary);
     font-size: 1.1rem;
+}
+
+/* تحسينات إضافية لشبكة المانغا */
+@media (max-width: 360px) {
+    .manga-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .manga-thumbnail {
+        height: 160px;
+    }
+    
+    .manga-info {
+        padding: 8px 12px;
+    }
+    
+    .manga-title {
+        font-size: 0.9rem;
+    }
+}
+
+/* تحسينات للشاشات الكبيرة جداً */
+@media (min-width: 1400px) {
+    .manga-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2rem;
+    }
+    
+    .manga-thumbnail {
+        height: 320px;
+    }
+}
+
+/* تحسينات خاصة للتابلت */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .manga-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.25rem;
+    }
+    
+    .manga-thumbnail {
+        height: 220px;
+    }
+}
+
+/* تحسينات الصور في صفحة التفاصيل */
+@media (max-width: 768px) {
+    .manga-detail {
+        gap: 20px;
+        padding: 1.5rem;
+    }
+    
+    .manga-detail-thumbnail {
+        flex: 0 0 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .manga-detail {
+        flex-direction: column;
+        padding: 1rem;
+    }
+    
+    .manga-detail-thumbnail {
+        flex: none;
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+    }
+    
+    .manga-detail-title {
+        font-size: 1.3rem;
+        text-align: center;
+    }
+    
+    .manga-detail-meta {
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .manga-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+    
+    .manga-thumbnail {
+        height: 180px;
+    }
+}
+
+/* تحسينات الفصول على الشاشات الصغيرة */
+@media (max-width: 480px) {
+    .chapters-list {
+        padding: 1rem;
+    }
+    
+    .chapter-item {
+        padding: 12px 15px;
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+    }
+    
+    .chapter-item:hover {
+        transform: translateX(-3px);
+    }
+}
+
+/* تحسينات التعليقات على الهواتف */
+@media (max-width: 480px) {
+    .comments-section {
+        margin-top: 2rem;
+    }
+    
+    .comments-list {
+        padding: 1rem;
+    }
+    
+    .comment-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .comment-actions {
+        gap: 15px;
+    }
+    
+    .comment-action {
+        font-size: 0.8rem;
+    }
+}
+
+/* تحسينات الاستجابة الأساسية */
+@media (min-width: 768px) {
+    .manga-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .manga-thumbnail {
+        height: 250px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .manga-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .manga-thumbnail {
+        height: 280px;
+    }
 }

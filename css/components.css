@@ -9,7 +9,7 @@ header {
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 2px 20px rgba(26, 115, 232, 0.2);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
     backdrop-filter: blur(10px);
 }
 
@@ -17,8 +17,7 @@ header {
     display: flex;
     align-items: center;
     gap: 12px;
-    flex: 1;
-    justify-content: center;
+    /* إزالة flex: 1; و justify-content: center; لترتيب العناصر على اليسار */
 }
 
 .logo i {
@@ -38,7 +37,8 @@ header {
 }
 
 .btn {
-    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+    /* استخدام اللون الأساسي لضمان التناسق مع الثيمات */
+    background-color: var(--primary-color);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -46,49 +46,61 @@ header {
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 600;
-    box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
 }
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(26, 115, 232, 0.4);
+    /* استخدام لون ثانوي أغمق قليلاً أو تأثير ظل مختلف */
+    background-color: var(--secondary-color);
+    box-shadow: 0 6px 16px rgba(var(--primary-color-rgb), 0.5);
 }
 
+.btn-outline {
+    background-color: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: none;
+}
+
+.btn-outline:hover {
+    background-color: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+}
 
 /* شريط البحث */
 .search-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background: var(--card-bg);
-    padding: 1rem 2rem;
-    border-bottom: 1px solid var(--border-color);
-    z-index: 1100;
-    display: none;
+    /* تعديل ليكون شريط البحث جزءًا من الهيدر وليس ثابتاً في الأعلى */
+    flex: 1; /* لملء المساحة المتاحة */
+    max-width: 500px; /* تحديد أقصى عرض ليكون مرتباً */
+    position: relative; /* ليكون جزءاً من تدفق الهيدر */
+    display: flex; /* لترتيب العناصر داخله */
+    align-items: center;
+    margin: 0 20px; /* إضافة هامش جانبي */
+}
+
+.search-container.active {
+    display: flex;
 }
 
 .search-input {
     width: 100%;
-    padding: 12px 45px 12px 15px;
+    padding: 10px 15px; /* تقليل الحشو ليتناسب مع الهيدر */
     border: 1px solid var(--border-color);
-    border-radius: 8px;
+    border-radius: 20px; /* جعل الحواف أكثر استدارة */
     background: var(--bg-color);
     color: var(--text-color);
-    font-size: 1rem;
+    font-size: 0.9rem;
+    margin: 0; /* إزالة الهامش */
 }
 
 .search-close {
-    position: absolute;
-    left: 2.5rem;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    color: var(--accent-color);
-    cursor: pointer;
-    font-size: 1.2rem;
+    /* إخفاء زر الإغلاق إذا كان شريط البحث جزءاً من الهيدر */
+    display: none;
 }
+
+
 /* القائمة الجانبية */
 .overlay {
     position: fixed;
@@ -184,8 +196,8 @@ header {
 }
 
 .theme-btn.active {
-    border-color: var(--accent-color);
-    background: var(--accent-color);
+    border-color: var(--primary-color);
+    background: var(--primary-color);
     color: white;
 }
 
@@ -233,7 +245,7 @@ header {
 
 .manga-card:hover {
     transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 30px rgba(59, 130, 246, 0.5); /* تغيير لون الظل */
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5); /* تغيير لون الظل */
     border-color: var(--accent-color);
 }
 

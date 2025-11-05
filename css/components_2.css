@@ -1,4 +1,60 @@
-/* components_2.css - المكونات الأساسية */
+/* components_2.css - المكونات الأساسية المحدثة */
+/* الأزرار المحسنة - تم إصلاح التدرج اللوني */
+.btn {
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(var(--primary-color-rgb), 0.4);
+    background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-color) 100%);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.btn-outline:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.85rem;
+}
+
+.btn-lg {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+}
+
+/* أزرار خاصة */
+.logout-btn {
+    background: linear-gradient(135deg, var(--error-color) 0%, #c82333 100%);
+}
+
+.logout-btn:hover {
+    background: linear-gradient(135deg, #c82333 0%, var(--error-color) 100%);
+}
+
+/* شريط البحث المحسن */
 .search-container {
     flex: 1;
     max-width: 400px;
@@ -7,23 +63,35 @@
 
 .search-input {
     width: 100%;
-    padding: 0.6rem 1rem;
-    border-radius: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    background-color: rgba(255, 255, 255, 0.15);
-    color: white;
+    padding: 12px 45px 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-color);
+    color: var(--text-color);
+    font-size: 1rem;
     transition: var(--transition);
-    font-size: 0.9rem;
 }
 
 .search-input:focus {
     outline: none;
-    background-color: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
 }
 
 .search-input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--text-secondary);
+}
+
+.search-close {
+    position: absolute;
+    left: 2.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--accent-color);
+    cursor: pointer;
+    font-size: 1.2rem;
 }
 
 .search-results {
@@ -39,16 +107,21 @@
     z-index: 10;
     display: none;
     margin-top: 0.5rem;
+    border: 1px solid var(--border-color);
 }
 
 .search-result-item {
     padding: 0.75rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border-color);
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 0.75rem;
     transition: var(--transition);
+}
+
+.search-result-item:hover {
+    background-color: var(--hover-color);
 }
 
 .search-result-item img {
@@ -66,47 +139,10 @@
 
 .search-result-meta {
     font-size: 0.75rem;
-    color: #666;
+    color: var(--text-secondary);
 }
 
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.btn {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-    white-space: nowrap;
-}
-
-.btn:hover {
-    background-color: var(--secondary-color);
-    transform: translateY(-1px);
-}
-
-.btn-outline {
-    background-color: transparent;
-    border: 2px solid var(--primary-color);
-    color: var(--primary-color);
-}
-
-.btn-outline:hover {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-/* Filters */
+/* الفلاتر المحسنة */
 .filters {
     display: flex;
     gap: 0.75rem;
@@ -143,32 +179,217 @@
     transform: translateY(-2px);
 }
 
-/* Manga Grid - التصميم الأساسي فقط */
-.manga-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
-    margin: 1rem 0;
+/* محول الثيمات */
+.theme-selector {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
 }
 
-/* Responsive Design for Manga Grid */
-@media (min-width: 768px) {
-    .manga-grid {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1.5rem;
+.theme-selector span {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.theme-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* عمودان فقط */
+    gap: 0.75rem;
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 0.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.theme-option:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.theme-option.active {
+    border-color: var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+}
+
+.theme-option i {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.theme-option span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* أيقونات خاصة بكل ثيم */
+.theme-option[data-theme="dark"] i {
+    color: var(--primary-color); /* استخدام المتغير لضمان التناسق */
+}
+
+
+.theme-option.active[data-theme="dark"] i,
+.theme-option.active[data-theme="blue"] i {
+    color: white;
+}
+
+.theme-switcher {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.theme-btn {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    background: var(--card-bg);
+    color: var(--text-color);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.theme-btn.active {
+    border-color: var(--accent-color);
+    background: var(--accent-color);
+    color: white;
+}
+
+/* زر الرجوع */
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.back-btn:hover {
+    transform: translateX(-5px);
+    color: var(--accent-color);
+}
+
+/* زر الرجوع للهواتف */
+.mobile-back-btn {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    display: none;
+}
+
+.mobile-back-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+    background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-color) 100%);
+}
+
+/* تحسينات إضافية لأزرار الهواتف */
+@media (max-width: 480px) {
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+    
+    .nav-buttons {
+        gap: 8px;
+    }
+    
+    .nav-buttons .btn span {
+        display: none;
+    }
+    
+    .nav-buttons .btn i {
+        margin-right: 0;
     }
 }
 
-@media (min-width: 1024px) {
-    .manga-grid {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1.5rem;
+/* تحسين شريط البحث على الهواتف */
+.search-container.mobile-search {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--card-bg);
+    padding: 1rem;
+    z-index: 1100;
+    display: none;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-container.mobile-search.active {
+    display: block;
+}
+
+/* تحسينات الفلاتر على الشاشات الصغيرة */
+@media (max-width: 380px) {
+    .filters {
+        gap: 0.25rem;
+    }
+    
+    .filter-btn {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* تحسينات الاستجابة */
+@media (max-width: 768px) {
+    .search-container {
+        max-width: 300px;
+    }
+    
+    .filters {
+        gap: 0.5rem;
+    }
+    
+    .filter-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.85rem;
+    }
+    
+    .mobile-back-btn {
+        display: block;
     }
 }
 
 @media (max-width: 480px) {
-    .manga-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
+    .search-container {
+        display: none;
+    }
+    
+    .theme-options {
+        grid-template-columns: 1fr;
     }
 }
