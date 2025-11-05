@@ -10,7 +10,7 @@
     <meta name="keywords" content="تسجيل دخول مانجا, حساب مانجا, مانجا عربية, manga arabic">
     <meta name="author" content="جديد المانجا">
     <meta name="robots" content="noindex, nofollow">
-    
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="تسجيل الدخول | جديد المانجا">
     <meta property="og:description" content="سجل دخولك إلى موقع جديد المانجا لتتمتع بمزايا إضافية">
@@ -68,6 +68,7 @@
             border-radius: var(--border-radius);
             padding: 2rem;
             box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
         }
         .auth-header {
             text-align: center;
@@ -85,13 +86,13 @@
             color: var(--text-color);
         }
         .auth-subtitle {
-            color: #666;
+            color: var(--text-muted);
             margin-bottom: 1.5rem;
         }
         .auth-tabs {
             display: flex;
             margin-bottom: 1.5rem;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--border-color);
         }
         .auth-tab {
             flex: 1;
@@ -103,6 +104,7 @@
             cursor: pointer;
             transition: var(--transition);
             border-bottom: 2px solid transparent;
+            font-family: inherit;
         }
         .auth-tab.active {
             color: var(--primary-color);
@@ -126,16 +128,17 @@
         .form-input {
             width: 100%;
             padding: 0.75rem;
-            border: 1px solid rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
             border-radius: var(--border-radius);
             background: var(--bg-color);
             color: var(--text-color);
             transition: var(--transition);
+            font-family: inherit;
         }
         .form-input:focus {
             outline: none;
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+            box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
         }
         .auth-btn {
             width: 100%;
@@ -147,67 +150,32 @@
             cursor: pointer;
             transition: var(--transition);
             font-size: 1rem;
+            font-family: inherit;
+            font-weight: 600;
         }
         .auth-btn:hover {
             background: var(--secondary-color);
+            transform: translateY(-2px);
         }
         .auth-btn:disabled {
-            background: #ccc;
+            background: var(--text-muted);
             cursor: not-allowed;
-        }
-        .auth-divider {
-            text-align: center;
-            margin: 1.5rem 0;
-            position: relative;
-        }
-        .auth-divider::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: rgba(0,0,0,0.1);
-        }
-        .auth-divider span {
-            background: var(--card-bg);
-            padding: 0 1rem;
-            color: #666;
-        }
-        .social-auth {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        .social-btn {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid rgba(0,0,0,0.1);
-            border-radius: var(--border-radius);
-            background: var(--bg-color);
-            color: var(--text-color);
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        .social-btn:hover {
-            background: rgba(0,0,0,0.05);
+            transform: none;
         }
         .auth-footer {
             text-align: center;
             margin-top: 1.5rem;
             padding-top: 1.5rem;
-            border-top: 1px solid rgba(0,0,0,0.1);
+            border-top: 1px solid var(--border-color);
         }
         .auth-link {
             color: var(--primary-color);
             text-decoration: none;
+            transition: var(--transition);
         }
         .auth-link:hover {
             text-decoration: underline;
+            color: var(--secondary-color);
         }
         .form-message {
             padding: 0.75rem;
@@ -232,6 +200,15 @@
             text-align: center;
             margin-top: 2rem;
         }
+
+        /* إخفاء زر البحث */
+        .nav-buttons {
+            display: none !important;
+        }
+        
+        .search-container {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -253,7 +230,64 @@
                 الرئيسية
             </a>
         </div>
+        
+        <!-- تم إزالة زر البحث -->
     </header>
+
+    <!-- Drawer -->
+    <div class="drawer">
+        <div class="drawer-header">
+            <h2 class="drawer-title">القائمة</h2>
+            <button class="drawer-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="userInfo" class="user-info hidden">
+            <img src="" alt="صورة المستخدم" class="user-avatar">
+            <div class="user-details">
+                <div class="user-name">مستخدم</div>
+                <div class="user-email">user@example.com</div>
+            </div>
+        </div>
+        
+        <ul class="drawer-menu">
+            <li class="drawer-menu-item">
+                <a href="index.html" class="drawer-menu-link">
+                    <i class="fas fa-home"></i>
+                    <span>الصفحة الرئيسية</span>
+                </a>
+            </li>
+            <!-- تم إزالة أزرار الفلاتر -->
+            <li class="drawer-menu-item">
+                <a href="notifications.html" class="drawer-menu-link" id="notificationsDrawerBtn">
+                    <i class="fas fa-bell"></i>
+                    <span>الإشعارات</span>
+                </a>
+            </li>
+        </ul>
+        
+        <!-- قسم الثيمات -->
+        <div class="theme-selector">
+            <span>المظهر:</span>
+            <div class="theme-options">
+                <div class="theme-option active" data-theme="dark">
+                    <i class="fas fa-moon"></i>
+                    <span>أسود</span>
+                </div>
+                <div class="theme-option" data-theme="blue">
+                    <i class="fas fa-palette"></i>
+                    <span>أزرق</span>
+                </div>
+            </div>
+        </div>
+        
+        <button id="logoutBtn" class="btn btn-outline hidden">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>تسجيل الخروج</span>
+        </button>
+    </div>
+    <div class="drawer-overlay"></div>
 
     <!-- Main Content -->
     <div class="container">
@@ -362,5 +396,98 @@
     <script src="js/utils.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/auth-page.js"></script>
+
+    <script>
+        // كود التحكم في الدراور - مشابه لـ app.js
+        document.addEventListener('DOMContentLoaded', function() {
+            const drawer = document.querySelector('.drawer');
+            const drawerToggle = document.getElementById('drawerToggle');
+            const drawerClose = document.querySelector('.drawer-close');
+            const drawerOverlay = document.querySelector('.drawer-overlay');
+
+            function openDrawer() {
+                drawer.classList.add('open');
+                drawerOverlay.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeDrawer() {
+                drawer.classList.remove('open');
+                drawerOverlay.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+
+            if (drawerToggle) {
+                drawerToggle.addEventListener('click', openDrawer);
+            }
+
+            if (drawerClose) {
+                drawerClose.addEventListener('click', closeDrawer);
+            }
+
+            if (drawerOverlay) {
+                drawerOverlay.addEventListener('click', closeDrawer);
+            }
+
+            // إغلاق الدراور عند النقر على رابط
+            const drawerLinks = document.querySelectorAll('.drawer-menu-link');
+            drawerLinks.forEach(link => {
+                link.addEventListener('click', closeDrawer);
+            });
+
+            // كود التحكم في التبويبات
+            const tabs = document.querySelectorAll('.auth-tab');
+            const forms = document.querySelectorAll('.auth-form');
+            const title = document.getElementById('authTitle');
+            const subtitle = document.getElementById('authSubtitle');
+            const forgotLink = document.getElementById('forgotPasswordLink');
+            const backToLoginLinks = document.querySelectorAll('.back-to-login');
+
+            function activate(tab) {
+                tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+                forms.forEach(f => f.classList.toggle('active', f.id === (tab === 'login' ? 'loginForm' : tab === 'register' ? 'registerForm' : 'resetPasswordForm')));
+                if (tab === 'login') {
+                    title.textContent = 'تسجيل الدخول';
+                    subtitle.textContent = 'أدخل بياناتك للوصول إلى حسابك';
+                } else if (tab === 'register') {
+                    title.textContent = 'إنشاء حساب';
+                    subtitle.textContent = 'أنشئ حسابك للاستمتاع بالمزايا الكاملة';
+                } else {
+                    title.textContent = 'إعادة تعيين كلمة السر';
+                    subtitle.textContent = 'أدخل بريدك الإلكتروني لإرسال رابط التعيين';
+                }
+            }
+
+            tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.tab)));
+            if (forgotLink) forgotLink.addEventListener('click', (e) => { e.preventDefault(); activate('reset'); });
+            backToLoginLinks.forEach(l => l.addEventListener('click', (e) => { e.preventDefault(); activate('login'); }));
+
+            // إدارة الثيمات
+            const themeOptions = document.querySelectorAll('.theme-option');
+            themeOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const theme = this.getAttribute('data-theme');
+                    changeTheme(theme);
+                });
+            });
+
+            function changeTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('theme', theme);
+                
+                themeOptions.forEach(option => {
+                    if (option.getAttribute('data-theme') === theme) {
+                        option.classList.add('active');
+                    } else {
+                        option.classList.remove('active');
+                    }
+                });
+            }
+
+            // تحميل الثيم المحفوظ
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            changeTheme(savedTheme);
+        });
+    </script>
 </body>
 </html>

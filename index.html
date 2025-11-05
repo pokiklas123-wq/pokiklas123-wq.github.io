@@ -11,7 +11,6 @@
     <meta name="author" content="جديد المانجا">
     <meta name="robots" content="index, follow">
     <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="جديد المانجا | أفضل موقع لقراءة المانجا العربية مجاناً">
     <meta property="og:description" content="اقرأ أفضل المانجا العربية والمانغا المترجمة مجاناً على موقع جديد المانجا. آلاف السلاسل المصورة بتحديث يومي.">
@@ -29,12 +28,6 @@
     
     <!-- Canonical URL -->
     <link rel="canonical" href="https://pokiklas123-wq.github.io">
-    
-    <!-- Preload للموارد المهمة -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" as="style">
-    <link rel="preload" href="css/style.css" as="style">
-    <link rel="preload" href="css/components.css" as="style">
-    <link rel="preload" href="images/logo.png" as="image">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
@@ -67,78 +60,184 @@
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="T4xp7a3-2XFFTweKUoIDPPE-OvQgtwpbGrHT-8nYCds" />
     
-    <!-- الخطوط -->
+    <!-- الروابط -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome المخفف -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" />
-    
-    <!-- CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
     
     <style>
-        /* تحسينات الأداء */
-        .lazy-image {
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .lazy-image.loaded {
-            opacity: 1;
-        }
-        
-        /* تنسيق مختصر لقسم SEO */
+        /* تنسيق قسم محتوى SEO */
         .seo-content-section {
             background: var(--card-bg);
             border-radius: 12px;
-            padding: 1.5rem;
-            margin: 1.5rem 0;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow);
             border: 1px solid var(--border-color);
+        }
+
+        .seo-text-content h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
             text-align: center;
         }
 
         .seo-text-content h2 {
-            color: var(--primary-color);
+            color: var(--accent-color);
             font-size: 1.5rem;
-            margin-bottom: 1rem;
+            margin: 2rem 0 1rem 0;
+            border-right: 4px solid var(--primary-color);
+            padding-right: 1rem;
+        }
+
+        .seo-text-content h3 {
+            color: var(--text-color);
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.5rem 0;
         }
 
         .seo-text-content p {
-            line-height: 1.6;
+            line-height: 1.8;
+            margin-bottom: 1rem;
             color: var(--text-color);
-            font-size: 1rem;
+            font-size: 1.1rem;
+        }
+
+        /* شبكة الميزات */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .feature-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: rgba(74, 144, 226, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(74, 144, 226, 0.2);
+        }
+
+        .feature-item i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
             margin-bottom: 1rem;
         }
 
-        .seo-features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
+        .feature-item h3 {
+            margin: 0.5rem 0;
+            color: var(--primary-color);
+        }
+
+        /* قائمة أنواع المانجا */
+        .manga-types-list {
+            list-style: none;
+            padding: 0;
             margin: 1.5rem 0;
         }
 
-        .seo-feature {
-            text-align: center;
+        .manga-types-list li {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            font-size: 1.1rem;
+        }
+
+        .manga-types-list li:last-child {
+            border-bottom: none;
+        }
+
+        /* خطوات الاستخدام */
+        .usage-steps {
+            margin: 1.5rem 0;
+            padding-right: 1.5rem;
+        }
+
+        .usage-steps li {
+            margin-bottom: 1rem;
             padding: 1rem;
-            background: var(--bg-color);
+            background: rgba(39, 174, 96, 0.1);
             border-radius: 8px;
-            border: 1px solid var(--border-color);
+            border-right: 4px solid #27ae60;
         }
 
-        .seo-feature i {
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
+        /* قسم الدعوة للإجراء */
+        .cta-section {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border-radius: 12px;
+            margin: 2rem 0;
         }
 
-        .seo-feature span {
-            font-size: 0.9rem;
-            color: var(--text-color);
+        .cta-section h3 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
         }
 
-        /* تنسيق الشعار */
-        .logo {
+        .cta-section p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1rem;
+        }
+
+	        /* تنسيق الهيدر لمرونة العناصر */
+	        header {
+	            display: flex;
+	            justify-content: space-between;
+	            align-items: center;
+	            padding: 1rem; /* تأكد من وجود مسافة داخلية */
+	        }
+	        
+	        .header-actions {
+	            display: flex;
+	            align-items: center;
+	            gap: 0.5rem;
+	        }
+	        
+	        /* تنسيق أزرار الفلتر */
+	        .filters {
+	            display: flex;
+	            flex-wrap: wrap;
+	            gap: 0.5rem;
+	            margin-top: 1.5rem; /* إضافة مسافة علوية */
+	            margin-bottom: 1.5rem;
+	            padding: 0.5rem;
+	            background: var(--card-bg);
+	            border-radius: var(--border-radius);
+	            box-shadow: var(--shadow);
+	            border: 1px solid var(--border-color);
+	        }
+	        
+	        .filter-btn {
+	            background: var(--bg-color);
+	            color: var(--text-color);
+	            border: 1px solid var(--border-color);
+	            padding: 0.5rem 1rem;
+	            border-radius: 20px;
+	            cursor: pointer;
+	            transition: all 0.3s ease;
+	            font-weight: bold;
+	        }
+	        
+	        .filter-btn:hover {
+	            background: var(--hover-color);
+	            border-color: var(--primary-color);
+	        }
+	        
+	        .filter-btn.active {
+	            background: var(--primary-color);
+	            color: white;
+	            border-color: var(--primary-color);
+	            box-shadow: 0 2px 4px rgba(var(--primary-color-rgb), 0.4);
+	        }
+	        
+	        /* تنسيق الشعار */
+	        .logo {
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -159,71 +258,22 @@
             color: var(--primary-color);
         }
 
-        /* تنسيق أقسام الفلاتر */
-        .filter-headers {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .filter-header {
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem 1rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .filter-header:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-color);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-
-        .filter-header.active {
-            background: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-        }
-
-        .filter-header.active .filter-icon {
-            color: white;
-        }
-
-        .filter-header.active .filter-name {
-            color: white;
-        }
-
-        .filter-icon {
-            font-size: 2rem;
-            color: var(--primary-color);
-            transition: all 0.3s ease;
-        }
-
-        .filter-name {
-            font-size: 1rem;
-            font-weight: bold;
-            color: var(--text-color);
-            transition: all 0.3s ease;
-        }
-
-        /* تحسينات للأداء على الجوال */
         @media (max-width: 768px) {
             .seo-content-section {
                 padding: 1rem;
                 margin: 1rem 0;
             }
             
-            .seo-features {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.5rem;
+            .seo-text-content h1 {
+                font-size: 1.5rem;
+            }
+            
+            .seo-text-content h2 {
+                font-size: 1.3rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
             }
             
             .logo-img {
@@ -233,58 +283,34 @@
             .logo-text {
                 font-size: 1rem;
             }
-
-            .filter-headers {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.75rem;
-            }
-
-            .filter-header {
-                padding: 1rem 0.5rem;
-            }
-
-            .filter-icon {
-                font-size: 1.5rem;
-            }
-
-            .filter-name {
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .filter-headers {
-                grid-template-columns: 1fr;
-                gap: 0.5rem;
-            }
         }
     </style>
 </head>
 <body>
     <header>
-        <button id="drawerToggle" class="btn btn-outline" aria-label="فتح القائمة">
+        <button id="drawerToggle" class="btn btn-outline">
             <i class="fas fa-bars"></i>
         </button>
         
         <!-- شعار الموقع -->
         <a href="index.html" class="logo">
-            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img" loading="lazy" width="40" height="40">
+            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img" width="40" height="40">
             <span class="logo-text">جديد المانجا</span>
         </a>
         
         <div class="header-actions">
-            <button id="notificationsBtn" class="btn btn-outline" style="position: relative;" aria-label="الإشعارات">
+            <button id="notificationsBtn" class="btn btn-outline" style="position: relative;">
                 <i class="fas fa-bell"></i>
                 <span class="notification-badge hidden">0</span>
             </button>
-            <button id="authBtn" class="btn" aria-label="تسجيل الدخول">
+            <button id="authBtn" class="btn">
                 <i class="fas fa-user"></i>
                 <span>تسجيل الدخول</span>
             </button>
         </div>
         
         <div class="nav-buttons">
-            <button class="btn search-btn" id="searchBtn" aria-label="بحث">
+            <button class="btn search-btn search-icon-mobile" id="searchBtn">
                 <i class="fas fa-search"></i>
             </button>
         </div>
@@ -293,7 +319,7 @@
     <!-- شريط البحث -->
     <div class="search-container" id="searchContainer">
         <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن مانجا...">
-        <button class="search-close" id="closeSearch" aria-label="إغلاق البحث">
+        <button class="search-close" id="closeSearch">
             <i class="fas fa-times"></i>
         </button>
     </div>
@@ -301,13 +327,13 @@
     <div class="drawer">
         <div class="drawer-header">
             <h2 class="drawer-title">القائمة</h2>
-            <button class="drawer-close" aria-label="إغلاق القائمة">
+            <button class="drawer-close">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         
         <div id="userInfo" class="user-info hidden">
-            <img src="" alt="صورة المستخدم" class="user-avatar" loading="lazy" width="50" height="50">
+            <img src="" alt="صورة المستخدم" class="user-avatar">
             <div class="user-details">
                 <div class="user-name">مستخدم</div>
                 <div class="user-email">user@example.com</div>
@@ -351,15 +377,22 @@
         <div class="theme-selector">
             <span>المظهر:</span>
             <div class="theme-options">
-                <div class="theme-option active" data-theme="dark">
+                <div class="theme-option theme-btn active" data-theme="dark">
                     <i class="fas fa-moon"></i>
                     <span>أسود</span>
                 </div>
-                <div class="theme-option" data-theme="blue">
+                <div class="theme-option theme-btn" data-theme="blue">
                     <i class="fas fa-palette"></i>
                     <span>أزرق</span>
                 </div>
             </div>
+        </div>
+        
+       <div class="theme-selector" style="display: none;">
+            <span>المظهر</span>
+            <div class="theme-option active" data-theme="light">فاتح</div>
+            <div class="theme-option" data-theme="dark">مظلم</div>
+            <div class="theme-option" data-theme="blue">أزرق</div>
         </div>
         
         <button id="logoutBtn" class="btn btn-outline hidden">
@@ -369,76 +402,83 @@
     </div>
     <div class="drawer-overlay"></div>
     
-    <div class="container">
-        <!-- أقسام الفلاتر -->
-        <div class="filter-headers">
-            <div class="filter-header active" data-filter="latest">
-                <div class="filter-icon">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="filter-name">الأحدث</div>
-            </div>
-            
-            <div class="filter-header" data-filter="popular">
-                <div class="filter-icon">
-                    <i class="fas fa-fire"></i>
-                </div>
-                <div class="filter-name">الأكثر مشاهدة</div>
-            </div>
-            
-            <div class="filter-header" data-filter="rating">
-                <div class="filter-icon">
-                    <i class="fas fa-star"></i>
-                </div>
-                <div class="filter-name">الأعلى تقييماً</div>
-            </div>
-            
-            <div class="filter-header" data-filter="oldest">
-                <div class="filter-icon">
-                    <i class="fas fa-history"></i>
-                </div>
-                <div class="filter-name">الأقدم</div>
-            </div>
+    <!-- هاته oldest و latest لا تلمسه لئنه في القاعدة بلمقلوب -->
+    
+<div class="container">
+    <!-- الفلاتر وشبكة المانجا أولاً -->
+    <div class="filters">
+        <button class="filter-btn active" data-filter="oldest">الأحدث</button>
+        <button class="filter-btn" data-filter="popular">الأكثر مشاهدة</button>
+        <button class="filter-btn" data-filter="rating">الأعلى تقييماً</button>
+        <button class="filter-btn" data-filter="latest">الأقدم</button>
+    </div>
+    
+    <div class="manga-grid" id="mangaGrid">
+        <!-- سيتم إضافة بطاقات المانجا ديناميكياً -->
+    </div>
+    
+    <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+        <span class="loading-text">جاري التحميل</span>
+        <div class="loading-progress">
+            <div class="spinner"></div>
         </div>
+    </div>
 
-        <div class="manga-grid" id="mangaGrid">
-            <!-- سيتم إضافة بطاقات المانجا ديناميكياً -->
-        </div>
-        
-        <div class="loading-indicator" id="loadingIndicator" style="display: none;">
-            <span class="loading-text">جاري التحميل</span>
-            <div class="loading-progress">
-                <div class="spinner"></div>
-            </div>
-        </div>
-
-        <!-- قسم محتوى SEO مختصر جداً -->
-        <div class="seo-content-section">
-            <div class="seo-text-content">
-                <h2>جديد المانجا - المنصة العربية الأولى</h2>
-                <p>موقع متكامل لقراءة المانجا العربية المترجمة مجاناً. آلاف السلاسل، تحديثات مستمرة، وجودة عالية.</p>
-                
-                <div class="seo-features">
-                    <div class="seo-feature">
-                        <i class="fas fa-book"></i>
-                        <span>أكبر مكتبة</span>
-                    </div>
-                    <div class="seo-feature">
-                        <i class="fas fa-sync"></i>
-                        <span>تحديثات يومية</span>
-                    </div>
-                    <div class="seo-feature">
-                        <i class="fas fa-mobile"></i>
-                        <span>متوافق مع الجوال</span>
-                    </div>
-                    <div class="seo-feature">
-                        <i class="fas fa-star"></i>
-                        <span>أعلى الجودة</span>
-                    </div>
+    <!-- قسم محتوى SEO في الأسفل -->
+    <div class="seo-content-section">
+        <div class="seo-text-content">
+            <h1>موقع جديد المانجا - أفضل منصة لقراءة المانجا العربية مجاناً</h1>
+            
+            <p>مرحبا بكم في <strong>موقع جديد المانجا</strong>، المنصة العربية المتكاملة لقراءة <strong>المانجا والمانغا</strong> مجاناً. نقدم لكم آلاف السلاسل المصورة المترجمة إلى العربية بأفضل جودة ممكنة وتحديثات يومية.</p>
+            
+            <h2>لماذا تختار موقع جديد المانجا؟</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-book-open"></i>
+                    <h3>أكبر مكتبة مانجا عربية</h3>
+                    <p>آلاف السلاسل المتنوعة من مختلف الأنواع والتصنيفات</p>
                 </div>
+                <div class="feature-item">
+                    <i class="fas fa-free-code-camp"></i>
+                    <h3>مجاني بالكامل</h3>
+                    <p>لا توجد رسوم اشتراك أو مدفوعات، كل المحتوى مجاني</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>متوافق مع جميع الأجهزة</h3>
+                    <p>تجربة قراءة سلسة على الجوال، التابلت، والكمبيوتر</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-sync"></i>
+                    <h3>تحديثات يومية</h3>
+                    <p>فصول جديدة تضاف باستمرار مع أحدث الإصدارات</p>
+                </div>
+            </div>
+            
+            <h2>أنواع المانجا المتاحة</h2>
+            <ul class="manga-types-list">
+                <li>📚 <strong>مانجا أكشن ومغامرات</strong> - قصص مليئة بالإثارة والتشويق</li>
+                <li>💕 <strong>مانجا رومانسية ودراما</strong> - حكايات عاطفية مؤثرة</li>
+                <li>😄 <strong>مانجا كوميدية وترفيهية</strong> - مواقف مضحكة ومسلية</li>
+                <li>🔮 <strong>مانجا خيال علمي وفانتازيا</strong> - عوالم خيالية ساحرة</li>
+                <li>⚽ <strong>مانجا رياضية وحياتية</strong> - قصص واقعية ملهمة</li>
+            </ul>
+            
+            <h2>كيفية استخدام الموقع</h2>
+            <ol class="usage-steps">
+                <li>تصفح المكتبة الغنية من الصفحة الرئيسية</li>
+                <li>استخدم خاصية البحث المتقدمة للعثور على مانجا محددة</li>
+                <li>اختر المانجا المفضلة لديك من بين آلاف السلاسل</li>
+                <li>ابدأ قراءة الفصول المتاحة مجاناً وبأفضل جودة</li>
+            </ol>
+            
+            <div class="cta-section">
+                <h3>ابدأ رحلة قراءة المانجا الآن!</h3>
+                <p>انضم إلى آلاف القراء الذين يستمتعون بقراءة المانجا العربية على موقعنا. اكتشف عالماً من القصص المصورة المثيرة.</p>
             </div>
         </div>
     </div>
+</div>
 
     <footer>
         <div class="footer-content">
@@ -470,92 +510,21 @@
         </div>
     </footer>
 
-    <!-- السكريبتات مع defer لتحسين الأداء -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js" defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js" defer></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js" defer></script>
+  <!-- السكريبتات -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
 
-    <script src="js/firebase-config.js" defer></script>
-    <script src="js/ui.js" defer></script>
-    <script src="js/auth.js" defer></script>
-    <script src="js/manga.js" defer></script>
-    <script src="js/comments.js" defer></script>
-    <script src="js/ratings.js" defer></script>
-    <script src="js/navigation.js" defer></script>
-    <script src="js/utils.js" defer></script>
-    <script src="js/app.js" defer></script>
-    <script src="js/notifications.js" defer></script>
-
-    <!-- كود التحميل البطيء للصور -->
-    <script defer>
-        class LazyLoader {
-            constructor() {
-                this.images = document.querySelectorAll('img[data-src]');
-                this.init();
-            }
-
-            init() {
-                if ('IntersectionObserver' in window) {
-                    this.setupIntersectionObserver();
-                } else {
-                    this.loadImagesImmediately();
-                }
-            }
-
-            setupIntersectionObserver() {
-                const imageObserver = new IntersectionObserver((entries, observer) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            this.loadImage(entry.target);
-                            observer.unobserve(entry.target);
-                        }
-                    });
-                });
-
-                this.images.forEach(img => imageObserver.observe(img));
-            }
-
-            loadImage(img) {
-                img.src = img.dataset.src;
-                img.classList.add('loaded');
-                img.removeAttribute('data-src');
-            }
-
-            loadImagesImmediately() {
-                this.images.forEach(img => this.loadImage(img));
-            }
-        }
-
-        // تهيئة النظام عندما يصبح DOM جاهزاً
-        document.addEventListener('DOMContentLoaded', function() {
-            new LazyLoader();
-            
-            // كود التحكم في أقسام الفلاتر
-            const filterHeaders = document.querySelectorAll('.filter-header');
-            
-            filterHeaders.forEach(header => {
-                header.addEventListener('click', function() {
-                    const filterType = this.getAttribute('data-filter');
-                    
-                    filterHeaders.forEach(h => h.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    filterManga(filterType);
-                });
-            });
-            
-            function filterManga(filterType) {
-                const mangaGrid = document.getElementById('mangaGrid');
-                mangaGrid.style.opacity = '0.5';
-                
-                setTimeout(() => {
-                    mangaGrid.style.opacity = '1';
-                    if (window.app && typeof window.app.loadManga === 'function') {
-                        window.app.loadManga(filterType);
-                    }
-                }, 300);
-            }
-        });
-    </script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/manga.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/ratings.js"></script>
+    <script src="js/navigation.js"></script>
+     <script src="js/ui.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/notifications.js"></script>t>
 </body>
 </html>

@@ -9,8 +9,8 @@
     <meta name="description" content="اقرأ أفضل المانجا العربية والمانغا المترجمة مجاناً على موقع جديد المانجا. آلاف السلاسل المصورة بتحديث يومي.">
     <meta name="keywords" content="مانجا, مانغا, قراءة مانجا, مانجا عربية, manga arabic, قصص مصورة">
     <meta name="author" content="جديد المانجا">
-    <meta name="robots" content="index, follow">
-    
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="تفاصيل المانجا | جديد المانجا">
     <meta property="og:description" content="اقرأ أفضل المانجا العربية والمانغا المترجمة مجاناً على موقع جديد المانجا">
@@ -20,6 +20,7 @@
     <meta property="og:site_name" content="جديد المانجا">
     
     <!-- Canonical URL -->
+    <!-- يجب تحديث هذا الرابط ديناميكياً ليعكس صفحة المانجا الفعلية -->
     <link rel="canonical" href="https://pokiklas123-wq.github.io/manga.html">
     
     <!-- Structured Data -->
@@ -123,10 +124,12 @@
             background: var(--card-bg);
             padding: 0.5rem 1rem;
             border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
         }
         .manga-description {
             line-height: 1.6;
             margin-bottom: 1.5rem;
+            color: var(--text-color);
         }
         
         /* أنماط نظام التقييم */
@@ -135,6 +138,7 @@
             padding: 1rem;
             background: var(--card-bg);
             border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
         }
         
         .star-rating {
@@ -146,13 +150,14 @@
         
         .star-rating i {
             font-size: 1.5rem;
-            color: #ddd;
+            color: var(--border-color);
             cursor: pointer;
             transition: all 0.2s ease;
         }
         
         .star-rating i:hover {
             transform: scale(1.2);
+            color: #ffc107;
         }
         
         .star-rating i.active {
@@ -171,7 +176,7 @@
             gap: 0.5rem;
             margin-top: 1rem;
             padding-top: 1rem;
-            border-top: 1px solid rgba(0,0,0,0.1);
+            border-top: 1px solid var(--border-color);
         }
         
         .chapters-section {
@@ -181,17 +186,18 @@
             background: var(--card-bg);
             border-radius: var(--border-radius);
             overflow: hidden;
+            border: 1px solid var(--border-color);
         }
         .chapter-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 1rem;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid var(--border-color);
             transition: var(--transition);
         }
         .chapter-item:hover {
-            background: rgba(0,0,0,0.05);
+            background: var(--hover-color);
         }
         .chapter-item:last-child {
             border-bottom: none;
@@ -208,12 +214,12 @@
         .empty-state {
             text-align: center;
             padding: 3rem;
-            color: #666;
+            color: var(--text-muted);
         }
         .empty-state i {
             font-size: 4rem;
             margin-bottom: 1rem;
-            color: #ccc;
+            color: var(--border-color);
         }
         .mt-2 {
             margin-top: 1rem;
@@ -226,6 +232,13 @@
                 flex: none;
                 max-width: 250px;
                 margin: 0 auto;
+            }
+            .manga-meta-large {
+                justify-content: center;
+            }
+            .meta-item {
+                font-size: 0.9rem;
+                padding: 0.4rem 0.8rem;
             }
         }
     </style>
