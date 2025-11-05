@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" data-theme="dark">
 <head>
@@ -224,6 +225,192 @@
         .mt-2 {
             margin-top: 1rem;
         }
+
+        /* أنماط الظيالوغ (Toast Notification) */
+        .toast-container {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .toast {
+            background: var(--card-bg);
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            animation: toastSlideIn 0.3s ease-out;
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.success {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, var(--card-bg), rgba(39, 174, 96, 0.1));
+        }
+
+        .toast-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .toast-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .toast-title {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--text-color);
+            margin: 0;
+        }
+
+        .toast-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .toast-manga-name {
+            font-weight: bold;
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .toast-rating-stars {
+            display: flex;
+            gap: 0.25rem;
+            margin: 0.5rem 0;
+            direction: ltr;
+        }
+
+        .toast-rating-stars i {
+            color: #ffc107;
+            font-size: 1.1rem;
+        }
+
+        .toast-rating-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .toast-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .toast-btn {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .toast-btn-close {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .toast-btn-close:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 0 0 12px 12px;
+            animation: toastProgress 3s linear forwards;
+        }
+
+        @keyframes toastSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes toastSlideOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+        }
+
+        @keyframes toastProgress {
+            from {
+                width: 100%;
+            }
+            to {
+                width: 0%;
+            }
+        }
+
+        .toast.hiding {
+            animation: toastSlideOut 0.3s ease-in forwards;
+        }
+
+        /* تخصيص الظيالوغ حسب الثيم */
+        [data-theme="dark"] .toast {
+            background: linear-gradient(135deg, #2d3748, #1a202c);
+            border-color: #4a5568;
+        }
+
+        [data-theme="dark"] .toast.success {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #2d3748, rgba(39, 174, 96, 0.2));
+        }
+
+        [data-theme="blue"] .toast {
+            background: linear-gradient(135deg, #ebf8ff, #bee3f8);
+            border-color: #3182ce;
+        }
+
+        [data-theme="blue"] .toast.success {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #ebf8ff, rgba(39, 174, 96, 0.15));
+        }
+
+        [data-theme="blue"] .toast-title,
+        [data-theme="blue"] .toast-body {
+            color: #2d3748;
+        }
+
         @media (max-width: 768px) {
             .manga-header {
                 flex-direction: column;
@@ -239,6 +426,25 @@
             .meta-item {
                 font-size: 0.9rem;
                 padding: 0.4rem 0.8rem;
+            }
+            
+            .toast-container {
+                top: 80px;
+                width: 95%;
+            }
+            
+            .toast {
+                padding: 1rem;
+            }
+            
+            .toast-header {
+                gap: 0.5rem;
+            }
+            
+            .toast-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 1rem;
             }
         }
     </style>
@@ -323,6 +529,9 @@
     </div>
     <div class="drawer-overlay"></div>
 
+    <!-- حاوية الظيالوغ -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <!-- Main Content -->
     <div class="container">
         <div id="mangaDetail" class="manga-detail">
@@ -341,5 +550,127 @@
     <script src="js/app.js"></script>
     <script src="js/notifications.js"></script>
     <script src="js/manga.js"></script>
+
+    <!-- كود إدارة الظيالوغ -->
+    <script>
+        class ToastManager {
+            constructor() {
+                this.container = document.getElementById('toastContainer');
+                this.toasts = new Set();
+            }
+
+            showRatingToast(mangaName, userRating, totalRatings, averageRating) {
+                const toastId = 'toast-' + Date.now();
+                const starsHTML = this.generateStarsHTML(userRating);
+                
+                const toastHTML = `
+                    <div class="toast success" id="${toastId}">
+                        <div class="toast-header">
+                            <div class="toast-icon">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <h3 class="toast-title">تم التقييم بنجاح!</h3>
+                        </div>
+                        <div class="toast-body">
+                            <div class="toast-manga-name">${mangaName}</div>
+                            <div class="toast-rating-stars">
+                                ${starsHTML}
+                            </div>
+                            <div class="toast-rating-info">
+                                <span>تقييمك: ${userRating} نجوم</span>
+                                <span>إجمالي التقييمات: ${totalRatings}</span>
+                            </div>
+                            <div class="toast-rating-info">
+                                <span>المعدل: ${averageRating.toFixed(1)}</span>
+                            </div>
+                        </div>
+                        <div class="toast-actions">
+                            <button class="toast-btn toast-btn-close" onclick="toastManager.hide('${toastId}')">
+                                تم
+                            </button>
+                        </div>
+                        <div class="toast-progress"></div>
+                    </div>
+                `;
+
+                this.container.insertAdjacentHTML('beforeend', toastHTML);
+                const toast = document.getElementById(toastId);
+                this.toasts.add(toastId);
+
+                // إخفاء تلقائي بعد 5 ثواني
+                setTimeout(() => {
+                    this.hide(toastId);
+                }, 5000);
+
+                return toastId;
+            }
+
+            generateStarsHTML(rating) {
+                let stars = '';
+                for (let i = 1; i <= 5; i++) {
+                    if (i <= rating) {
+                        stars += '<i class="fas fa-star"></i>';
+                    } else {
+                        stars += '<i class="far fa-star"></i>';
+                    }
+                }
+                return stars;
+            }
+
+            hide(toastId) {
+                const toast = document.getElementById(toastId);
+                if (toast) {
+                    toast.classList.add('hiding');
+                    setTimeout(() => {
+                        toast.remove();
+                        this.toasts.delete(toastId);
+                    }, 300);
+                }
+            }
+
+            hideAll() {
+                this.toasts.forEach(toastId => {
+                    this.hide(toastId);
+                });
+            }
+        }
+
+        // تهيئة مدير الظيالوغ
+        const toastManager = new ToastManager();
+
+        // دالة مساعدة لإظهار ظيالوغ التقييم
+        function showRatingNotification(mangaName, userRating, totalRatings, averageRating) {
+            return toastManager.showRatingToast(mangaName, userRating, totalRatings, averageRating);
+        }
+
+        // تعديل دالة التقييم في نظام النجوم لاستخدام الظيالوغ
+        document.addEventListener('DOMContentLoaded', function() {
+            // هذا الكود سيعمل مع نظام التقييم الموجود في manga.js
+            // سنضيف مستمعاً للأحداث عندما يتم التقييم
+            document.addEventListener('ratingSubmitted', function(e) {
+                const { mangaName, userRating, totalRatings, averageRating } = e.detail;
+                showRatingNotification(mangaName, userRating, totalRatings, averageRating);
+            });
+
+            // إذا كان هناك نظام تقييم مباشر في الصفحة
+            const starRatings = document.querySelectorAll('.star-rating');
+            starRatings.forEach(stars => {
+                stars.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('fa-star')) {
+                        const rating = parseInt(e.target.getAttribute('data-rating')) || 
+                                     Array.from(this.children).indexOf(e.target) + 1;
+                        
+                        // هنا يمكنك الحصول على بيانات المانجا من الصفحة
+                        const mangaName = document.querySelector('.manga-title-large')?.textContent || 'المانجا';
+                        const totalRatings = Math.floor(Math.random() * 100) + 1; // مثال - يجب استبداله بالبيانات الحقيقية
+                        const averageRating = (Math.random() * 2 + 3).toFixed(1); // مثال - يجب استبداله بالبيانات الحقيقية
+                        
+                        // إظهار الظيالوغ
+                        showRatingNotification(mangaName, rating, totalRatings, parseFloat(averageRating));
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
