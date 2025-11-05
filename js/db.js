@@ -41,19 +41,6 @@ class DatabaseManager {
         }
     }
     
-    // تحديث حقل updatedAt للمانجا
-    async updateMangaUpdatedAt(mangaId) {
-        try {
-            const mangaRef = this.database.ref('manga_list/' + mangaId);
-            await mangaRef.update({
-                updatedAt: Date.now()
-            });
-            return { success: true };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    }
-
     // زيادة عدد المشاهدات
     async incrementViews(mangaId) {
         try {

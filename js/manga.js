@@ -153,7 +153,7 @@ class MangaPage {
                     <div class="manga-meta-large">
                         <div class="meta-item">
                             <i class="fas fa-eye"></i>
-                         <span>${Utils.formatNumber(this.mangaData.views || 0)} مشاهدة</span>
+                            <span>${this.mangaData.views || 0} مشاهدة</span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-star"></i>

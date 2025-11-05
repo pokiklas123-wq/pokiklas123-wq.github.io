@@ -1,0 +1,141 @@
+:root {
+    --bg-color: #0d1117; /* خلفية داكنة */
+    --accent-color: #3b82f6; /* أزرق بارز */
+    --accent-light: #60a5fa; /* أزرق فاتح */
+    --text-color: #e2e8f0; /* لون النص الفاتح */
+    --card-bg: #161b22; /* خلفية البطاقة أغمق قليلاً */
+    --border-color: #30363d; /* لون الحدود */
+    --hover-color: #21262d; /* لون التمرير */
+    --success-color: #28a745;
+    --error-color: #dc3545;
+    --warning-color: #ffc107;
+    --blur-bg: rgba(13, 17, 23, 0.8);
+}
+
+/* تم إزالة الوضع الفاتح */
+
+:root[data-theme="colored"] {
+    --bg-color: #0f172a;
+    --accent-color: #8b5cf6;
+    --accent-light: #a78bfa;
+    --text-color: #e2e8f0;
+    --card-bg: #1e293b;
+    --border-color: #334155;
+    --hover-color: #334155;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    /* تغيير الخط لخط عربي حديث مثل Tajawal أو Cairo */
+    font-family: 'Tajawal', 'Cairo', 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    direction: rtl;
+    line-height: 1.6;
+    transition: all 0.3s ease;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+.page-title {
+    margin-bottom: 25px;
+    color: var(--accent-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 12px;
+    font-size: 2rem;
+    text-align: center;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.status-message {
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    text-align: center;
+    font-weight: 600;
+    display: none;
+}
+
+.status-success {
+    background: rgba(40, 167, 69, 0.2);
+    border: 1px solid var(--success-color);
+    color: var(--success-color);
+}
+
+.status-error {
+    background: rgba(220, 53, 69, 0.2);
+    border: 1px solid var(--error-color);
+    color: var(--error-color);
+}
+
+.status-info {
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+}
+
+.btn {
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-light) 100%);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid var(--accent-color);
+    color: var(--accent-color);
+}
+.btn-secondary:hover {
+    background: var(--accent-color);
+    color: var(--text-color);
+}

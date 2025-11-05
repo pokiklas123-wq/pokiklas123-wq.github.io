@@ -19,7 +19,7 @@ class ChapterPage {
         this.initializeFirebase();
         this.setupEventListeners();
         this.loadChapterData();
-        Utils.loadTheme();
+          // Utils.loadTheme(); // تم نقلها إلى ui.js أو يتم التعامل معها في ui.js
     }
     
     initializeFirebase() {
