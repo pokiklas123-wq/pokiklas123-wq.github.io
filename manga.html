@@ -11,7 +11,7 @@
     <meta name="keywords" content="مانجا, مانغا, قراءة مانجا, مانجا عربية, manga arabic, قصص مصورة">
     <meta name="author" content="جديد المانجا">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="googlebar" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="تفاصيل المانجا | جديد المانجا">
     <meta property="og:description" content="اقرأ أفضل المانجا العربية والمانغا المترجمة مجاناً على موقع جديد المانجا">
@@ -643,34 +643,113 @@
             return toastManager.showRatingToast(mangaName, userRating, totalRatings, averageRating);
         }
 
-        // تعديل دالة التقييم في نظام النجوم لاستخدام الظيالوغ
+        // تعديل نظام النجوم الحالي لاستخدام الظيالوغ الجديد
         document.addEventListener('DOMContentLoaded', function() {
-            // هذا الكود سيعمل مع نظام التقييم الموجود في manga.js
-            // سنضيف مستمعاً للأحداث عندما يتم التقييم
-            document.addEventListener('ratingSubmitted', function(e) {
-                const { mangaName, userRating, totalRatings, averageRating } = e.detail;
-                showRatingNotification(mangaName, userRating, totalRatings, averageRating);
+            // الانتظار حتى يتم تحميل محتوى المانجا
+            setTimeout(() => {
+                setupRatingSystem();
+            }, 1000);
+        });
+
+        function setupRatingSystem() {
+            // البحث عن نظام النجوم في الصفحة
+            const starRatings = document.querySelectorAll('.star-rating');
+            
+            starRatings.forEach(stars => {
+                // إزالة أي مستمعات قديمة
+                stars.replaceWith(stars.cloneNode(true));
             });
 
-            // إذا كان هناك نظام تقييم مباشر في الصفحة
-            const starRatings = document.querySelectorAll('.star-rating');
-            starRatings.forEach(stars => {
+            // إعادة الحصول على النجوم بعد الاستبدال
+            const newStarRatings = document.querySelectorAll('.star-rating');
+            
+            newStarRatings.forEach(stars => {
                 stars.addEventListener('click', function(e) {
                     if (e.target.classList.contains('fa-star')) {
-                        const rating = parseInt(e.target.getAttribute('data-rating')) || 
-                                     Array.from(this.children).indexOf(e.target) + 1;
+                        const starsArray = Array.from(this.children);
+                        const rating = starsArray.indexOf(e.target) + 1;
                         
-                        // هنا يمكنك الحصول على بيانات المانجا من الصفحة
+                        // تحديث النجوم المرئية
+                        starsArray.forEach((star, index) => {
+                            if (index < rating) {
+                                star.classList.add('active');
+                                star.classList.remove('far');
+                                star.classList.add('fas');
+                            } else {
+                                star.classList.remove('active');
+                                star.classList.remove('fas');
+                                star.classList.add('far');
+                            }
+                        });
+
+                        // الحصول على بيانات المانجا
                         const mangaName = document.querySelector('.manga-title-large')?.textContent || 'المانجا';
-                        const totalRatings = Math.floor(Math.random() * 100) + 1; // مثال - يجب استبداله بالبيانات الحقيقية
-                        const averageRating = (Math.random() * 2 + 3).toFixed(1); // مثال - يجب استبداله بالبيانات الحقيقية
                         
-                        // إظهار الظيالوغ
-                        showRatingNotification(mangaName, rating, totalRatings, parseFloat(averageRating));
+                        // محاكاة بيانات التقييم (يجب استبدالها بالبيانات الحقيقية من Firebase)
+                        const totalRatingsElement = document.querySelector('.average-rating');
+                        let totalRatings = 1;
+                        let averageRating = rating;
+
+                        if (totalRatingsElement) {
+                            const ratingText = totalRatingsElement.textContent;
+                            const matches = ratingText.match(/(\d+)/g);
+                            if (matches && matches.length > 0) {
+                                totalRatings = parseInt(matches[0]) + 1;
+                                // حساب المعدل الجديد
+                                const oldAverage = parseFloat(matches[1]) || rating;
+                                averageRating = ((oldAverage * (totalRatings - 1)) + rating) / totalRatings;
+                            }
+                        }
+
+                        // إظهار الظيالوغ الجديد
+                        showRatingNotification(mangaName, rating, totalRatings, averageRating);
+
+                        // هنا يمكنك إضافة كود حفظ التقييم في Firebase
+                        console.log(`تم تقييم ${mangaName} بـ ${rating} نجوم`);
                     }
                 });
+
+                // إضافة تأثير Hover للنجوم
+                stars.addEventListener('mouseover', function(e) {
+                    if (e.target.classList.contains('fa-star')) {
+                        const starsArray = Array.from(this.children);
+                        const hoverRating = starsArray.indexOf(e.target) + 1;
+                        
+                        starsArray.forEach((star, index) => {
+                            if (index < hoverRating) {
+                                star.style.color = '#ffc107';
+                            } else {
+                                star.style.color = 'var(--border-color)';
+                            }
+                        });
+                    }
+                });
+
+                stars.addEventListener('mouseout', function(e) {
+                    const starsArray = Array.from(this.children);
+                    starsArray.forEach(star => {
+                        if (star.classList.contains('active')) {
+                            star.style.color = '#ffc107';
+                        } else {
+                            star.style.color = 'var(--border-color)';
+                        }
+                    });
+                });
             });
-        });
+        }
+
+        // استبدال وظيفة showMessage القديمة إذا كانت موجودة
+        if (typeof showMessage !== 'undefined') {
+            const originalShowMessage = showMessage;
+            window.showMessage = function(message, type = 'info') {
+                if (type === 'success' && message.includes('تقييم')) {
+                    // تجاهل رسائل التقييم القديمة لأننا نستخدم الظيالوغ الجديد
+                    return;
+                }
+                // استدعاء الوظيفة الأصلية للرسائل الأخرى
+                originalShowMessage(message, type);
+            };
+        }
     </script>
 </body>
 </html>

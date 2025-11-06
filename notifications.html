@@ -25,6 +25,7 @@
     <title>الإشعارات - جديد المانجا</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/custom_dialog.css">
 
     <style>
         /* تنسيق الشعار */
@@ -410,8 +411,7 @@
     <div class="drawer-overlay"></div>
 
     <!-- Main Content -->
-    <div class="container">
-        <div class="notifications-container">
+    <main class="container">        <div class="notifications-container">
             <div class="mark-all-read">
                 <button class="btn btn-outline" onclick="notificationsManager.markAllAsRead()">
                     <i class="fas fa-check-double"></i>
@@ -438,6 +438,31 @@
 	    <script src="js/utils.js"></script>
 	    <script src="js/app.js"></script>
 	    <script src="js/notifications.js"></script>
+
+    <!-- هيكل ديالوج الحذف المخصص -->
+    <div class="custom-dialog delete-dialog" id="deleteNotificationModal">
+        <div class="custom-dialog-content">
+            <div class="custom-dialog-header">
+                <h3 id="deleteNotificationModalTitle">حذف الإشعار</h3>
+                <button class="custom-dialog-close" id="closeDeleteNotificationModal">&times;</button>
+            </div>
+            <div class="custom-dialog-body">
+                <p id="deleteNotificationModalMessage">هل أنت متأكد من أنك تريد حذف هذا الإشعار؟</p>
+                <div class="dialog-info-block">
+                    <i class="fas fa-bell"></i>
+                    <span id="deleteNotificationTargetInfo"></span>
+                </div>
+                <div class="dialog-info-block">
+                    <i class="fas fa-clock"></i>
+                    <span id="deleteNotificationTimeInfo"></span>
+                </div>
+            </div>
+            <div class="custom-dialog-footer">
+                <button class="btn-dialog btn-dialog-cancel" id="cancelDeleteNotification">إلغاء</button>
+                <button class="btn-dialog btn-dialog-danger" id="confirmDeleteNotification">حذف</button>
+            </div>
+        </div>
+    </div>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // تأكد من تهيئة التطبيق

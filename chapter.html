@@ -49,6 +49,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/custom_dialog.css">
     <style>
         /* تنسيق الشعار */
         .logo {
@@ -178,6 +179,10 @@
         .user-name {
             font-weight: bold;
             color: var(--text-color);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .comment-date {
             color: var(--text-muted);
@@ -187,6 +192,7 @@
             margin-bottom: 0.5rem;
             line-height: 1.5;
             color: var(--text-color);
+            word-wrap: break-word;
         }
         .comment-actions {
             display: flex;
@@ -207,6 +213,12 @@
         }
         .action-btn:hover {
             background: var(--hover-color);
+        }
+        .action-btn.delete-btn {
+            color: #dc3545;
+        }
+        .action-btn.delete-btn:hover {
+            background: rgba(220, 53, 69, 0.1);
         }
         .replies {
             margin-top: 1rem;
@@ -247,8 +259,135 @@
         }
         @keyframes highlight {
             0% { background-color: rgba(var(--primary-color-rgb), 0.3); }
-            100% { background-color: transparent; }
+            100% { background-color: #1de9b6; }
         }
+
+        /* تنسيقات الـ Modal لحذف التعليقات */
+        .delete-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .delete-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .delete-modal-content {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 450px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .delete-modal.open .delete-modal-content {
+            transform: translateY(0);
+        }
+
+        .delete-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .delete-modal-header h3 {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 1.25rem;
+        }
+
+        .delete-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .delete-modal-close:hover {
+            background: var(--hover-color);
+            color: var(--text-color);
+        }
+
+        .delete-modal-body {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .delete-modal-body p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        .delete-info {
+            background: var(--bg-color);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            margin-top: 1rem;
+        }
+
+        .delete-info div {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .delete-info div:last-child {
+            margin-bottom: 0;
+        }
+
+        .delete-modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .truncate-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         @media (max-width: 768px) {
             .chapter-nav {
                 flex-direction: column;
@@ -261,6 +400,16 @@
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 0.5rem;
+            }
+            .delete-modal-content {
+                width: 95%;
+                margin: 1rem;
+            }
+            .delete-modal-actions {
+                flex-direction: column;
+            }
+            .user-name {
+                max-width: 80px;
             }
         }
     </style>
@@ -384,6 +533,29 @@
         </div>
     </div>
 
+    <!-- نافذة تأكيد الحذف -->
+    <div id="deleteModal" class="delete-modal hidden">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3 id="deleteModalTitle">حذف التعليق</h3>
+                <button class="delete-modal-close" id="closeDeleteModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="delete-modal-body">
+                <p id="deleteModalMessage"></p>
+                <div class="delete-info">
+                    <div id="deleteTargetInfo"></div>
+                    <div id="deleteTimeInfo"></div>
+                </div>
+            </div>
+            <div class="delete-modal-actions">
+                <button id="confirmDelete" class="btn btn-danger">حذف</button>
+                <button id="cancelDelete" class="btn btn-outline">كلا</button>
+            </div>
+        </div>
+    </div>
+
     <script src="js/firebase-config.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -394,5 +566,31 @@
     <script src="js/db.js"></script>
     <script src="js/comments.js"></script>
     <script src="js/chapter.js"></script>
+    
+<script>
+// كود لفتح الردود تلقائياً عند القدوم من الإشعارات
+document.addEventListener('DOMContentLoaded', function() {
+    // اقرأ الـ URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const commentId = urlParams.get('comment');
+    const replyId = urlParams.get('reply');
+    
+    // إذا في commentId، افتح الردود وانسكرول
+    if (commentId) {
+        // انتظر حتى يتم تحميل التعليقات
+        const checkCommentsLoaded = setInterval(() => {
+            if (window.commentsManager) {
+                clearInterval(checkCommentsLoaded);
+                setTimeout(() => {
+                    window.commentsManager.openRepliesAndScroll(commentId, replyId);
+                }, 1000);
+            }
+        }, 100);
+    }
+});
+</script>
+    
+    
+    
 </body>
 </html>
