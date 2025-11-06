@@ -139,3 +139,85 @@ body {
     background: var(--accent-color);
     color: var(--text-color);
 }
+
+/*مضهر زر عرض الرظود*/
+.replies-toggle-btn {
+    background-color: #1e7e34;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 5px 0;
+}
+
+.replies-toggle-btn:hover {
+    background-color: #155724;
+    transform: translateY(-1px);
+}
+
+.replies-toggle-btn:active {
+    transform: translateY(0);
+}
+
+.replies-toggle-btn i {
+    transition: transform 0.3s ease;
+}
+
+.replies-toggle-btn.active i {
+    transform: rotate(180deg);
+}
+
+.reply-highlight {
+    background: linear-gradient(135deg, rgba(30, 126, 52, 0.15) 0%, rgba(21, 87, 36, 0.25) 100%) !important;
+    border-left: 3px solid #1e7e34;
+    border-right: 1px solid #1e7e34;
+    padding: 8px 12px 8px 15px;
+    margin: 5px -5px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    animation: pulse-highlight 3s ease-in-out;
+    box-shadow: 0 4px 12px rgba(30, 126, 52, 0.3);
+    position: relative;
+    transform: translateX(-5px);
+}
+
+.reply-highlight::before {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: linear-gradient(to bottom, #1e7e34, #ff5252);
+    border-radius: 4px;
+}
+
+@keyframes pulse-highlight {
+    0% { 
+        box-shadow: 0 4px 12px rgba(30, 126, 52, 0.7);
+        background: linear-gradient(135deg, rgba(30, 126, 52, 0.15) 0%, rgba(21, 87, 36, 0.25) 100%);
+    }
+    50% { 
+        box-shadow: 0 6px 20px rgba(30, 126, 52, 0.7);
+        background: linear-gradient(135deg, rgba(30, 126, 52, 0.25) 0%, rgba(21, 87, 36, 0.35) 100%);
+    }
+    100% { 
+        box-shadow: 0 4px 12px rgba(30, 126, 52, 0.7);
+        background: linear-gradient(135deg, rgba(30, 126, 52, 0.15) 0%, rgba(21, 87, 36, 0.25) 100%);
+    }
+}
+
+.replies-container {
+    transition: all 0.3s ease;
+}
+
+.replies-toggle-btn.active {
+    background-color: #155724 !important;
+}
