@@ -139,7 +139,7 @@ class CommentsManager {
                     <button class="action-btn edit-comment" data-id="${comment.id}">
                         <i class="fas fa-edit"></i> تعديل
                     </button>
-                    <button class="action-btn delete-comment" data-id="${comment.id}">
+                    <button class="action-btn delete-btn delete-comment" data-id="${comment.id}">
                         <i class="fas fa-trash"></i> حذف
                     </button>
                 ` : ''}
@@ -154,12 +154,29 @@ class CommentsManager {
                     <button type="button" class="btn btn-outline btn-sm cancel-reply" data-id="${comment.id}">إلغاء</button>
                 </div>
             </div>
-            <div class="replies" id="replies-${comment.id}">
-                ${this.renderReplies(comment.replies, comment.id)}
+            ${this.renderRepliesToggle(comment.replies, comment.id)}
+            <div class="replies-container" id="replies-container-${comment.id}" style="display: none;">
+                <div class="replies" id="replies-${comment.id}">
+                    ${this.renderReplies(comment.replies, comment.id)}
+                </div>
             </div>
         `;
 
         return commentEl;
+    }
+
+    renderRepliesToggle(replies, commentId) {
+        if (!replies) return '';
+        
+        const count = Object.keys(replies).length;
+        if (count === 0) return '';
+        
+        return `
+            <button class="replies-toggle-btn" data-id="${commentId}" data-count="${count}" id="replies-btn-${commentId}">
+                <i class="fas fa-chevron-down"></i>
+                عرض ${count} ردود
+            </button>
+        `;
     }
 
     renderReplies(replies, parentId) {
@@ -176,7 +193,7 @@ class CommentsManager {
             const timestamp = reply.timestamp ? Utils.formatTimestamp(reply.timestamp) : 'غير معروف';
             
             html += `
-                <div class="comment reply" id="reply-${parentId}-${reply.id}">
+                <div class="comment reply" id="reply-${reply.id}">
                     <div class="comment-header">
                         <div class="comment-user">
                             <img src="${reply.userAvatar}" alt="${reply.userName}" class="user-avatar-small"
@@ -191,7 +208,7 @@ class CommentsManager {
                     </div>
                     ${isOwner ? `
                         <div class="comment-actions">
-                            <button class="action-btn delete-reply" data-parent-id="${parentId}" data-id="${reply.id}">
+                            <button class="action-btn delete-btn delete-reply" data-parent-id="${parentId}" data-id="${reply.id}">
                                 <i class="fas fa-trash"></i> حذف
                             </button>
                         </div>
@@ -217,11 +234,13 @@ class CommentsManager {
         } else if (target.classList.contains('cancel-reply')) {
             this.toggleReplyForm(commentId, false);
         } else if (target.classList.contains('delete-comment')) {
-            this.deleteComment(commentId);
+            this.showDeleteCommentModal(commentId);
         } else if (target.classList.contains('delete-reply')) {
-            this.deleteReply(parentId, commentId);
+            this.showDeleteReplyModal(parentId, commentId);
         } else if (target.classList.contains('edit-comment')) {
-            this.editComment(commentId);
+            this.showEditCommentModal(commentId);
+        } else if (target.classList.contains('replies-toggle-btn')) {
+            this.toggleReplies(commentId);
         }
     }
 
@@ -274,8 +293,11 @@ class CommentsManager {
 
             // إرسال إشعار لصاحب التعليق الأصلي
             if (parentComment.userId !== user.uid) {
-                await this.sendReplyNotification(parentComment.userId, commentId, replyRef.key, newReply);
+                this.sendReplyNotification(parentComment.userId, commentId, replyRef.key, newReply);
             }
+
+            // تحديث العداد بعد إضافة الرد
+            this.updateRepliesToggle(commentId, 1);
 
         } catch (error) {
             console.error('Error adding reply:', error);
@@ -283,43 +305,117 @@ class CommentsManager {
         }
     }
 
-    async deleteComment(commentId) {
-        if (!confirm('هل أنت متأكد من حذف هذا التعليق؟')) return;
-        
-        try {
-            await this.commentsRef.child(commentId).remove();
-            Utils.showMessage('تم حذف التعليق بنجاح.', 'success');
-        } catch (error) {
-            console.error('Error deleting comment:', error);
-            Utils.showMessage('حدث خطأ أثناء حذف التعليق.', 'error');
+    showEditCommentModal(commentId) {
+        if (!this.auth.currentUser) {
+            Utils.showMessage('يجب تسجيل الدخول لتعديل التعليق.', 'warning');
+            return;
+        }
+
+        // الحصول على بيانات التعليق لعرضها في الظيالوغ
+        const commentRef = this.commentsRef.child(commentId);
+        commentRef.once('value').then((snapshot) => {
+            const comment = snapshot.val();
+            if (comment && comment.userId === this.auth.currentUser.uid) {
+                const commentData = {
+                    id: commentId,
+                    text: comment.text,
+                    userName: comment.userName,
+                    timestamp: comment.timestamp,
+                    userId: comment.userId
+                };
+                
+                // استخدام الظيالوغ من chapterPage
+                this.chapterPage.showEditModal(commentData);
+            } else {
+                Utils.showMessage('لا يمكنك تعديل تعليقات الآخرين.', 'warning');
+            }
+        });
+    }
+
+    showDeleteCommentModal(commentId) {
+        if (!this.auth.currentUser) {
+            Utils.showMessage('يجب تسجيل الدخول لحذف التعليق.', 'warning');
+            return;
+        }
+
+        // الحصول على بيانات التعليق لعرضها في الظيالوغ
+        const commentRef = this.commentsRef.child(commentId);
+        commentRef.once('value').then((snapshot) => {
+            const comment = snapshot.val();
+            if (comment && comment.userId === this.auth.currentUser.uid) {
+                const commentData = {
+                    id: commentId,
+                    text: comment.text,
+                    userName: comment.userName,
+                    timestamp: comment.timestamp,
+                    userId: comment.userId
+                };
+                
+                // استخدام الظيالوغ من chapterPage
+                this.chapterPage.showDeleteModal('comment', commentData);
+            } else {
+                Utils.showMessage('لا يمكنك حذف تعليقات الآخرين.', 'warning');
+            }
+        });
+    }
+
+    updateRepliesToggle(commentId, change) {
+        const toggleBtn = document.getElementById(`replies-btn-${commentId}`);
+        if (toggleBtn) {
+            let count = parseInt(toggleBtn.getAttribute('data-count')) + change;
+            toggleBtn.setAttribute('data-count', count);
+            toggleBtn.innerHTML = `<i class="fas fa-chevron-down"></i> عرض ${count} ردود`;
+            
+            if (count <= 0) {
+                toggleBtn.style.display = 'none';
+                const container = document.getElementById(`replies-container-${commentId}`);
+                if (container) container.style.display = 'none';
+            } else {
+                toggleBtn.style.display = 'block';
+            }
         }
     }
 
-    async deleteReply(parentId, replyId) {
-        if (!confirm('هل أنت متأكد من حذف هذا الرد؟')) return;
-        
-        try {
-            await this.commentsRef.child(parentId).child('replies').child(replyId).remove();
-            Utils.showMessage('تم حذف الرد بنجاح.', 'success');
-        } catch (error) {
-            console.error('Error deleting reply:', error);
-            Utils.showMessage('حدث خطأ أثناء حذف الرد.', 'error');
+    toggleReplies(commentId) {
+        const container = document.getElementById(`replies-container-${commentId}`);
+        const toggleBtn = document.getElementById(`replies-btn-${commentId}`);
+        if (container && toggleBtn) {
+            const isHidden = container.style.display === 'none';
+            container.style.display = isHidden ? 'block' : 'none';
+            
+            const icon = toggleBtn.querySelector('i');
+            if (icon) {
+                icon.className = isHidden ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+            }
+            toggleBtn.classList.toggle('active', isHidden);
         }
     }
 
-    editComment(commentId) {
-        const commentElement = document.getElementById(`comment-${commentId}`);
-        const contentElement = commentElement.querySelector('.comment-content');
-        const currentText = contentElement.textContent;
-        
-        const newText = prompt('تعديل التعليق:', currentText);
-        if (newText && newText !== currentText) {
-            this.commentsRef.child(commentId).update({ 
-                text: newText,
-                edited: true,
-                editTimestamp: Date.now()
-            });
+    showDeleteReplyModal(parentId, replyId) {
+        if (!this.auth.currentUser) {
+            Utils.showMessage('يجب تسجيل الدخول لحذف الرد.', 'warning');
+            return;
         }
+
+        // الحصول على بيانات الرد لعرضها في الظيالوغ
+        const replyRef = this.commentsRef.child(parentId).child('replies').child(replyId);
+        replyRef.once('value').then((snapshot) => {
+            const reply = snapshot.val();
+            if (reply && reply.userId === this.auth.currentUser.uid) {
+                const replyData = {
+                    id: replyId,
+                    text: reply.text,
+                    userName: reply.userName,
+                    timestamp: reply.timestamp,
+                    userId: reply.userId
+                };
+                
+                // استخدام الظيالوغ من chapterPage
+                this.chapterPage.showDeleteModal('reply', replyData, { id: parentId });
+            } else {
+                Utils.showMessage('لا يمكنك حذف ردود الآخرين.', 'warning');
+            }
+        });
     }
 
     async sendReplyNotification(parentCommentUserId, commentId, replyId, replyData) {
@@ -343,6 +439,40 @@ class CommentsManager {
             console.log('تم إرسال الإشعار بنجاح إلى:', parentCommentUserId);
         } catch (error) {
             console.error('Error sending notification:', error);
+        }
+    }
+
+    // دالة جديدة لفتح الردود والتمرير تلقائياً
+    openRepliesAndScroll(commentId, replyId = null) {
+        const toggleBtn = document.getElementById(`replies-btn-${commentId}`);
+        const repliesContainer = document.getElementById(`replies-container-${commentId}`);
+        
+        if (toggleBtn && repliesContainer) {
+            // افتح الردود
+            repliesContainer.style.display = 'block';
+            toggleBtn.innerHTML = `<i class="fas fa-chevron-up"></i> إخفاء الردود`;
+            toggleBtn.classList.add('active');
+            
+            // إذا في رد معين نبي ننسكرول ليه
+            if (replyId) {
+                setTimeout(() => {
+                    const targetReply = document.getElementById(`reply-${replyId}`);
+                    if (targetReply) {
+                        targetReply.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        
+                        // إضافة highlight مؤقت
+                        targetReply.style.backgroundColor = '#f0f8ff';
+                        targetReply.classList.add('reply-highlight');
+                        setTimeout(() => {
+                            targetReply.style.backgroundColor = '';
+                            targetReply.classList.remove('reply-highlight');
+                        }, 3000);
+                    }
+                }, 500);
+            }
         }
     }
 }

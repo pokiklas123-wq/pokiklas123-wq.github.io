@@ -19,7 +19,6 @@ class ChapterPage {
         this.initializeFirebase();
         this.setupEventListeners();
         this.loadChapterData();
-          // Utils.loadTheme(); // تم نقلها إلى ui.js أو يتم التعامل معها في ui.js
     }
     
     initializeFirebase() {
@@ -52,8 +51,151 @@ class ChapterPage {
         setTimeout(() => {
             if (typeof CommentsManager !== 'undefined') {
                 this.commentsManager = new CommentsManager(this);
+                
+                // في constructor أو حيث تنشئ CommentsManager
+
+window.commentsManager = this.commentsManager; // هذا السطر الجديد
             }
         }, 2000);
+    }
+    
+    showDeleteModal(type, item, parentComment = null) {
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteModalTitle = document.getElementById('deleteModalTitle');
+        const deleteModalMessage = document.getElementById('deleteModalMessage');
+        const deleteTargetInfo = document.getElementById('deleteTargetInfo');
+        const deleteTimeInfo = document.getElementById('deleteTimeInfo');
+        const confirmDelete = document.getElementById('confirmDelete');
+        const cancelDelete = document.getElementById('cancelDelete');
+        const closeDeleteModal = document.getElementById('closeDeleteModal');
+        
+        const isReply = type === 'reply';
+        const itemText = this.truncateText(item.text, 50);
+        const userName = this.truncateText(item.userName || 'مستخدم', 15);
+        const timeAgo = item.timestamp ? this.getTimeAgo(item.timestamp) : 'وقت غير معروف';
+        
+        if (isReply) {
+            deleteModalTitle.textContent = 'حذف الرد';
+            deleteModalMessage.textContent = `هل تريد حذف الرد "${itemText}"`;
+            deleteTargetInfo.innerHTML = `
+                <i class="fas fa-user"></i>
+                <strong>على "${userName}"</strong>
+            `;
+        } else {
+            deleteModalTitle.textContent = 'حذف التعليق';
+            deleteModalMessage.textContent = `هل تريد حذف التعليق "${itemText}"`;
+            deleteTargetInfo.innerHTML = `
+                <i class="fas fa-book"></i>
+                <strong>من مانجا "${this.mangaData?.name || 'غير معروف'}"</strong>
+            `;
+        }
+        
+        deleteTimeInfo.innerHTML = `
+            <i class="fas fa-clock"></i>
+            <span>تم ${isReply ? 'الرد' : 'الإرسال'} منذ ${timeAgo}</span>
+        `;
+        
+        // إزالة المستمعين السابقين
+        confirmDelete.replaceWith(confirmDelete.cloneNode(true));
+        cancelDelete.replaceWith(cancelDelete.cloneNode(true));
+        closeDeleteModal.replaceWith(closeDeleteModal.cloneNode(true));
+        
+        // إضافة مستمعين جدد
+        document.getElementById('confirmDelete').addEventListener('click', () => {
+            this.executeDelete(type, item, parentComment);
+        });
+        
+        document.getElementById('cancelDelete').addEventListener('click', () => {
+            this.hideDeleteModal();
+        });
+        
+        document.getElementById('closeDeleteModal').addEventListener('click', () => {
+            this.hideDeleteModal();
+        });
+        
+        // إغلاق النافذة عند النقر خارج المحتوى
+        deleteModal.addEventListener('click', (e) => {
+            if (e.target === deleteModal) {
+                this.hideDeleteModal();
+            }
+        });
+        
+        deleteModal.classList.remove('hidden');
+        deleteModal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    hideDeleteModal() {
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.classList.remove('open');
+        deleteModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+    
+    async executeDelete(type, item, parentComment = null) {
+        try {
+            const user = this.auth.currentUser;
+            if (!user) {
+                alert('يجب تسجيل الدخول لحذف التعليق');
+                return;
+            }
+            
+            // التحقق من أن المستخدم هو صاحب التعليق
+            if (item.userId !== user.uid) {
+                alert('لا يمكنك حذف تعليقات الآخرين');
+                this.hideDeleteModal();
+                return;
+            }
+            
+            if (type === 'comment') {
+                await this.deleteComment(item.id);
+            } else if (type === 'reply') {
+                await this.deleteReply(parentComment.id, item.id);
+            }
+            
+            this.hideDeleteModal();
+            
+            // إعادة تحميل التعليقات
+            if (this.commentsManager) {
+                this.commentsManager.loadComments();
+            }
+            
+        } catch (error) {
+            console.error('Error deleting:', error);
+            alert('حدث خطأ أثناء الحذف');
+        }
+    }
+    
+    async deleteComment(commentId) {
+        const commentRef = this.db.ref(`comments/${this.mangaId}/${this.chapterNumber}/${commentId}`);
+        await commentRef.remove();
+    }
+    
+    async deleteReply(commentId, replyId) {
+        const replyRef = this.db.ref(`comments/${this.mangaId}/${this.chapterNumber}/${commentId}/replies/${replyId}`);
+        await replyRef.remove();
+    }
+    
+    truncateText(text, maxLength) {
+        if (!text) return '...';
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
+    }
+    
+    getTimeAgo(timestamp) {
+        const now = new Date().getTime();
+        const diff = now - timestamp;
+        
+        const minutes = Math.floor(diff / 60000);
+        const hours = Math.floor(diff / 3600000);
+        const days = Math.floor(diff / 86400000);
+        
+        if (minutes < 1) return 'لحظات';
+        if (minutes < 60) return `${minutes} دقيقة`;
+        if (hours < 24) return `${hours} ساعة`;
+        if (days < 7) return `${days} يوم`;
+        if (days < 30) return `${Math.floor(days / 7)} أسبوع`;
+        return `${Math.floor(days / 30)} شهر`;
     }
     
     async loadChapterData() {

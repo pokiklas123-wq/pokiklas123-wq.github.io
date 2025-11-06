@@ -1,3 +1,4 @@
+
 // js/manga.js
 class MangaPage {
     constructor() {
@@ -220,13 +221,13 @@ class MangaPage {
         this.loadUserRating();
         
         stars.forEach(star => {
-            star.addEventListener('click', () => {
-                const rating = parseInt(star.getAttribute('data-rating'));
+            star.addEventListener('click', (e) => {
+                const rating = parseInt(e.target.getAttribute('data-rating'));
                 this.rateManga(rating);
             });
             
-            star.addEventListener('mouseover', () => {
-                const rating = parseInt(star.getAttribute('data-rating'));
+            star.addEventListener('mouseover', (e) => {
+                const rating = parseInt(e.target.getAttribute('data-rating'));
                 this.highlightStars(rating);
             });
             
@@ -253,6 +254,8 @@ class MangaPage {
     
     updateStars(rating) {
         const stars = document.querySelectorAll('.star-rating i');
+        const userRatingValue = document.getElementById('userRatingValue');
+        
         stars.forEach(star => {
             const starRating = parseInt(star.getAttribute('data-rating'));
             if (starRating <= rating) {
@@ -263,6 +266,10 @@ class MangaPage {
                 star.classList.remove('fas', 'active');
             }
         });
+        
+        if (userRatingValue) {
+            userRatingValue.textContent = rating;
+        }
     }
     
     async loadUserRating() {
@@ -275,7 +282,6 @@ class MangaPage {
             if (userRating) {
                 this.userRatings[this.mangaId] = userRating;
                 this.updateStars(userRating);
-                document.getElementById('userRatingValue').textContent = userRating;
             }
         } catch (error) {
             console.error('Error loading user rating:', error);
@@ -293,13 +299,24 @@ class MangaPage {
             await this.db.ref(`user_ratings/${this.auth.currentUser.uid}/${this.mangaId}`).set(rating);
             
             // تحديث النجوم في الواجهة
+            this.userRatings[this.mangaId] = rating;
             this.updateStars(rating);
-            document.getElementById('userRatingValue').textContent = rating;
             
             // تحديث التقييم العام للمانجا
-            await this.updateMangaRating(rating);
+            const ratingData = await this.updateMangaRating(rating);
             
-            this.showMessage('تم تقييم المانجا بنجاح', 'success');
+            // إظهار الظيالوغ الجديد بدلاً من التنبيه القديم
+            if (typeof showRatingNotification === 'function') {
+                showRatingNotification(
+                    this.mangaData.name, 
+                    rating, 
+                    ratingData.totalRatings, 
+                    ratingData.averageRating
+                );
+            } else {
+                // إذا لم تكن الدالة متاحة، استخدم التنبيه القديم
+                this.showMessage('تم تقييم المانجا بنجاح', 'success');
+            }
             
         } catch (error) {
             console.error('Error rating manga:', error);
@@ -324,25 +341,104 @@ class MangaPage {
                 }
             });
 
-            const average = count > 0 ? (total / count).toFixed(1) : newRating;
+            const average = count > 0 ? (total / count).toFixed(1) : newRating.toFixed(1);
             
             // تحديث تقييم المانجا
             await this.db.ref(`manga_list/${this.mangaId}/rating`).set(parseFloat(average));
             
             // تحديث العرض
-            document.getElementById('averageRatingValue').textContent = average;
+            const averageRatingElement = document.getElementById('averageRatingValue');
+            if (averageRatingElement) {
+                averageRatingElement.textContent = average;
+            }
+            
+            return {
+                averageRating: parseFloat(average),
+                totalRatings: count
+            };
             
         } catch (error) {
             console.error('Error updating manga rating:', error);
+            return {
+                averageRating: parseFloat(newRating),
+                totalRatings: 1
+            };
         }
     }
     
     showAuthMessage(message) {
-        alert(message);
+        // استخدام الظيالوغ لرسائل المصادقة أيضاً
+        if (typeof showRatingNotification === 'function') {
+            // إنشاء ظيالوغ مخصص لرسائل المصادقة
+            if (window.toastManager) {
+                const toastId = 'auth-toast-' + Date.now();
+                const toastHTML = `
+                    <div class="toast" id="${toastId}">
+                        <div class="toast-header">
+                            <div class="toast-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <h3 class="toast-title">تنبيه</h3>
+                        </div>
+                        <div class="toast-body">
+                            <div class="toast-manga-name">${message}</div>
+                        </div>
+                        <div class="toast-actions">
+                            <button class="toast-btn toast-btn-close" onclick="toastManager.hide('${toastId}')">
+                                تم
+                            </button>
+                        </div>
+                        <div class="toast-progress"></div>
+                    </div>
+                `;
+                
+                window.toastManager.container.insertAdjacentHTML('beforeend', toastHTML);
+                window.toastManager.toasts.add(toastId);
+                
+                setTimeout(() => {
+                    window.toastManager.hide(toastId);
+                }, 5000);
+            }
+        } else {
+            alert(message);
+        }
     }
     
     showMessage(message, type = 'info') {
-        alert(message);
+        // استخدام الظيالوغ لجميع الرسائل
+        if (typeof showRatingNotification === 'function' && window.toastManager) {
+            const toastId = 'message-toast-' + Date.now();
+            const isSuccess = type === 'success';
+            
+            const toastHTML = `
+                <div class="toast ${isSuccess ? 'success' : ''}" id="${toastId}">
+                    <div class="toast-header">
+                        <div class="toast-icon" style="background: linear-gradient(135deg, ${isSuccess ? '#27ae60, #229954' : '#e74c3c, #c0392b'});">
+                            <i class="fas ${isSuccess ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                        </div>
+                        <h3 class="toast-title">${isSuccess ? 'نجاح' : 'خطأ'}</h3>
+                    </div>
+                    <div class="toast-body">
+                        <div class="toast-manga-name">${message}</div>
+                    </div>
+                    <div class="toast-actions">
+                        <button class="toast-btn toast-btn-close" onclick="toastManager.hide('${toastId}')">
+                            تم
+                        </button>
+                    </div>
+                    <div class="toast-progress"></div>
+                </div>
+            `;
+            
+            window.toastManager.container.insertAdjacentHTML('beforeend', toastHTML);
+            window.toastManager.toasts.add(toastId);
+            
+            setTimeout(() => {
+                window.toastManager.hide(toastId);
+            }, 5000);
+        } else {
+            alert(message);
+        }
     }
     
     prepareChaptersList() {

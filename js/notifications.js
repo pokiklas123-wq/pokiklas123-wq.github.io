@@ -11,6 +11,13 @@ class NotificationsManager {
         
         this.setupAuthListener();
     }
+    
+    
+    
+
+    
+    
+    
 
     setupAuthListener() {
         this.auth.onAuthStateChanged(user => {
@@ -163,12 +170,12 @@ class NotificationsManager {
                 this.markAsRead(notification.id);
             });
         }
-        if (deleteBtn) {
-            deleteBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.deleteNotification(notification.id);
-            });
-        }
+	            if (deleteBtn) {
+	                deleteBtn.addEventListener('click', (e) => {
+	                    e.stopPropagation();
+	                    this.showDeleteNotificationModal(notification);
+	                });
+	            }
         
         return notificationEl;
     }
@@ -194,19 +201,19 @@ class NotificationsManager {
     }
 
     handleNotificationClick(notification) {
-        if (notification.type === 'reply' && notification.mangaId && notification.chapterId) {
-            // الانتقال إلى الفصل مع التركيز على التعليق والرد
-            let hash = `comment-${notification.commentId}`;
-            if (notification.replyId) {
-                hash = `reply-${notification.commentId}-${notification.replyId}`;
-            }
-            
-            window.location.href = `chapter.html?manga=${notification.mangaId}&chapter=${notification.chapterId}#${hash}`;
+    if (notification.type === 'reply' && notification.mangaId && notification.chapterId) {
+        // الانتقال إلى الفصل مع تمرير commentId و replyId في الـ URL
+        let url = `chapter.html?manga=${notification.mangaId}&chapter=${notification.chapterId}&comment=${notification.commentId}`;
+        if (notification.replyId) {
+            url += `&reply=${notification.replyId}`;
         }
         
-        // وضع علامة كمقروء عند النقر
-        this.markAsRead(notification.id);
+        window.location.href = url;
     }
+    
+    // وضع علامة كمقروء عند النقر
+    this.markAsRead(notification.id);
+}
 
     async markAsRead(id) {
         if (!this.notificationsRef || !this.userId) return;
@@ -219,19 +226,101 @@ class NotificationsManager {
         }
     }
 
-    async deleteNotification(id) {
-        if (!confirm('هل أنت متأكد من حذف هذا الإشعار؟')) return;
-        
-        try {
-            await this.notificationsRef.child(id).remove();
-            Utils.showMessage('تم حذف الإشعار بنجاح', 'success');
-        } catch (error) {
-            console.error('Error deleting notification:', error);
-            Utils.showMessage('حدث خطأ أثناء حذف الإشعار', 'error');
-        }
-    }
+	    async executeDeleteNotification(id) {
+	        if (!this.notificationsRef || !this.userId) return;
+	        
+	        try {
+	            await this.notificationsRef.child(id).remove();
+	            this.hideDeleteNotificationModal();
+	            Utils.showMessage('تم حذف الإشعار بنجاح', 'success');
+	        } catch (error) {
+	            console.error('Error deleting notification:', error);
+	            Utils.showMessage('حدث خطأ أثناء حذف الإشعار', 'error');
+	        }
+	    }
+
+	    showDeleteNotificationModal(notification) {
+	        const deleteModal = document.getElementById('deleteNotificationModal');
+	        const deleteModalTitle = document.getElementById('deleteNotificationModalTitle');
+	        const deleteModalMessage = document.getElementById('deleteNotificationModalMessage');
+	        const deleteTargetInfo = document.getElementById('deleteNotificationTargetInfo');
+	        const deleteTimeInfo = document.getElementById('deleteNotificationTimeInfo');
+	        const confirmDelete = document.getElementById('confirmDeleteNotification');
+	        const cancelDelete = document.getElementById('cancelDeleteNotification');
+	        const closeDeleteModal = document.getElementById('closeDeleteNotificationModal');
+
+	        deleteModalTitle.textContent = 'حذف الإشعار';
+	        deleteModalMessage.textContent = `هل أنت متأكد من أنك تريد حذف الإشعار: "${this.truncateText(notification.text, 50)}؟"`;
+	        
+	        deleteTargetInfo.innerHTML = `
+	            <i class="fas fa-tag"></i>
+	            <strong>النوع: ${this.getNotificationTitle(notification.type)}</strong>
+	        `;
+	        
+	        const timeAgo = notification.timestamp ? this.getTimeAgo(notification.timestamp) : 'وقت غير معروف';
+	        deleteTimeInfo.innerHTML = `
+	            <i class="fas fa-clock"></i>
+	            <span>تم الإرسال منذ ${timeAgo}</span>
+	        `;
+
+	        // إزالة المستمعين السابقين
+	        confirmDelete.replaceWith(confirmDelete.cloneNode(true));
+	        cancelDelete.replaceWith(cancelDelete.cloneNode(true));
+	        closeDeleteModal.replaceWith(closeDeleteModal.cloneNode(true));
+
+	        // إضافة مستمعين جدد
+	        document.getElementById('confirmDeleteNotification').addEventListener('click', () => {
+	            this.executeDeleteNotification(notification.id);
+	        });
+
+	        document.getElementById('cancelDeleteNotification').addEventListener('click', () => {
+	            this.hideDeleteNotificationModal();
+	        });
+
+	        document.getElementById('closeDeleteNotificationModal').addEventListener('click', () => {
+	            this.hideDeleteNotificationModal();
+	        });
+
+	        // إغلاق النافذة عند النقر خارج المحتوى
+	        deleteModal.addEventListener('click', (e) => {
+	            if (e.target === deleteModal) {
+	                this.hideDeleteNotificationModal();
+	            }
+	        });
+
+	        deleteModal.classList.add('open');
+	        document.body.style.overflow = 'hidden';
+	    }
+
+	    hideDeleteNotificationModal() {
+	        const deleteModal = document.getElementById('deleteNotificationModal');
+	        deleteModal.classList.remove('open');
+	        document.body.style.overflow = '';
+	    }
     
-    async markAllAsRead() {
+	    truncateText(text, maxLength) {
+	        if (!text) return '...';
+	        if (text.length <= maxLength) return text;
+	        return text.substring(0, maxLength) + '...';
+	    }
+
+	    getTimeAgo(timestamp) {
+	        const now = new Date().getTime();
+	        const diff = now - timestamp;
+	        
+	        const minutes = Math.floor(diff / 60000);
+	        const hours = Math.floor(diff / 3600000);
+	        const days = Math.floor(diff / 86400000);
+	        
+	        if (minutes < 1) return 'لحظات';
+	        if (minutes < 60) return `${minutes} دقيقة`;
+	        if (hours < 24) return `${hours} ساعة`;
+	        if (days < 7) return `${days} يوم`;
+	        if (days < 30) return `${Math.floor(days / 7)} أسبوع`;
+	        return `${Math.floor(days / 30)} شهر`;
+	    }
+
+	    async markAllAsRead() {
         if (!this.userId || !this.notificationsRef) return;
         
         try {
