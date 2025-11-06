@@ -1,6 +1,9 @@
+/*.xml
+  Content-Type: application/xml
+  X-Robots-Tag: all
+  Access-Control-Allow-Origin: *
+
 /sitemap.xml
   Content-Type: application/xml
   X-Robots-Tag: all
-
-/*.xml
-  Content-Type: application/xml
+  Access-Control-Allow-Origin: *
