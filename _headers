@@ -1,0 +1,6 @@
+/sitemap.xml
+  Content-Type: application/xml
+  X-Robots-Tag: all
+
+/*.xml
+  Content-Type: application/xml
