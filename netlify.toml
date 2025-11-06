@@ -1,13 +1,22 @@
 [[headers]]
+  for = "/*.xml"
+  [headers.values]
+    Content-Type = "application/xml"
+    X-Robots-Tag = "all"
+    Access-Control-Allow-Origin = "*"
+
+[[headers]]
   for = "/sitemap.xml"
   [headers.values]
     Content-Type = "application/xml"
     X-Robots-Tag = "all"
+    Access-Control-Allow-Origin = "*"
 
 [[headers]]
-  for = "/*.xml"
+  for = "/robots.txt"
   [headers.values]
-    Content-Type = "application/xml"
+    Content-Type = "text/plain"
+    X-Robots-Tag = "all"
 
 [[redirects]]
   from = "/sitemap.xml"
