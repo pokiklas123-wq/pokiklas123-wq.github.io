@@ -7,7 +7,7 @@ Disallow: /private/
 Crawl-delay: 1
 
 # خرائط الموقع
-Sitemap: https://pokiklas123-wq.github.io/sitemap.xml
+Sitemap: https://manga-new-arbic.netlify.app/sitemap.xml
 
 # إعدادات محددة لمحركات البحث
 User-agent: Googlebot
