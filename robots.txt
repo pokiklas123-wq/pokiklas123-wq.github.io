@@ -6,46 +6,14 @@ Disallow: /admin/
 Disallow: /private/
 Crawl-delay: 1
 
-# خرائط الموقع
+# Sitemap
 Sitemap: https://pokiklas123-wq.github.io/sitemap.xml
 
-# إعدادات محددة لمحركات البحث
-User-agent: Googlebot
-Allow: /
-Crawl-delay: 1
-Disallow: /auth.html
-Disallow: /notifications.html
-
-User-agent: Bingbot
-Allow: /
-Crawl-delay: 2
-Disallow: /auth.html
-
-User-agent: Yandex
-Allow: /
-Crawl-delay: 1
-
-User-agent: DuckDuckBot
-Allow: /
-Crawl-delay: 1
-
-User-agent: Baiduspider
-Allow: /
-Crawl-delay: 3
-
-# محركات البحث العربية والإقليمية
-User-agent: Majestic-12
-Allow: /
-
-User-agent: AhrefsBot
-Allow: /
-Crawl-delay: 2
-
-# منع أدوات التحليل من الزحف الثقيل
-User-agent: SEMrushBot
+# Rate limiting for aggressive bots
+User-agent: MJ12bot
 Crawl-delay: 5
 
-User-agent: MJ12bot
+User-agent: SEMrushBot
 Crawl-delay: 5
 
 User-agent: DotBot
