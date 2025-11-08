@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO الأساسي -->
+    <title>قراءة الفصل | جديد المانجا - أفضل موقع لقراءة المانجا العربية</title>
+    <meta name="description" content="اقرأ فصول المانجا العربية مجاناً على موقع جديد المانجا. أفضل جودة قراءة وتجربة مستخدم سلسة.">
+    <meta name="keywords" content="قراءة مانجا, فصول مانجا, مانجا عربية, manga arabic, قصص مصورة">
+    <meta name="author" content="جديد المانجا">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="قراءة الفصل | جديد المانجا">
+    <meta property="og:description" content="اقرأ فصول المانجا العربية مجاناً على موقع جديد المانجا">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://pokiklas123-wq.github.io/chapter.html">
+    <meta property="og:image" content="https://pokiklas123-wq.github.io/images/og-image.jpg">
+    <meta property="og:site_name" content="جديد المانجا">
+    
+    <!-- Canonical URL -->
+    <!-- يجب تحديث هذا الرابط ديناميكياً ليعكس الفصل الفعلي -->
+    <link rel="canonical" href="https://pokiklas123-wq.github.io/chapter.html">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "قراءة فصول المانجا العربية مجاناً",
+        "description": "استمتع بقراءة فصول المانجا العربية على موقع جديد المانجا بأفضل تجربة مستخدم",
+        "author": {
+            "@type": "Organization",
+            "name": "جديد المانجا"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "جديد المانجا",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://pokiklas123-wq.github.io/images/logo.png"
+            }
+        }
+    }
+    </script>
+    
+    <title>قراءة الفصل</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/custom_dialog.css">
+    <style>
+        /* تنسيق الشعار */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .logo-text {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .logo-img {
+                width: 32px;
+                height: 32px;
+            }
+            .logo-text {
+                font-size: 1rem;
+            }
+        }
+
+        .chapter-header {
+        
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        .chapter-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: var(--text-color);
+        }
+        .chapter-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+        .chapter-images {
+            max-width: 100%;
+            margin: 0 auto 0rem;
+        }
+        .chapter-image {
+            width: 100%;
+            margin-bottom: 0rem;
+            border-radius: 0px;
+            box-shadow: var(--shadow);
+        }
+        .comments-section {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+        .comments-title {
+            margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            color: var(--text-color);
+        }
+        .comment-form {
+            margin-bottom: 2rem;
+        }
+        .comment-input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            background: var(--bg-color);
+            color: var(--text-color);
+            margin-bottom: 1rem;
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+        .comment-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+        }
+        .comments-list {
+            margin-top: 2rem;
+        }
+        .comment {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            background: var(--bg-color);
+            border-radius: var(--border-radius);
+        }
+        .comment:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .comment-user {
+            display: flex;
+            align-items: center;
+            color: var(--text-color);
+            gap: 0.5rem;
+        }
+        .user-avatar-small {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .user-name {
+            font-weight: bold;
+            color: var(--primary-color);
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .comment-date {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        .comment-content {
+            margin-bottom: 0.5rem;
+            line-height: 1.5;
+            color: var(--text-color);
+            word-wrap: break-word;
+        }
+        .comment-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            transition: var(--transition);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        .action-btn:hover {
+            background: var(--hover-color);
+        }
+        .action-btn.delete-btn {
+            color: #dc3545;
+        }
+        .action-btn.delete-btn:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+        .replies {
+            margin-top: 1rem;
+            margin-right: 2rem;
+            padding-right: 1rem;
+            border-right: 2px solid var(--border-color);
+        }
+        .reply-form {
+            margin-top: 1rem;
+            display: none;
+        }
+        .show-replies-btn {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            transition: var(--transition);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        .show-replies-btn:hover {
+            background: var(--hover-color);
+        }
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+        }
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--border-color);
+        }
+        .highlight {
+            animation: highlight 3s ease;
+        }
+        @keyframes highlight {
+            0% { background-color: rgba(var(--primary-color-rgb), 0.3); }
+            100% { background-color: #1de9b6; }
+        }
+
+        /* تنسيقات الـ Modal لحذف التعليقات */
+        .delete-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .delete-modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .delete-modal-content {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 450px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+
+        .delete-modal.open .delete-modal-content {
+            transform: translateY(0);
+        }
+
+        .delete-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .delete-modal-header h3 {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 1.25rem;
+        }
+
+        .delete-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.25rem;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .delete-modal-close:hover {
+            background: var(--hover-color);
+            color: var(--text-color);
+        }
+
+        .delete-modal-body {
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .delete-modal-body p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        .delete-info {
+            background: var(--bg-color);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            margin-top: 1rem;
+        }
+
+        .delete-info div {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .delete-info div:last-child {
+            margin-bottom: 0;
+        }
+
+        .delete-modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .truncate-text {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .chapter-nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .replies {
+                margin-right: 1rem;
+            }
+            .comment-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+            .delete-modal-content {
+                width: 95%;
+                margin: 1rem;
+            }
+            .delete-modal-actions {
+                flex-direction: column;
+            }
+            .user-name {
+                max-width: 80px;
+            }
+        }
+        
+        
+        /* تنسيقات الـ Modal لتعديل التعليقات */
+.edit-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.edit-modal.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.edit-modal-content {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    width: 90%;
+    max-width: 500px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease;
+}
+
+.edit-modal.open .edit-modal-content {
+    transform: translateY(0);
+}
+
+.edit-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.edit-modal-header h3 {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.25rem;
+}
+
+.edit-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.edit-modal-close:hover {
+    background: var(--hover-color);
+    color: var(--text-color);
+}
+
+.edit-modal-body {
+    padding: 1.5rem;
+}
+
+.edit-modal-textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: var(--bg-color);
+    color: var(--text-color);
+    resize: vertical;
+    min-height: 120px;
+    font-family: inherit;
+    margin-bottom: 1rem;
+}
+
+.edit-modal-textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+}
+
+.edit-info {
+    background: var(--bg-color);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.edit-modal-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+@media (max-width: 768px) {
+    .edit-modal-content {
+        width: 95%;
+        margin: 1rem;
+    }
+    .edit-modal-actions {
+        flex-direction: column;
+    }
+}
+
+.edited-badge {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    font-style: italic;
+}
+        
+        
+        
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <button id="drawerToggle" class="btn btn-outline">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <!-- شعار الموقع -->
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img">
+            <span class="logo-text">جديد المانجا</span>
+        </a>
+        
+        <div class="header-actions">
+            <button id="notificationsBtn" class="btn btn-outline">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge hidden"></span>
+            </button>
+            <button id="authBtn" class="btn">
+                <i class="fas fa-user"></i>
+                <span>تسجيل الدخول</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Drawer -->
+    <div class="drawer">
+        <div class="drawer-header">
+            <h2 class="drawer-title">القائمة</h2>
+            <button class="drawer-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="userInfo" class="user-info hidden">
+            <img src="" alt="صورة المستخدم" class="user-avatar">
+            <div class="user-details">
+                <div class="user-name"></div>
+                <div class="user-email"></div>
+            </div>
+        </div>
+        
+        <ul class="drawer-menu">
+            <li class="drawer-menu-item">
+                <a href="index.html" class="drawer-menu-link">
+                    <i class="fas fa-home"></i>
+                    <span>الصفحة الرئيسية</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link">
+                    <i class="fas fa-fire"></i>
+                    <span>الأكثر مشاهدة</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link">
+                    <i class="fas fa-star"></i>
+                    <span>الأعلى تقييماً</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link">
+                    <i class="fas fa-history"></i>
+                    <span>الأحدث</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="notifications.html" class="drawer-menu-link" id="notificationsDrawerBtn">
+                    <i class="fas fa-bell"></i>
+                    <span>الإشعارات</span>
+                </a>
+            </li>
+        </ul>
+        
+        <!-- قسم الثيمات المعدل -->
+        <div class="theme-selector">
+            <span>المظهر:</span>
+	            <div class="theme-options">
+	                <div class="theme-option theme-btn active" data-theme="dark">
+	                    <i class="fas fa-moon"></i>
+	                    <span>أسود</span>
+	                </div>
+	                <div class="theme-option theme-btn" data-theme="blue">
+	                    <i class="fas fa-palette"></i>
+	                    <span>أزرق</span>
+	                </div>
+	            </div>
+        </div>
+        
+        <button id="logoutBtn" class="btn btn-outline hidden">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>تسجيل الخروج</span>
+        </button>
+    </div>
+    <div class="drawer-overlay"></div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div id="chapterContent">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container comments-section">
+        <h2 class="comments-title">التعليقات</h2>
+        <div id="commentFormContainer">
+            <form id="commentForm" class="comment-form">
+                <textarea id="commentInput" class="comment-input" placeholder="اكتب تعليقك هنا..." required></textarea>
+                <button type="submit" class="btn">إرسال التعليق</button>
+            </form>
+        </div>
+        <div id="commentsContainer" class="comments-list">
+            <!-- سيتم تقديم التعليقات هنا بواسطة comments.js -->
+        </div>
+    </div>
+
+    <!-- نافذة تأكيد الحذف -->
+    <div id="deleteModal" class="delete-modal hidden">
+        <div class="delete-modal-content">
+            <div class="delete-modal-header">
+                <h3 id="deleteModalTitle">حذف التعليق</h3>
+                <button class="delete-modal-close" id="closeDeleteModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="delete-modal-body">
+                <p id="deleteModalMessage"></p>
+                <div class="delete-info">
+                    <div id="deleteTargetInfo"></div>
+                    <div id="deleteTimeInfo"></div>
+                </div>
+            </div>
+            <div class="delete-modal-actions">
+                <button id="confirmDelete" class="btn btn-danger">حذف</button>
+                <button id="cancelDelete" class="btn btn-outline">كلا</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/chapter.js"></script>
+    
+<script>
+// كود لفتح الردود تلقائياً عند القدوم من الإشعارات
+document.addEventListener('DOMContentLoaded', function() {
+    // اقرأ الـ URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const commentId = urlParams.get('comment');
+    const replyId = urlParams.get('reply');
+    
+    // إذا في commentId، افتح الردود وانسكرول
+    if (commentId) {
+        // انتظر حتى يتم تحميل التعليقات
+        const checkCommentsLoaded = setInterval(() => {
+            if (window.commentsManager) {
+                clearInterval(checkCommentsLoaded);
+                setTimeout(() => {
+                    window.commentsManager.openRepliesAndScroll(commentId, replyId);
+                }, 1000);
+            }
+        }, 100);
+    }
+});
+</script>
+    
+    
+    
+</body>
+</html>
