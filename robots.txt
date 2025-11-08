@@ -4,4 +4,4 @@ Disallow: /notifications.html
 Disallow: /admin/
 Disallow: /private/
 
-Sitemap: https://pgfxtool-pro.web.app/sitemap.xml
+Sitemap: https://manga-arabic.web.app/sitemap.xml
