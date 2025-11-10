@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قراءة الفصل</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: var(--primary-dark);
+        }
+
+        .chapter-reader {
+            width: 100%;
+            background-color: var(--primary-dark);
+        }
+
+        .chapter-images {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .chapter-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            background-color: var(--primary-dark);
+            border: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .comments-section {
+            max-width: 1000px;
+            margin: 3rem auto;
+            padding: 2rem;
+            background-color: var(--secondary-dark);
+            border-radius: 12px;
+            border: 1px solid var(--border-dark);
+        }
+
+        .comments-header {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--text-primary);
+        }
+
+        .comment-input-box {
+            background-color: var(--tertiary-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            background-color: var(--accent-dark);
+            border: 1px solid var(--border-dark);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            margin-bottom: 1rem;
+            resize: vertical;
+        }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
+        .comment-textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .comment-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .comments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .comment {
+            background-color: var(--tertiary-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-dark);
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .comment-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .comment-info {
+            flex: 1;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .comment-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .comment-text {
+            color: var(--text-primary);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            word-break: break-word;
+        }
+
+        .comment-actions-btn {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .comment-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .comment-action-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .replies {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-dark);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .reply {
+            background-color: var(--accent-dark);
+            border-left: 3px solid var(--accent-color);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .reply-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .reply-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-dark);
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .reply-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .reply-author {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .reply-time {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .reply-text {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .reply-actions {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .reply-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: color 0.3s ease;
+        }
+
+        .reply-action-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .reply-input {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: var(--tertiary-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+        }
+
+        .reply-textarea {
+            width: 100%;
+            min-height: 60px;
+            padding: 0.75rem;
+            background-color: var(--accent-dark);
+            border: 1px solid var(--border-dark);
+            color: var(--text-primary);
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            margin-bottom: 0.75rem;
+            resize: vertical;
+        }
+
+        .reply-textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+
+        .reply-textarea::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .reply-actions-btn {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .reply-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--accent-color);
+            color: var(--primary-dark);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .reply-btn:hover {
+            background-color: #00b8d4;
+        }
+
+        .cancel-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--tertiary-dark);
+            color: var(--text-primary);
+            border: 1px solid var(--border-dark);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-btn:hover {
+            background-color: var(--accent-dark);
+            border-color: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .comments-section {
+                margin: 2rem 1rem;
+                padding: 1rem;
+            }
+
+            .comment-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Chapter Reader -->
+    <div class="chapter-reader">
+        <div class="chapter-images" id="chapter-images">
+            <p style="text-align: center; color: var(--text-secondary); padding: 3rem;">جاري تحميل الفصل...</p>
+        </div>
+    </div>
+
+    <!-- Comments Section -->
+    <div class="comments-section">
+        <h2 class="comments-header">التعليقات</h2>
+
+        <!-- Comment Input -->
+        <div class="comment-input-box" id="comment-input-box" style="display: none;">
+            <textarea 
+                class="comment-textarea" 
+                id="comment-textarea" 
+                placeholder="اكتب تعليقك هنا..."
+            ></textarea>
+            <div class="comment-actions">
+                <button class="btn btn-secondary" onclick="cancelComment()">إلغاء</button>
+                <button class="btn btn-primary" onclick="submitComment()">نشر التعليق</button>
+            </div>
+        </div>
+
+        <!-- Login prompt -->
+        <div id="login-prompt" style="text-align: center; padding: 2rem; background-color: var(--tertiary-dark); border-radius: 12px; margin-bottom: 2rem;">
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">يجب تسجيل الدخول لنشر تعليق</p>
+            <button class="btn btn-primary" onclick="navigateTo('auth.html')">تسجيل الدخول</button>
+        </div>
+
+        <!-- Comments List -->
+        <div class="comments-list" id="comments-list">
+            <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">جاري تحميل التعليقات...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        let currentMangaId = null;
+        let currentChapterId = null;
+        let currentUser = null;
+
+        // Get parameters from URL
+        function getParams() {
+            currentMangaId = getQueryParam('mangaId');
+            currentChapterId = getQueryParam('chapterId');
+        }
+
+        // Load chapter images - REAL DATA
+        function loadChapterImages() {
+            FirebaseDatabase.getChapter(currentMangaId, currentChapterId).then(chapter => {
+                if (chapter && chapter.images) {
+                    displayChapterImages(chapter.images);
+                    markChapterAsRead();
+                } else {
+                    showChapterError('لا توجد صور في هذا الفصل');
+                }
+            }).catch(error => {
+                console.error('Error loading chapter:', error);
+                showChapterError('خطأ في تحميل الفصل');
+            });
+        }
+
+        // Display chapter images
+        function displayChapterImages(images) {
+            const container = document.getElementById('chapter-images');
+            container.innerHTML = '';
+
+            images.forEach((imageUrl, index) => {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = `صفحة ${index + 1}`;
+                img.className = 'chapter-image';
+                img.onerror = function() {
+                    this.style.display = 'none';
+                };
+                container.appendChild(img);
+            });
+        }
+
+        // Show chapter error
+        function showChapterError(message) {
+            const container = document.getElementById('chapter-images');
+            container.innerHTML = `
+                <div style="text-align: center; padding: 3rem; color: var(--accent-secondary);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+                    <h3>${message}</h3>
+                    <button class="btn btn-primary" onclick="navigateTo('manga_information.html?id=${currentMangaId}')" style="margin-top: 1rem;">
+                        العودة لقائمة الفصول
+                    </button>
+                </div>
+            `;
+        }
+
+        // Mark chapter as read
+        function markChapterAsRead() {
+            if (currentUser) {
+                FirebaseDatabase.markChapterAsRead(currentUser.uid, currentMangaId, currentChapterId);
+            }
+        }
+
+        // Load comments - REAL DATA STRUCTURE
+        function loadComments() {
+            FirebaseDatabase.getComments(currentMangaId, currentChapterId).then(comments => {
+                displayComments(comments);
+            }).catch(error => {
+                console.error('Error loading comments:', error);
+                showCommentsError('خطأ في تحميل التعليقات');
+            });
+        }
+
+        // Display comments
+        function displayComments(comments) {
+            const list = document.getElementById('comments-list');
+            list.innerHTML = '';
+
+            if (comments.length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 2rem;">لا توجد تعليقات حتى الآن</p>';
+                return;
+            }
+
+            comments.forEach(comment => {
+                const commentEl = createCommentElement(comment);
+                list.appendChild(commentEl);
+            });
+        }
+
+        // Show comments error
+        function showCommentsError(message) {
+            const list = document.getElementById('comments-list');
+            list.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--accent-secondary);">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">❌</div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Create comment element
+        function createCommentElement(comment) {
+            const div = document.createElement('div');
+            div.className = 'comment';
+            div.innerHTML = `
+                <div class="comment-header">
+                    <div class="comment-avatar">
+                        ${comment.userAvatar ? `<img src="${comment.userAvatar}" alt="${comment.userName}" onerror="this.style.display='none'; this.parentNode.innerHTML='${comment.userName.charAt(0).toUpperCase()}';">` : comment.userName.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="comment-info">
+                        <div class="comment-author">${comment.userName || 'مستخدم مجهول'}</div>
+                        <div class="comment-time">${formatTimestamp(comment.timestamp)}</div>
+                    </div>
+                </div>
+                <div class="comment-text">${comment.text}</div>
+                <div class="comment-actions-btn">
+                    <button class="comment-action-btn" onclick="toggleReplyForm('${comment.id}')">
+                        <i class="fas fa-reply"></i> رد
+                    </button>
+                    ${currentUser && currentUser.uid === comment.userId ? `
+                        <button class="comment-action-btn" onclick="deleteComment('${comment.id}')">
+                            <i class="fas fa-trash"></i> حذف
+                        </button>
+                    ` : ''}
+                </div>
+                <div class="reply-input" id="reply-form-${comment.id}" style="display: none;">
+                    <textarea class="reply-textarea" id="reply-text-${comment.id}" placeholder="اكتب ردك هنا..."></textarea>
+                    <div class="reply-actions-btn">
+                        <button class="cancel-btn" onclick="toggleReplyForm('${comment.id}')">إلغاء</button>
+                        <button class="reply-btn" onclick="submitReply('${comment.id}', '${comment.userName.replace(/'/g, "\\'")}')">نشر الرد</button>
+                    </div>
+                </div>
+            `;
+            return div;
+        }
+
+        // Submit comment
+        function submitComment() {
+            if (!currentUser) {
+                alert('يجب تسجيل الدخول أولاً');
+                return;
+            }
+
+            const text = document.getElementById('comment-textarea').value.trim();
+            if (!text) {
+                alert('يرجى كتابة تعليق');
+                return;
+            }
+
+            FirebaseDatabase.getUserData(currentUser.uid).then(userData => {
+                FirebaseDatabase.addComment(
+                    currentMangaId,
+                    currentChapterId,
+                    currentUser.uid,
+                    userData.username || 'مستخدم',
+                    userData.userAvatar || '',
+                    text
+                ).then(() => {
+                    document.getElementById('comment-textarea').value = '';
+                    loadComments();
+                    showNotification('تم نشر التعليق بنجاح');
+                }).catch(error => {
+                    console.error('Error adding comment:', error);
+                    alert('خطأ في نشر التعليق');
+                });
+            });
+        }
+
+        // Cancel comment
+        function cancelComment() {
+            document.getElementById('comment-textarea').value = '';
+        }
+
+        // Toggle reply form
+        function toggleReplyForm(commentId) {
+            const form = document.getElementById(`reply-form-${commentId}`);
+            if (form) {
+                form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        // Submit reply
+        function submitReply(commentId, replyingTo) {
+            if (!currentUser) {
+                alert('يجب تسجيل الدخول أولاً');
+                return;
+            }
+
+            const text = document.getElementById(`reply-text-${commentId}`).value.trim();
+            if (!text) {
+                alert('يرجى كتابة رد');
+                return;
+            }
+
+            FirebaseDatabase.getUserData(currentUser.uid).then(userData => {
+                FirebaseDatabase.replyToComment(
+                    currentMangaId,
+                    currentChapterId,
+                    commentId,
+                    currentUser.uid,
+                    userData.username || 'مستخدم',
+                    userData.userAvatar || '',
+                    replyingTo,
+                    text
+                ).then(() => {
+                    document.getElementById(`reply-text-${commentId}`).value = '';
+                    loadComments();
+                    showNotification('تم نشر الرد بنجاح');
+                }).catch(error => {
+                    console.error('Error adding reply:', error);
+                    alert('خطأ في نشر الرد');
+                });
+            });
+        }
+
+        // Delete comment
+        function deleteComment(commentId) {
+            if (confirm('هل تريد حذف هذا التعليق؟')) {
+                FirebaseDatabase.deleteComment(currentMangaId, currentChapterId, commentId).then(() => {
+                    loadComments();
+                    showNotification('تم حذف التعليق');
+                }).catch(error => {
+                    console.error('Error deleting comment:', error);
+                    alert('خطأ في حذف التعليق');
+                });
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            getParams();
+            if (!currentMangaId || !currentChapterId) {
+                showChapterError('معرف المانجا أو الفصل غير صحيح');
+                return;
+            }
+            loadChapterImages();
+            loadComments();
+
+            FirebaseAuth.onAuthStateChanged(user => {
+                currentUser = user;
+                const inputBox = document.getElementById('comment-input-box');
+                const loginPrompt = document.getElementById('login-prompt');
+
+                if (user) {
+                    inputBox.style.display = 'block';
+                    loginPrompt.style.display = 'none';
+                } else {
+                    inputBox.style.display = 'none';
+                    loginPrompt.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

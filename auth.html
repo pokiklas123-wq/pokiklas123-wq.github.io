@@ -3,490 +3,535 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- SEO الأساسي -->
-    <title>تسجيل الدخول | جديد المانجا - أفضل موقع لقراءة المانجا العربية</title>
-    <meta name="description" content="سجل دخولك إلى موقع جديد المانجا لتتمتع بمزايا إضافية في قراءة المانجا العربية مجاناً.">
-    <meta name="keywords" content="تسجيل دخول مانجا, حساب مانجا, مانجا عربية, manga arabic">
-    <meta name="author" content="جديد المانجا">
-    <meta name="robots" content="noindex, nofollow">
-    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="تسجيل الدخول | جديد المانجا">
-    <meta property="og:description" content="سجل دخولك إلى موقع جديد المانجا لتتمتع بمزايا إضافية">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://pokiklas123-wq.github.io/auth.html">
-    <meta property="og:image" content="https://pokiklas123-wq.github.io/images/og-image.jpg">
-    <meta property="og:site_name" content="جديد المانجا">
-    
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://pokiklas123-wq.github.io/auth.html">
-    
-    <title>تسجيل الدخول - جديد المانجا</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>تسجيل الدخول والتسجيل</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* تنسيق الشعار */
-        .logo {
+        body {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .logo-img {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
-
-        .logo-text {
-            font-weight: bold;
-            font-size: 1.2rem;
-            color: var(--primary-color);
-        }
-
-        @media (max-width: 768px) {
-            .logo-img {
-                width: 32px;
-                height: 32px;
-            }
-            .logo-text {
-                font-size: 1rem;
-            }
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--secondary-dark) 100%);
         }
 
         .auth-container {
-            max-width: 400px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        .auth-card {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 450px;
             padding: 2rem;
-            box-shadow: var(--shadow);
-            border: 1px solid var(--border-color);
         }
+
+        .auth-card {
+            background-color: var(--secondary-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
         .auth-header {
             text-align: center;
             margin-bottom: 2rem;
         }
+
         .auth-logo {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 0.5rem;
+            font-size: 3rem;
+            margin-bottom: 1rem;
         }
+
         .auth-title {
-            font-size: 1.5rem;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
             margin-bottom: 0.5rem;
-            color: var(--text-color);
         }
+
         .auth-subtitle {
-            color: var(--text-muted);
-            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
         }
-        .auth-tabs {
-            display: flex;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .auth-tab {
-            flex: 1;
-            padding: 1rem;
-            text-align: center;
-            background: none;
-            border: none;
-            color: var(--text-color);
-            cursor: pointer;
-            transition: var(--transition);
-            border-bottom: 2px solid transparent;
-            font-family: inherit;
-        }
-        .auth-tab.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-        }
+
         .auth-form {
-            display: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
-        .auth-form.active {
-            display: block;
-        }
+
         .form-group {
-            margin-bottom: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
+
         .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
             font-weight: 500;
-            color: var(--text-color);
+            color: var(--text-primary);
+            font-size: 0.95rem;
         }
+
         .form-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: var(--border-radius);
-            background: var(--bg-color);
-            color: var(--text-color);
-            transition: var(--transition);
+            padding: 0.75rem 1rem;
+            background-color: var(--tertiary-dark);
+            border: 1px solid var(--border-dark);
+            color: var(--text-primary);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
             font-family: inherit;
         }
+
         .form-input:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+            background-color: var(--accent-dark);
         }
-        .auth-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: var(--primary-color);
-            color: white;
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-input.error {
+            border-color: var(--accent-secondary);
+            box-shadow: 0 0 10px rgba(255, 107, 157, 0.2);
+        }
+
+        .error-message {
+            font-size: 0.85rem;
+            color: var(--accent-secondary);
+            display: none;
+            margin-top: 0.25rem;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .submit-btn {
+            padding: 0.85rem 1.5rem;
+            background-color: var(--accent-color);
+            color: var(--primary-dark);
             border: none;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: var(--transition);
+            border-radius: 8px;
             font-size: 1rem;
-            font-family: inherit;
             font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
-        .auth-btn:hover {
-            background: var(--secondary-color);
+
+        .submit-btn:hover {
+            background-color: #00b8d4;
             transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 212, 255, 0.3);
         }
-        .auth-btn:disabled {
-            background: var(--text-muted);
+
+        .submit-btn:disabled {
+            background-color: var(--text-secondary);
             cursor: not-allowed;
             transform: none;
         }
+
+        .submit-btn.loading {
+            pointer-events: none;
+        }
+
+        .spinner-small {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .divider-line {
+            flex: 1;
+            height: 1px;
+            background-color: var(--border-dark);
+        }
+
+        .divider-text {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .social-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .social-btn {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--tertiary-dark);
+            border: 1px solid var(--border-dark);
+            color: var(--text-primary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .social-btn:hover {
+            background-color: var(--accent-dark);
+            border-color: var(--accent-color);
+        }
+
         .auth-footer {
             text-align: center;
             margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border-color);
-        }
-        .auth-link {
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        .auth-link:hover {
-            text-decoration: underline;
-            color: var(--secondary-color);
-        }
-        .form-message {
-            padding: 0.75rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 1rem;
-            text-align: center;
-            display: none;
-        }
-        .form-message.success {
-            background: rgba(39, 174, 96, 0.1);
-            color: #27ae60;
-            border: 1px solid #27ae60;
-            display: block;
-        }
-        .form-message.error {
-            background: rgba(231, 76, 60, 0.1);
-            color: #e74c3c;
-            border: 1px solid #e74c3c;
-            display: block;
-        }
-        .back-home {
-            text-align: center;
-            margin-top: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
-        /* إخفاء زر البحث */
-        .nav-buttons {
-            display: none !important;
+        .auth-footer a {
+            color: var(--accent-color);
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
         }
-        
-        .search-container {
-            display: none !important;
+
+        .auth-footer a:hover {
+            color: #00b8d4;
+        }
+
+        .auth-toggle {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .form-hidden {
+            display: none;
+        }
+
+        .theme-toggle-auth {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 1rem;
+            }
+
+            .auth-card {
+                padding: 1.5rem;
+            }
+
+            .auth-title {
+                font-size: 1.5rem;
+            }
+
+            .auth-logo {
+                font-size: 2.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <button id="drawerToggle" class="btn btn-outline">
-            <i class="fas fa-bars"></i>
-        </button>
-        
-        <!-- شعار الموقع -->
-        <a href="index.html" class="logo">
-            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img">
-            <span class="logo-text">جديد المانجا</span>
-        </a>
-        
-        <div class="header-actions">
-            <a href="index.html" class="btn btn-outline">
-                <i class="fas fa-home"></i>
-                الرئيسية
-            </a>
-        </div>
-        
-        <!-- تم إزالة زر البحث -->
-    </header>
+    <!-- Theme Toggle -->
+    <button class="icon-btn theme-toggle-auth" id="theme-toggle-auth" title="تبديل المظهر">
+        <i class="fas fa-moon"></i>
+    </button>
 
-    <!-- Drawer -->
-    <div class="drawer">
-        <div class="drawer-header">
-            <h2 class="drawer-title">القائمة</h2>
-            <button class="drawer-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div id="userInfo" class="user-info hidden">
-            <img src="" alt="صورة المستخدم" class="user-avatar">
-            <div class="user-details">
-                <div class="user-name">مستخدم</div>
-                <div class="user-email">user@example.com</div>
+    <!-- Auth Container -->
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Header -->
+            <div class="auth-header">
+                <div class="auth-logo">📖</div>
+                <h1 class="auth-title" id="auth-title">تسجيل الدخول</h1>
+                <p class="auth-subtitle" id="auth-subtitle">أدخل بيانات حسابك للمتابعة</p>
             </div>
-        </div>
-        
-        <ul class="drawer-menu">
-            <li class="drawer-menu-item">
-                <a href="index.html" class="drawer-menu-link">
-                    <i class="fas fa-home"></i>
-                    <span>الصفحة الرئيسية</span>
-                </a>
-            </li>
-            <!-- تم إزالة أزرار الفلاتر -->
-            <li class="drawer-menu-item">
-                <a href="notifications.html" class="drawer-menu-link" id="notificationsDrawerBtn">
-                    <i class="fas fa-bell"></i>
-                    <span>الإشعارات</span>
-                </a>
-            </li>
-        </ul>
-        
-        <!-- قسم الثيمات -->
-        <div class="theme-selector">
-            <span>المظهر:</span>
-            <div class="theme-options">
-                <div class="theme-option active" data-theme="dark">
-                    <i class="fas fa-moon"></i>
-                    <span>أسود</span>
-                </div>
-                <div class="theme-option" data-theme="blue">
-                    <i class="fas fa-palette"></i>
-                    <span>أزرق</span>
-                </div>
-            </div>
-        </div>
-        
-        <button id="logoutBtn" class="btn btn-outline hidden">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>تسجيل الخروج</span>
-        </button>
-    </div>
-    <div class="drawer-overlay"></div>
 
-    <!-- Main Content -->
-    <div class="container">
-        <div class="auth-container">
-            <div class="auth-card">
-                <div class="auth-header">
-                    <div class="auth-logo">جديد المانجا</div>
-                    <h1 class="auth-title" id="authTitle">تسجيل الدخول</h1>
-                    <p class="auth-subtitle" id="authSubtitle">أدخل بياناتك للوصول إلى حسابك</p>
+            <!-- Login Form -->
+            <form class="auth-form" id="login-form">
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input 
+                        type="email" 
+                        class="form-input" 
+                        id="login-email"
+                        placeholder="your@email.com"
+                        required
+                    >
+                    <div class="error-message" id="login-email-error"></div>
                 </div>
-                
-                <div class="auth-tabs">
-                    <button class="auth-tab active" data-tab="login">تسجيل الدخول</button>
-                    <button class="auth-tab" data-tab="register">إنشاء حساب</button>
+
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور</label>
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="login-password"
+                        placeholder="••••••••"
+                        required
+                    >
+                    <div class="error-message" id="login-password-error"></div>
                 </div>
-                
-                <!-- نموذج تسجيل الدخول -->
-                <form class="auth-form active" id="loginForm">
-                    <div class="form-group">
-                        <label class="form-label" for="loginEmail">البريد الإلكتروني</label>
-                        <input type="email" class="form-input" id="loginEmail" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="loginPassword">كلمة السر</label>
-                        <input type="password" class="form-input" id="loginPassword" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <button type="submit" class="auth-btn" id="loginBtn">
-                            <span class="btn-text">تسجيل الدخول</span>
-                            <div class="spinner" style="display: none;"></div>
-                        </button>
-                    </div>
-                    
-                    <div class="auth-footer">
-                        <a href="#" class="auth-link" id="forgotPasswordLink">نسيت كلمة السر؟</a>
-                    </div>
-                </form>
-                
-                <!-- نموذج إنشاء حساب -->
-                <form class="auth-form" id="registerForm">
-                    <div class="form-group">
-                        <label class="form-label" for="registerName">الاسم الكامل</label>
-                        <input type="text" class="form-input" id="registerName" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="registerEmail">البريد الإلكتروني</label>
-                        <input type="email" class="form-input" id="registerEmail" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="registerPassword">كلمة السر</label>
-                        <input type="password" class="form-input" id="registerPassword" required minlength="6">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label class="form-label" for="registerConfirmPassword">تأكيد كلمة السر</label>
-                        <input type="password" class="form-input" id="registerConfirmPassword" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <button type="submit" class="auth-btn" id="registerBtn">
-                            <span class="btn-text">إنشاء حساب</span>
-                            <div class="spinner" style="display: none;"></div>
-                        </button>
-                    </div>
-                </form>
-                
-                <!-- نموذج إعادة تعيين كلمة السر -->
-                <form class="auth-form" id="resetPasswordForm">
-                    <div class="form-group">
-                        <label class="form-label" for="resetEmail">البريد الإلكتروني</label>
-                        <input type="email" class="form-input" id="resetEmail" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <button type="submit" class="auth-btn" id="resetPasswordBtn">
-                            <span class="btn-text">إرسال رابط التعيين</span>
-                            <div class="spinner" style="display: none;"></div>
-                        </button>
-                    </div>
-                    
-                    <div class="auth-footer">
-                        <a href="#" class="auth-link back-to-login">العودة لتسجيل الدخول</a>
-                    </div>
-                </form>
-                
-                <!-- رسائل النموذج -->
-                <div class="form-message" id="formMessage"></div>
-            </div>
-            
-            <div class="back-home">
-                <a href="index.html" class="btn btn-outline">
-                    <i class="fas fa-arrow-right"></i>
-                    العودة للصفحة الرئيسية
-                </a>
+
+                <button type="submit" class="submit-btn" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> دخول
+                </button>
+            </form>
+
+            <!-- Register Form (Hidden) -->
+            <form class="auth-form form-hidden" id="register-form">
+                <div class="form-group">
+                    <label class="form-label">اسم المستخدم</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="register-username"
+                        placeholder="اختر اسم مستخدم"
+                        required
+                    >
+                    <div class="error-message" id="register-username-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">البريد الإلكتروني</label>
+                    <input 
+                        type="email" 
+                        class="form-input" 
+                        id="register-email"
+                        placeholder="your@email.com"
+                        required
+                    >
+                    <div class="error-message" id="register-email-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">كلمة المرور</label>
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="register-password"
+                        placeholder="••••••••"
+                        required
+                    >
+                    <div class="error-message" id="register-password-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">تأكيد كلمة المرور</label>
+                    <input 
+                        type="password" 
+                        class="form-input" 
+                        id="register-confirm-password"
+                        placeholder="••••••••"
+                        required
+                    >
+                    <div class="error-message" id="register-confirm-error"></div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="register-btn">
+                    <i class="fas fa-user-plus"></i> إنشاء حساب
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <p id="auth-footer-text">
+                    ليس لديك حساب؟ 
+                    <a onclick="toggleAuthMode()">إنشاء حساب جديد</a>
+                </p>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
     <script src="js/firebase-config.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/auth-page.js"></script>
-
+    <script src="js/main.js"></script>
     <script>
-        // كود التحكم في الدراور - مشابه لـ app.js
-        document.addEventListener('DOMContentLoaded', function() {
-            const drawer = document.querySelector('.drawer');
-            const drawerToggle = document.getElementById('drawerToggle');
-            const drawerClose = document.querySelector('.drawer-close');
-            const drawerOverlay = document.querySelector('.drawer-overlay');
+        let isLoginMode = true;
 
-            function openDrawer() {
-                drawer.classList.add('open');
-                drawerOverlay.classList.add('open');
-                document.body.style.overflow = 'hidden';
+        // Check if user is already logged in
+        FirebaseAuth.onAuthStateChanged(user => {
+            if (user) {
+                navigateTo('index.html');
+            }
+        });
+
+        // Toggle between login and register
+        function toggleAuthMode() {
+            isLoginMode = !isLoginMode;
+
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const authTitle = document.getElementById('auth-title');
+            const authSubtitle = document.getElementById('auth-subtitle');
+            const authFooterText = document.getElementById('auth-footer-text');
+
+            if (isLoginMode) {
+                loginForm.classList.remove('form-hidden');
+                registerForm.classList.add('form-hidden');
+                authTitle.textContent = 'تسجيل الدخول';
+                authSubtitle.textContent = 'أدخل بيانات حسابك للمتابعة';
+                authFooterText.innerHTML = 'ليس لديك حساب؟ <a onclick="toggleAuthMode()">إنشاء حساب جديد</a>';
+            } else {
+                loginForm.classList.add('form-hidden');
+                registerForm.classList.remove('form-hidden');
+                authTitle.textContent = 'إنشاء حساب جديد';
+                authSubtitle.textContent = 'انضم إلينا واستمتع بقراءة المانجا';
+                authFooterText.innerHTML = 'لديك حساب بالفعل؟ <a onclick="toggleAuthMode()">تسجيل الدخول</a>';
             }
 
-            function closeDrawer() {
-                drawer.classList.remove('open');
-                drawerOverlay.classList.remove('open');
-                document.body.style.overflow = '';
+            clearErrors();
+        }
+
+        // Login
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+
+            if (!email || !password) {
+                showError('login-email-error', 'البريد الإلكتروني وكلمة المرور مطلوبة');
+                return;
             }
 
-            if (drawerToggle) {
-                drawerToggle.addEventListener('click', openDrawer);
+            const loginBtn = document.getElementById('login-btn');
+            loginBtn.disabled = true;
+            loginBtn.classList.add('loading');
+            loginBtn.innerHTML = '<div class="spinner-small"></div> جاري التحميل...';
+
+            try {
+                await FirebaseAuth.login(email, password);
+                navigateTo('index.html');
+            } catch (error) {
+                showError('login-email-error', getErrorMessage(error.code));
+                loginBtn.disabled = false;
+                loginBtn.classList.remove('loading');
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> دخول';
+            }
+        });
+
+        // Register
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearErrors();
+
+            const username = document.getElementById('register-username').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value.trim();
+            const confirmPassword = document.getElementById('register-confirm-password').value.trim();
+
+            // Validation
+            if (!username || username.length < 3) {
+                showError('register-username-error', 'اسم المستخدم يجب أن يكون 3 أحرف على الأقل');
+                return;
             }
 
-            if (drawerClose) {
-                drawerClose.addEventListener('click', closeDrawer);
+            if (!email) {
+                showError('register-email-error', 'البريد الإلكتروني مطلوب');
+                return;
             }
 
-            if (drawerOverlay) {
-                drawerOverlay.addEventListener('click', closeDrawer);
+            if (!password || password.length < 6) {
+                showError('register-password-error', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+                return;
             }
 
-            // إغلاق الدراور عند النقر على رابط
-            const drawerLinks = document.querySelectorAll('.drawer-menu-link');
-            drawerLinks.forEach(link => {
-                link.addEventListener('click', closeDrawer);
-            });
+            if (password !== confirmPassword) {
+                showError('register-confirm-error', 'كلمات المرور غير متطابقة');
+                return;
+            }
 
-            // كود التحكم في التبويبات
-            const tabs = document.querySelectorAll('.auth-tab');
-            const forms = document.querySelectorAll('.auth-form');
-            const title = document.getElementById('authTitle');
-            const subtitle = document.getElementById('authSubtitle');
-            const forgotLink = document.getElementById('forgotPasswordLink');
-            const backToLoginLinks = document.querySelectorAll('.back-to-login');
+            const registerBtn = document.getElementById('register-btn');
+            registerBtn.disabled = true;
+            registerBtn.classList.add('loading');
+            registerBtn.innerHTML = '<div class="spinner-small"></div> جاري الإنشاء...';
 
-            function activate(tab) {
-                tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-                forms.forEach(f => f.classList.toggle('active', f.id === (tab === 'login' ? 'loginForm' : tab === 'register' ? 'registerForm' : 'resetPasswordForm')));
-                if (tab === 'login') {
-                    title.textContent = 'تسجيل الدخول';
-                    subtitle.textContent = 'أدخل بياناتك للوصول إلى حسابك';
-                } else if (tab === 'register') {
-                    title.textContent = 'إنشاء حساب';
-                    subtitle.textContent = 'أنشئ حسابك للاستمتاع بالمزايا الكاملة';
-                } else {
-                    title.textContent = 'إعادة تعيين كلمة السر';
-                    subtitle.textContent = 'أدخل بريدك الإلكتروني لإرسال رابط التعيين';
+            try {
+                await FirebaseAuth.register(email, password, username);
+                alert('تم إنشاء الحساب بنجاح! سيتم تحويلك الآن.');
+                navigateTo('index.html');
+            } catch (error) {
+                showError('register-email-error', getErrorMessage(error.code));
+                registerBtn.disabled = false;
+                registerBtn.classList.remove('loading');
+                registerBtn.innerHTML = '<i class="fas fa-user-plus"></i> إنشاء حساب';
+            }
+        });
+
+        // Error handling
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+
+                // Find input field and add error class
+                const inputId = elementId.replace('-error', '');
+                const inputElement = document.getElementById(inputId);
+                if (inputElement) {
+                    inputElement.classList.add('error');
                 }
             }
+        }
 
-            tabs.forEach(t => t.addEventListener('click', () => activate(t.dataset.tab)));
-            if (forgotLink) forgotLink.addEventListener('click', (e) => { e.preventDefault(); activate('reset'); });
-            backToLoginLinks.forEach(l => l.addEventListener('click', (e) => { e.preventDefault(); activate('login'); }));
-
-            // إدارة الثيمات
-            const themeOptions = document.querySelectorAll('.theme-option');
-            themeOptions.forEach(option => {
-                option.addEventListener('click', function() {
-                    const theme = this.getAttribute('data-theme');
-                    changeTheme(theme);
-                });
+        function clearErrors() {
+            const errorElements = document.querySelectorAll('.error-message');
+            errorElements.forEach(el => {
+                el.textContent = '';
+                el.classList.remove('show');
             });
 
-            function changeTheme(theme) {
-                document.documentElement.setAttribute('data-theme', theme);
-                localStorage.setItem('theme', theme);
-                
-                themeOptions.forEach(option => {
-                    if (option.getAttribute('data-theme') === theme) {
-                        option.classList.add('active');
-                    } else {
-                        option.classList.remove('active');
-                    }
-                });
-            }
+            const inputElements = document.querySelectorAll('.form-input');
+            inputElements.forEach(el => {
+                el.classList.remove('error');
+            });
+        }
 
-            // تحميل الثيم المحفوظ
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            changeTheme(savedTheme);
+        function getErrorMessage(code) {
+            const messages = {
+                'auth/email-already-in-use': 'البريد الإلكتروني مستخدم بالفعل',
+                'auth/invalid-email': 'البريد الإلكتروني غير صحيح',
+                'auth/weak-password': 'كلمة المرور ضعيفة جداً',
+                'auth/user-not-found': 'المستخدم غير موجود',
+                'auth/wrong-password': 'كلمة المرور غير صحيحة',
+                'auth/too-many-login-attempts': 'محاولات دخول كثيرة جداً، حاول لاحقاً',
+                'auth/operation-not-allowed': 'العملية غير مسموحة',
+                'auth/network-request-failed': 'خطأ في الاتصال بالإنترنت'
+            };
+
+            return messages[code] || 'حدث خطأ ما. يرجى المحاولة لاحقاً.';
+        }
+
+        // Theme toggle
+        document.getElementById('theme-toggle-auth').addEventListener('click', () => {
+            const themeManager = new ThemeManager();
+            themeManager.toggleTheme();
         });
     </script>
 </body>

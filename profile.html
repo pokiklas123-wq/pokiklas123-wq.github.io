@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ملفي الشخصي</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .profile-header {
+            background-color: var(--secondary-dark);
+            border-bottom: 1px solid var(--border-dark);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .profile-header-icons {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .profile-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .profile-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border-dark);
+        }
+
+        .profile-tab {
+            padding: 1rem 1.5rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            position: relative;
+            bottom: -1px;
+        }
+
+        .profile-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .profile-tab.active {
+            color: var(--accent-color);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .notifications-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .notification-item {
+            background-color: var(--secondary-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background-color: var(--tertiary-dark);
+            border-color: var(--accent-color);
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-text {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .notification-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .notification-action-btn:hover {
+            color: var(--accent-color);
+        }
+
+        .notifications-toolbar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .toolbar-btn {
+            padding: 0.5rem 1rem;
+            background-color: var(--tertiary-dark);
+            border: 1px solid var(--border-dark);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .toolbar-btn:hover {
+            background-color: var(--accent-dark);
+            border-color: var(--accent-color);
+        }
+
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .profile-info-card {
+            background-color: var(--secondary-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-color), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: var(--primary-dark);
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+        }
+
+        .profile-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-email {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-dark);
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-color);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.25rem;
+        }
+
+        .logout-btn {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--accent-secondary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 1.5rem;
+        }
+
+        .logout-btn:hover {
+            background-color: #ff4081;
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .profile-container {
+                padding: 0 1rem;
+            }
+
+            .profile-tabs {
+                gap: 0.5rem;
+                overflow-x: auto;
+            }
+
+            .profile-tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+                white-space: nowrap;
+            }
+
+            .favorites-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .profile-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="profile-header">
+        <button class="icon-btn" onclick="navigateTo('index.html')" title="الصفحة الرئيسية">
+            <i class="fas fa-home"></i>
+        </button>
+        <span style="flex: 1; text-align: center; font-weight: 600;">ملفي الشخصي</span>
+        <div class="profile-header-icons">
+            <button class="icon-btn" id="theme-toggle-profile" title="تبديل المظهر">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="icon-btn" onclick="logout()" title="تسجيل الخروج">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="profile-container">
+        <!-- Tabs -->
+        <div class="profile-tabs">
+            <button class="profile-tab active" onclick="switchTab('notifications')">
+                <i class="fas fa-bell"></i> الإشعارات
+            </button>
+            <button class="profile-tab" onclick="switchTab('profile')">
+                <i class="fas fa-user"></i> الملف الشخصي
+            </button>
+            <button class="profile-tab" onclick="switchTab('favorites')">
+                <i class="fas fa-heart"></i> المفضلة
+            </button>
+        </div>
+
+        <!-- Notifications Tab -->
+        <div class="tab-content active" id="notifications-tab">
+            <div class="notifications-toolbar">
+                <button class="toolbar-btn" onclick="markAllAsRead()">
+                    <i class="fas fa-check-double"></i> تعين كمقروء
+                </button>
+                <button class="toolbar-btn" onclick="clearAllNotifications()">
+                    <i class="fas fa-trash"></i> حذف الكل
+                </button>
+            </div>
+            <div class="notifications-list" id="notifications-list">
+                <p style="text-align: center; color: var(--text-secondary); padding: 2rem;">جاري تحميل الإشعارات...</p>
+            </div>
+        </div>
+
+        <!-- Profile Tab -->
+        <div class="tab-content" id="profile-tab">
+            <div class="profile-info-card">
+                <div class="profile-avatar" id="profile-avatar">U</div>
+                <div class="profile-name" id="profile-name">جاري التحميل...</div>
+                <div class="profile-email" id="profile-email">جاري التحميل...</div>
+
+                <div class="profile-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="stat-favorites">0</div>
+                        <div class="stat-label">المفضلة</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="stat-read">0</div>
+                        <div class="stat-label">فصول مقروءة</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="stat-comments">0</div>
+                        <div class="stat-label">تعليقات</div>
+                    </div>
+                </div>
+
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+                </button>
+            </div>
+        </div>
+
+        <!-- Favorites Tab -->
+        <div class="tab-content" id="favorites-tab">
+            <div class="favorites-grid" id="favorites-grid">
+                <p style="text-align: center; color: var(--text-secondary); padding: 2rem; grid-column: 1 / -1;">جاري تحميل المفضلة...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        let currentUser = null;
+
+        // Switch tab
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.profile-tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            event.target.closest('.profile-tab').classList.add('active');
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+
+            if (tabName === 'favorites') {
+                loadFavorites();
+            } else if (tabName === 'notifications') {
+                loadNotifications();
+            }
+        }
+
+        // Load notifications
+        function loadNotifications() {
+            if (!currentUser) return;
+
+            FirebaseDatabase.getNotifications(currentUser.uid).then(notifications => {
+                displayNotifications(notifications);
+            }).catch(error => {
+                console.error('Error loading notifications:', error);
+                showNotificationsError('خطأ في تحميل الإشعارات');
+            });
+        }
+
+        // Display notifications
+        function displayNotifications(notifications) {
+            const list = document.getElementById('notifications-list');
+            list.innerHTML = '';
+
+            if (!notifications || notifications.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🔔</div><p>لا توجد إشعارات</p></div>';
+                return;
+            }
+
+            notifications.forEach(notification => {
+                const item = document.createElement('div');
+                item.className = 'notification-item';
+                if (!notification.read) {
+                    item.style.borderLeft = '4px solid var(--accent-color)';
+                }
+                item.innerHTML = `
+                    <div class="notification-content">
+                        <div class="notification-text">${notification.text}</div>
+                        <div class="notification-time">${formatTimestamp(notification.timestamp)}</div>
+                    </div>
+                    <div class="notification-actions">
+                        <button class="notification-action-btn" onclick="deleteNotification('${notification.id}')" title="حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // Show notifications error
+        function showNotificationsError(message) {
+            const list = document.getElementById('notifications-list');
+            list.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--accent-secondary);">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">❌</div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Delete notification
+        function deleteNotification(notificationId) {
+            if (currentUser) {
+                FirebaseDatabase.deleteNotification(currentUser.uid, notificationId).then(() => {
+                    loadNotifications();
+                    showNotification('تم حذف الإشعار');
+                }).catch(error => {
+                    console.error('Error deleting notification:', error);
+                    alert('خطأ في حذف الإشعار');
+                });
+            }
+        }
+
+        // Mark all as read
+        function markAllAsRead() {
+            if (currentUser) {
+                FirebaseDatabase.markAllNotificationsAsRead(currentUser.uid).then(() => {
+                    loadNotifications();
+                    showNotification('تم تعين جميع الإشعارات كمقروء');
+                }).catch(error => {
+                    console.error('Error marking all as read:', error);
+                    alert('خطأ في تعين الإشعارات كمقروء');
+                });
+            }
+        }
+
+        // Clear all notifications
+        function clearAllNotifications() {
+            if (confirm('هل تريد حذف جميع الإشعارات؟')) {
+                if (currentUser) {
+                    FirebaseDatabase.clearAllNotifications(currentUser.uid).then(() => {
+                        loadNotifications();
+                        showNotification('تم حذف جميع الإشعارات');
+                    }).catch(error => {
+                        console.error('Error clearing notifications:', error);
+                        alert('خطأ في حذف الإشعارات');
+                    });
+                }
+            }
+        }
+
+        // Load favorites - REAL DATA
+        function loadFavorites() {
+            if (!currentUser) return;
+
+            FirebaseDatabase.getFavorites(currentUser.uid).then(favoriteIds => {
+                if (!favoriteIds || favoriteIds.length === 0) {
+                    document.getElementById('favorites-grid').innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><div class="empty-state-icon">❤️</div><p>لم تضف أي مانجا للمفضلة بعد</p></div>';
+                    return;
+                }
+
+                FirebaseDatabase.getMangaList().then(allManga => {
+                    const favorites = allManga.filter(m => favoriteIds.includes(m.id));
+                    displayFavorites(favorites);
+                }).catch(error => {
+                    console.error('Error loading manga list:', error);
+                    showFavoritesError('خطأ في تحميل المفضلة');
+                });
+            }).catch(error => {
+                console.error('Error loading favorites:', error);
+                showFavoritesError('خطأ في تحميل المفضلة');
+            });
+        }
+
+        // Display favorites
+        function displayFavorites(favorites) {
+            const grid = document.getElementById('favorites-grid');
+            grid.innerHTML = '';
+
+            favorites.forEach(manga => {
+                const card = document.createElement('div');
+                card.className = 'manga-card';
+                card.onclick = () => navigateTo(`manga_information.html?id=${manga.id}`);
+                card.innerHTML = `
+                    <div class="manga-card-image">
+                        ${manga.thumbnail ? `<img src="${manga.thumbnail}" alt="${manga.name}" onerror="this.parentNode.innerHTML='📚';">` : '📚'}
+                    </div>
+                    <div class="manga-card-content">
+                        <div>
+                            <div class="manga-title">${manga.name || 'بدون عنوان'}</div>
+                            <div class="manga-chapter">${manga.chapters ? Object.keys(manga.chapters).length : 0} فصول</div>
+                        </div>
+                        <div class="manga-stats">
+                            <div class="stat-item">
+                                <i class="fas fa-star"></i> ${manga.rating || '0'}
+                            </div>
+                            <div class="stat-item">
+                                <i class="fas fa-eye"></i> ${formatNumber(manga.views || 0)}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Show favorites error
+        function showFavoritesError(message) {
+            const grid = document.getElementById('favorites-grid');
+            grid.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: var(--accent-secondary); grid-column: 1 / -1;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">❌</div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        // Load profile info
+        function loadProfileInfo() {
+            if (!currentUser) return;
+
+            FirebaseDatabase.getUserData(currentUser.uid).then(userData => {
+                if (userData) {
+                    document.getElementById('profile-name').textContent = userData.username || 'مستخدم';
+                    document.getElementById('profile-email').textContent = currentUser.email;
+                    document.getElementById('profile-avatar').textContent = (userData.username || 'U').charAt(0).toUpperCase();
+
+                    // Load stats
+                    FirebaseDatabase.getFavorites(currentUser.uid).then(fav => {
+                        document.getElementById('stat-favorites').textContent = (fav || []).length;
+                    });
+
+                    FirebaseDatabase.getReadChapters(currentUser.uid).then(read => {
+                        document.getElementById('stat-read').textContent = (read || []).length;
+                    });
+
+                    // تعيين عدد التعليقات (يمكن إضافته لاحقاً)
+                    document.getElementById('stat-comments').textContent = '0';
+                }
+            }).catch(error => {
+                console.error('Error loading user data:', error);
+            });
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('هل تريد تسجيل الخروج؟')) {
+                FirebaseAuth.logout().then(() => {
+                    navigateTo('index.html');
+                }).catch(error => {
+                    console.error('Error logging out:', error);
+                    alert('خطأ في تسجيل الخروج');
+                });
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('theme-toggle-profile');
+            if (themeToggle) {
+                themeToggle.addEventListener('click', () => {
+                    const themeManager = new ThemeManager();
+                    themeManager.toggleTheme();
+                });
+            }
+
+            FirebaseAuth.onAuthStateChanged(user => {
+                if (user) {
+                    currentUser = user;
+                    loadProfileInfo();
+                    loadNotifications();
+                } else {
+                    navigateTo('auth.html');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
