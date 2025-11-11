@@ -1,353 +1,389 @@
+
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manga Reader - منصة قراءة المانجا</title>
-    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- SEO الأساسي -->
+    <title>جديد المانجا | أفضل موقع لقراءة المانجا العربية مجاناً</title>
+    <meta name="description" content="موقع جديد المانجا - منصة متكاملة لقراءة المانجا العربية والمانغا المترجمة مجاناً. آلاف السلاسل المصورة بأفضل جودة وترجمة عربية.">
+    <meta name="keywords" content="مانجا, مانغا, قصص مصورة, مانجا عربية, قراءة مانجا, manga arabic, مانجا اونلاين, مانغا مترجمة, موقع مانجا, قراءة مانجا مجانا">
+    <meta name="author" content="جديد المانجا">
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="جديد المانجا | أفضل موقع لقراءة المانجا العربية مجاناً">
+    <meta property="og:description" content="اقرأ أفضل المانجا العربية والمانغا المترجمة مجاناً على موقع جديد المانجا. آلاف السلاسل المصورة بتحديث يومي.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://manga-arabic.web.app/">
+    <meta property="og:image" content="https://manga-arabic.web.app/images/og-image.jpg">
+    <meta property="og:site_name" content="جديد المانجا">
+    <meta property="og:locale" content="ar_AR">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="جديد المانجا | أفضل موقع لقراءة المانجا العربية">
+    <meta name="twitter:description" content="اقرأ المانجا العربية مجاناً على موقع جديد المانجا. آلاف السلاسل المصورة بأفضل جودة.">
+    <meta name="twitter:image" content="https://manga-arabic.web.app/images/og-image.jpg">
+    
+    <!-- Canonical URL مصحح -->
+    <link rel="canonical" href="https://manga-arabic.web.app/">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "جديد المانجا",
+        "url": "https://manga-arabic.web.app/",
+        "description": "موقع متكامل لقراءة المانجا العربية والمانغا المترجمة مجاناً",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://manga-arabic.web.app/?search={search_term_string}",
+            "query-input": "required name=search_term_string"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "جديد المانجا",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://manga-arabic.web.app/images/logo.png"
+            }
+        }
+    }
+    </script>
+    
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="T4xp7a3-2XFFTweKUoIDPPE-OvQgtwpbGrHT-8nYCds" />
+    
+    <!-- الروابط -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <style>
+     
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <div class="header-left">
-            <button class="icon-btn" id="search-toggle" title="بحث">
+    <header>
+        <button id="drawerToggle" class="btn btn-outline">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <!-- شعار الموقع -->
+        <a href="index.html" class="logo">
+            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img" width="40" height="40">
+            <span class="logo-text">جديد المانجا</span>
+        </a>
+        
+        <div class="header-actions">
+            <button id="notificationsBtn" class="btn btn-outline" style="position: relative;">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge hidden">0</span>
+            </button>
+            <button id="authBtn" class="btn">
+                <i class="fas fa-user"></i>
+                <span>تسجيل الدخول</span>
+            </button>
+        </div>
+        
+        <div class="nav-buttons">
+            <button class="btn search-btn search-icon-mobile" id="searchBtn">
                 <i class="fas fa-search"></i>
-            </button>
-            <button class="icon-btn" id="login-toggle" title="تسجيل الدخول">
-                <i class="fas fa-sign-in-alt"></i>
-            </button>
-        </div>
-
-        <div class="header-center">
-            <span>📖 Manga Reader</span>
-        </div>
-
-        <div class="header-right">
-            <button class="icon-btn" id="theme-toggle" title="تبديل المظهر">
-                <i class="fas fa-moon"></i>
-            </button>
-            <button class="icon-btn" id="drawer-toggle" title="القائمة">
-                <i class="fas fa-bars"></i>
             </button>
         </div>
     </header>
 
-    <!-- Search Container -->
-    <div class="search-container" id="search-container">
-        <input 
-            type="text" 
-            class="search-input" 
-            id="search-input" 
-            placeholder="ابحث عن المانجا..."
-        >
-        <button class="icon-btn">
+    <!-- شريط البحث -->
+    <div class="search-container" id="searchContainer">
+        <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن مانجا...">
+        <button class="search-close" id="closeSearch">
             <i class="fas fa-times"></i>
         </button>
     </div>
 
-    <!-- Filter Container -->
-    <div class="filter-container">
-        <button class="filter-btn active" onclick="filterManga('latest')">الأحدث</button>
-        <button class="filter-btn" onclick="filterManga('oldest')">الأقدم</button>
-        <button class="filter-btn" onclick="filterManga('views')">الأكثر مشاهدة</button>
-        <button class="filter-btn" onclick="filterManga('rating')">الأعلى تقييماً</button>
-    </div>
-
-    <!-- Manga Grid -->
-    <div class="manga-grid" id="manga-grid">
-        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-secondary);">
-            <div class="spinner"></div>
-            <p style="margin-top: 1rem;">جاري تحميل المانجا...</p>
-        </div>
-    </div>
-
-    <!-- Drawer -->
-    <div class="drawer" id="drawer">
+    <div class="drawer">
         <div class="drawer-header">
-            <div class="avatar" id="user-avatar">U</div>
-            <div class="drawer-user-info">
-                <div class="drawer-username" id="drawer-username">Guest</div>
-                <div class="drawer-email" id="drawer-email">guest@example.com</div>
+            <h2 class="drawer-title">القائمة</h2>
+            <button class="drawer-close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div id="userInfo" class="user-info hidden">
+            <img src="" alt="صورة المستخدم" class="user-avatar">
+            <div class="user-details">
+                <div class="user-name">جاري التحميل...</div>
+                <div class="user-email">جاري التحميل...</div>
             </div>
         </div>
-
-        <div class="drawer-menu">
-            <div class="drawer-menu-item" onclick="navigateTo('profile.html')">
-                <i class="fas fa-user"></i> ملفي الشخصي
-            </div>
-        </div>
-
-        <div class="drawer-section">
-            <div class="drawer-section-title">المظهر</div>
+        
+        <ul class="drawer-menu">
+            <li class="drawer-menu-item">
+                <a href="index.html" class="drawer-menu-link">
+                    <i class="fas fa-home"></i>
+                    <span>الصفحة الرئيسية</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link" data-filter="popular">
+                    <i class="fas fa-fire"></i>
+                    <span>الأكثر مشاهدة</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link" data-filter="rating">
+                    <i class="fas fa-star"></i>
+                    <span>الأعلى تقييماً</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="#" class="drawer-menu-link" data-filter="latest">
+                    <i class="fas fa-history"></i>
+                    <span>الأحدث</span>
+                </a>
+            </li>
+            <li class="drawer-menu-item">
+                <a href="notifications.html" class="drawer-menu-link" id="notificationsDrawerBtn">
+                    <i class="fas fa-bell"></i>
+                    <span>الإشعارات</span>
+                </a>
+            </li>
+        </ul>
+        
+        <!-- قسم الثيمات المعدل -->
+        <div class="theme-selector">
+            <span>المظهر:</span>
             <div class="theme-options">
-                <button class="theme-option active" id="dark-theme-option">
-                    <i class="fas fa-moon"></i> الوضع الأسود
-                </button>
-                <button class="theme-option" id="blue-theme-option">
-                    <i class="fas fa-water"></i> الوضع الأزرق الداكن
-                </button>
+                <div class="theme-option theme-btn active" data-theme="dark">
+                    <i class="fas fa-moon"></i>
+                    <span>أسود</span>
+                </div>
+                <div class="theme-option theme-btn" data-theme="blue">
+                    <i class="fas fa-palette"></i>
+                    <span>أزرق</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="theme-selector" style="display: none;">
+            <span>المظهر</span>
+            <div class="theme-option active" data-theme="light">فاتح</div>
+            <div class="theme-option" data-theme="dark">مظلم</div>
+            <div class="theme-option" data-theme="blue">أزرق</div>
+        </div>
+        
+        <button id="logoutBtn" class="btn btn-outline hidden">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>تسجيل الخروج</span>
+        </button>
+    </div>
+    <div class="drawer-overlay"></div>
+    
+    <!-- هاته oldest و latest لا تلمسه لئنه في القاعدة بلمقلوب -->
+    
+    <div class="container">
+        <!-- الفلاتر وشبكة المانجا أولاً -->
+        <div class="filters">
+            <button class="filter-btn active" data-filter="latest">الأحدث</button>
+            <button class="filter-btn" data-filter="popular">الأكثر مشاهدة</button>
+            <button class="filter-btn" data-filter="rating">الأعلى تقييماً</button>
+            <button class="filter-btn" data-filter="oldest">الأقدم</button>
+        </div>
+        
+        <div class="manga-grid" id="mangaGrid">
+            <!-- بداية: البطاقات الوهمية التي ستظهر أثناء التحميل -->
+            <!-- سيتم استبدال هذا المحتوى بالكامل عبر JavaScript بعد جلب البيانات -->
+            <div class="manga-card-skeleton">
+                <div class="skeleton-image shimmer-bg"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text title shimmer-bg"></div>
+                    <div class="skeleton-text meta shimmer-bg"></div>
+                </div>
+            </div>
+            <div class="manga-card-skeleton">
+                <div class="skeleton-image shimmer-bg"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text title shimmer-bg"></div>
+                    <div class="skeleton-text meta shimmer-bg"></div>
+                </div>
+            </div>
+            <div class="manga-card-skeleton">
+                <div class="skeleton-image shimmer-bg"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text title shimmer-bg"></div>
+                    <div class="skeleton-text meta shimmer-bg"></div>
+                </div>
+            </div>
+            <div class="manga-card-skeleton">
+                <div class="skeleton-image shimmer-bg"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text title shimmer-bg"></div>
+                    <div class="skeleton-text meta shimmer-bg"></div>
+                </div>
+            </div>
+            <div class="manga-card-skeleton">
+                <div class="skeleton-image shimmer-bg"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text title shimmer-bg"></div>
+                    <div class="skeleton-text meta shimmer-bg"></div>
+                </div>
+            </div>
+            <div class="manga-card-skeleton">
+                <div class="skeleton-image shimmer-bg"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text title shimmer-bg"></div>
+                    <div class="skeleton-text meta shimmer-bg"></div>
+                </div>
+            </div>
+            <div class="manga-card-skeleton">
+                <div class="skeleton-image shimmer-bg"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text title shimmer-bg"></div>
+                    <div class="skeleton-text meta shimmer-bg"></div>
+                </div>
+            </div>
+            <div class="manga-card-skeleton">
+                <div class="skeleton-image shimmer-bg"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text title shimmer-bg"></div>
+                    <div class="skeleton-text meta shimmer-bg"></div>
+                </div>
+            </div>
+            <div class="manga-card-skeleton">
+                <div class="skeleton-image shimmer-bg"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text title shimmer-bg"></div>
+                    <div class="skeleton-text meta shimmer-bg"></div>
+                </div>
+            </div>
+            <div class="manga-card-skeleton">
+                <div class="skeleton-image shimmer-bg"></div>
+                <div class="skeleton-content">
+                    <div class="skeleton-text title shimmer-bg"></div>
+                    <div class="skeleton-text meta shimmer-bg"></div>
+                </div>
+            </div>
+            <!-- نهاية: البطاقات الوهمية -->
+        </div>
+        
+        <div class="loading-indicator" id="loadingIndicator" style="display: none;">
+            <span class="loading-text">جاري التحميل</span>
+            <div class="loading-progress">
+                <div class="spinner"></div>
             </div>
         </div>
 
-        <div class="drawer-section">
-            <div class="drawer-section-title">قنوات الاتصال</div>
-            <div class="drawer-menu">
-                <div class="drawer-menu-item">
-                    <i class="fas fa-envelope"></i> البريد الإلكتروني
+        <!-- قسم محتوى SEO في الأسفل -->
+        <div class="seo-content-section">
+            <div class="seo-text-content">
+                <h1>موقع جديد المانجا - أفضل منصة لقراءة المانجا العربية مجاناً</h1>
+                
+                <p>مرحبا بكم في <strong>موقع جديد المانجا</strong>، المنصة العربية المتكاملة لقراءة <strong>المانجا والمانغا</strong> مجاناً. نقدم لكم آلاف السلاسل المصورة المترجمة إلى العربية بأفضل جودة ممكنة وتحديثات يومية.</p>
+                
+                <h2>لماذا تختار موقع جديد المانجا؟</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <i class="fas fa-book-open"></i>
+                        <h3>أكبر مكتبة مانجا عربية</h3>
+                        <p>آلاف السلاسل المتنوعة من مختلف الأنواع والتصنيفات</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fab fa-free-code-camp"></i>
+                        <h3>مجاني بالكامل</h3>
+                        <p>لا توجد رسوم اشتراك أو مدفوعات، كل المحتوى مجاني</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-mobile-alt"></i>
+                        <h3>متوافق مع جميع الأجهزة</h3>
+                        <p>تجربة قراءة سلسة على الجوال، التابلت، والكمبيوتر</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-sync"></i>
+                        <h3>تحديثات يومية</h3>
+                        <p>فصول جديدة تضاف باستمرار مع أحدث الإصدارات</p>
+                    </div>
                 </div>
-                <div class="drawer-menu-item">
-                    <i class="fas fa-phone"></i> الاتصال
-                </div>
-                <div class="drawer-menu-item">
-                    <i class="fas fa-question-circle"></i> الاستفسار
+                
+                <h2>أنواع المانجا المتاحة</h2>
+                <ul class="manga-types-list">
+                    <li>📚 <strong>مانجا أكشن ومغامرات</strong> - قصص مليئة بالإثارة والتشويق</li>
+                    <li>💕 <strong>مانجا رومانسية ودراما</strong> - حكايات عاطفية مؤثرة</li>
+                    <li>😄 <strong>مانجا كوميدية وترفيهية</strong> - مواقف مضحكة ومسلية</li>
+                    <li>🔮 <strong>مانجا خيال علمي وفانتازيا</strong> - عوالم خيالية ساحرة</li>
+                    <li>⚽ <strong>مانجا رياضية وحياتية</strong> - قصص واقعية ملهمة</li>
+                </ul>
+                
+                <h2>كيفية استخدام الموقع</h2>
+                <ol class="usage-steps">
+                    <li>تصفح المكتبة الغنية من الصفحة الرئيسية</li>
+                    <li>استخدم خاصية البحث المتقدمة للعثور على مانجا محددة</li>
+                    <li>اختر المانجا المفضلة لديك من بين آلاف السلاسل</li>
+                    <li>ابدأ قراءة الفصول المتاحة مجاناً وبأفضل جودة</li>
+                </ol>
+                
+                <div class="cta-section">
+                    <h3>ابدأ رحلة قراءة المانجا الآن!</h3>
+                    <p>انضم إلى آلاف القراء الذين يستمتعون بقراءة المانجا العربية على موقعنا. اكتشف عالماً من القصص المصورة المثيرة.</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Overlay -->
-    <div class="overlay" id="overlay"></div>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>جديد المانجا</h3>
+                <p>أفضل موقع لقراءة المانجا العربية. استمتع بأفضل القصص المصورة من مختلف الأنواع.</p>
+            </div>
+            <div class="footer-section">
+                <h3>روابط سريعة</h3>
+                <ul class="footer-links">
+                    <li><a href="index.html">الصفحة الرئيسية</a></li>
+                    <li><a href="#">المانجا الجديدة</a></li>
+                    <li><a href="#">الأكثر مشاهدة</a></li>
+                    <li><a href="#">الأعلى تقييماً</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>الدعم</h3>
+                <ul class="footer-links">
+                    <li><a href="https://wa.me/2130562622999">اتصل بنا WhatsApp</a></li>
+                    <li><a href="#">الأسئلة الشائعة</a></li>
+                    <li><a href="#">سياسة الخصوصية</a></li>
+                    <li><a href="#">شروط الاستخدام</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2024 جديد المانجا. جميع الحقوق محفوظة.
+        </div>
+    </footer>
 
-    <!-- Scripts - IMPORTANT: Correct Order -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js"></script>
-    
-    <!-- Load Firebase Config FIRST -->
+    <!-- السكريبتات -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+
     <script src="js/firebase-config.js"></script>
-    
-    <!-- Then load main.js -->
-    <script src="js/main.js"></script>
-    
-    <!-- Finally load page-specific scripts -->
-   <script>
-    let allMangaData = [];
-
-    // Test if FirebaseDatabase is available
-    function testFirebaseDatabase() {
-        console.log('🧪 Testing FirebaseDatabase...');
-        
-        if (typeof FirebaseDatabase === 'undefined') {
-            console.error('❌ FirebaseDatabase is not defined!');
-            showEmptyState('خطأ في التهيئة', '❌', 'FirebaseDatabase غير متاح. تحقق من Console للمزيد من المعلومات.');
-            return false;
-        }
-        
-        console.log('✅ FirebaseDatabase is available!');
-        return true;
-    }
-
-    // Load manga data from Firebase - UPDATED FOR REAL STRUCTURE
-    async function loadMangaCards() {
-        const grid = document.getElementById('manga-grid');
-        
-        // Test Firebase first
-        if (!testFirebaseDatabase()) {
-            return;
-        }
-
-        grid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-secondary);">
-                <div class="spinner"></div>
-                <p style="margin-top: 1rem;">جاري تحميل المانجا...</p>
-            </div>
-        `;
-
-        try {
-            console.log('🔄 جاري تحميل بيانات المانجا من Firebase...');
-            const mangaList = await FirebaseDatabase.getMangaList();
-            
-            if (mangaList && mangaList.length > 0) {
-                console.log(`✅ تم تحميل ${mangaList.length} مانجا`);
-                allMangaData = mangaList;
-                displayMangaCards(mangaList);
-            } else {
-                console.warn('⚠️ لا توجد بيانات مانجا في قاعدة البيانات');
-                showEmptyState('لا توجد مانجا متاحة حالياً', '📚', 'قاعدة البيانات فارغة أو هيكل البيانات مختلف.');
-            }
-        } catch (error) {
-            console.error('❌ خطأ في تحميل المانجا:', error);
-            showEmptyState('خطأ في تحميل البيانات', '❌', `خطأ: ${error.message}`);
-        }
-    }
-
-    function displayMangaCards(mangaList) {
-        const grid = document.getElementById('manga-grid');
-        grid.innerHTML = '';
-
-        if (!mangaList || mangaList.length === 0) {
-            showEmptyState('لا توجد مانجا', '📚', 'لم يتم العثور على أي مانجا في قاعدة البيانات.');
-            return;
-        }
-
-        mangaList.forEach(manga => {
-            const card = document.createElement('div');
-            card.className = 'manga-card';
-            card.onclick = () => navigateTo(`manga_information.html?id=${manga.id}`);
-            
-            // Calculate chapters count from real data structure
-            const chaptersCount = manga.chapters ? Object.keys(manga.chapters).length : 0;
-            
-            card.innerHTML = `
-                <div class="manga-card-image">
-                    ${manga.thumbnail && manga.thumbnail.startsWith('http') ? 
-                        `<img src="${manga.thumbnail}" alt="${manga.name}" 
-                              onerror="this.onerror=null; this.style.display='none'; this.parentNode.innerHTML='📚';"
-                              loading="lazy">` : 
-                        '📚'
-                    }
-                </div>
-                <div class="manga-card-content">
-                    <div>
-                        <div class="manga-title">${manga.name || 'بدون عنوان'}</div>
-                        <div class="manga-chapter">${chaptersCount} فصول</div>
-                    </div>
-                    <div class="manga-stats">
-                        <div class="stat-item">
-                            <i class="fas fa-star"></i> ${manga.rating || '0.0'}
-                        </div>
-                        <div class="stat-item">
-                            <i class="fas fa-eye"></i> ${formatNumber(manga.views || 0)}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            grid.appendChild(card);
-        });
-    }
-
-    function showEmptyState(title, icon, message) {
-        const grid = document.getElementById('manga-grid');
-        grid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: var(--text-secondary);">
-                <div style="font-size: 4rem; margin-bottom: 1rem;">${icon}</div>
-                <h3 style="margin-bottom: 1rem; color: var(--text-primary);">${title}</h3>
-                <p>${message}</p>
-                <button onclick="checkDataStructure()" class="btn btn-primary" style="margin-top: 1rem;">فحص هيكل البيانات</button>
-                <button onclick="loadMangaCards()" class="btn btn-secondary" style="margin-top: 0.5rem;">إعادة المحاولة</button>
-            </div>
-        `;
-    }
-
-    async function checkDataStructure() {
-        try {
-            const structure = await FirebaseDebug.checkDataStructure();
-            alert(`📊 هيكل البيانات:\n\n- المانجا: ${structure.manga}\n- المستخدمين: ${structure.users}\n- التعليقات: ${structure.comments}`);
-        } catch (error) {
-            alert('❌ خطأ في فحص هيكل البيانات: ' + error.message);
-        }
-    }
-
-    // Filter manga based on real data
-    function filterManga(type) {
-        if (!allMangaData || allMangaData.length === 0) {
-            showNotification('لا توجد بيانات للفلترة', 'error');
-            return;
-        }
-
-        const buttons = document.querySelectorAll('.filter-btn');
-        buttons.forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-
-        let sorted = [...allMangaData];
-
-        switch(type) {
-            case 'latest':
-                sorted.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
-                break;
-            case 'oldest':
-                sorted.sort((a, b) => (a.updatedAt || 0) - (b.updatedAt || 0));
-                break;
-            case 'views':
-                sorted.sort((a, b) => (b.views || 0) - (a.views || 0));
-                break;
-            case 'rating':
-                sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-                break;
-        }
-
-        displayMangaCards(sorted);
-    }
-
-    // Search functionality - real data search
-    document.getElementById('search-input').addEventListener('keyup', (e) => {
-        const query = e.target.value.toLowerCase();
-        
-        if (!query) {
-            displayMangaCards(allMangaData);
-            return;
-        }
-
-        const filtered = allMangaData.filter(manga => 
-            (manga.name || '').toLowerCase().includes(query) ||
-            (manga.description || '').toLowerCase().includes(query)
-        );
-
-        if (filtered.length === 0) {
-            showEmptyState('لا توجد نتائج', '🔍', `لا توجد نتائج للبحث عن: "${query}"`);
-        } else {
-            displayMangaCards(filtered);
-        }
-    });
-
-    // Update user info in drawer - UPDATED FOR REAL STRUCTURE
-    function updateDrawerUserInfo() {
-        const user = FirebaseAuth.getCurrentUser();
-        if (user) {
-            FirebaseDatabase.getUserData(user.uid).then(userData => {
-                if (userData) {
-                    const displayName = userData.username || 'مستخدم';
-                    const email = userData.email || user.email;
-                    
-                    document.getElementById('drawer-username').textContent = displayName;
-                    document.getElementById('drawer-email').textContent = email;
-                    document.getElementById('user-avatar').textContent = displayName.charAt(0).toUpperCase();
-                }
-            }).catch(error => {
-                console.error('Error loading user data:', error);
-            });
-        }
-    }
-
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('🚀 بدء تحميل التطبيق...');
-        
-        // Load data after a short delay to ensure Firebase is initialized
-        setTimeout(() => {
-            testFirebaseDatabase();
-            loadMangaCards();
-            updateDrawerUserInfo();
-        }, 1000);
-
-        // Check login status
-        FirebaseAuth.onAuthStateChanged(user => {
-            if (user) {
-                document.getElementById('login-toggle').innerHTML = '<i class="fas fa-sign-out-alt"></i>';
-                document.getElementById('login-toggle').onclick = () => {
-                    if (confirm('هل تريد تسجيل الخروج؟')) {
-                        FirebaseAuth.logout().then(() => {
-                            window.location.href = 'index.html';
-                        });
-                    }
-                };
-                document.getElementById('login-toggle').title = 'تسجيل الخروج';
-                updateDrawerUserInfo();
-            } else {
-                document.getElementById('login-toggle').innerHTML = '<i class="fas fa-sign-in-alt"></i>';
-                document.getElementById('login-toggle').onclick = () => {
-                    navigateTo('auth.html');
-                };
-                document.getElementById('login-toggle').title = 'تسجيل الدخول';
-                document.getElementById('drawer-username').textContent = 'Guest';
-                document.getElementById('drawer-email').textContent = 'guest@example.com';
-                document.getElementById('user-avatar').textContent = 'G';
-            }
-        });
-    });
-</script>
+    <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/manga.js"></script>
+    <script src="js/comments.js"></script>
+    <script src="js/ratings.js"></script>
+    <script src="js/navigation.js"></script>
+    <!-- تم حذف ui.js المكرر -->
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/notifications.js"></script>
 </body>
 </html>
