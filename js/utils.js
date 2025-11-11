@@ -1,32 +1,47 @@
 // js/utils.js
 class Utils {
     static formatTimestamp(timestamp) {
-        if (!timestamp) return '';
-        
-        try {
-            const date = new Date(parseInt(timestamp));
-            const now = new Date();
-            const diffMs = now - date;
-            const diffSecs = Math.floor(diffMs / 1000);
-            const diffMins = Math.floor(diffSecs / 60);
-            const diffHours = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHours / 24);
-            
-            if (diffSecs < 60) {
-                return 'الآن';
-            } else if (diffMins < 60) {
-                return `منذ ${diffMins} دقيقة`;
-            } else if (diffHours < 24) {
-                return `منذ ${diffHours} ساعة`;
-            } else if (diffDays < 7) {
-                return `منذ ${diffDays} يوم`;
-            } else {
-                return date.toLocaleDateString('ar-EG');
-            }
-        } catch (error) {
-            return 'تاريخ غير معروف';
+    if (!timestamp) return '';
+
+    try {
+        const date = new Date(parseInt(timestamp));
+        const now = new Date();
+        const diffMs = now - date;
+        const diffSecs = Math.floor(diffMs / 1000);
+        const diffMins = Math.floor(diffSecs / 60);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        if (diffSecs < 60) {
+            return 'الآن';
+        } else if (diffMins < 60) {
+            return diffMins === 1
+                ? 'قبل دقيقة'
+                : diffMins < 10
+                    ? `قبل ${diffMins} دقائق`
+                    : `قبل ${diffMins} دقيقة`;
+        } else if (diffHours < 24) {
+            return diffHours === 1
+                ? 'قبل ساعة'
+                : diffHours < 10
+                    ? `قبل ${diffHours} ساعات`
+                    : `قبل ${diffHours} ساعة`;
+        } else if (diffDays < 7) {
+            return diffDays === 1
+                ? 'قبل يوم'
+                : `قبل ${diffDays} أيام`;
+        } else {
+            return date.toLocaleDateString('ar-EG', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
         }
+    } catch (error) {
+        return 'تاريخ غير معروف';
     }
+}
+
     
     static showMessage(message, type = 'info') {
         // إزالة أي رسائل سابقة

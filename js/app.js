@@ -11,19 +11,12 @@ class MangaApp {
     
     async init() {
         try {
-        
-               
-        this.initializeFirebase();
-        
-        this.loadMangaData();
-        
-        Utils.loadTheme();
-        
-        this.setupUI();
-        
+            await this.initializeFirebase();
+            await this.loadMangaData();
+            Utils.loadTheme();
+            this.setupUI();
+            
             if (document.readyState === 'loading') {
-            
-            
                 document.addEventListener('DOMContentLoaded', () => this.setupApp());
             } else {
                 await this.setupApp();
@@ -32,24 +25,6 @@ class MangaApp {
             console.error('App initialization error:', error);
             this.showError('خطأ في تهيئة التطبيق');
         }
-    }
-    
-    async setupApp() {
-    
-      //  await 
-        
-        //await 
- 
-        
-        this.setupAuth();
-        
-        
-        
-        this.setupNotifications();
-        
-        this.isInitialized = true;
-        
-        console.log('✅ التطبيق جاهز للاستخدام');
     }
     
     async initializeFirebase() {
@@ -71,6 +46,13 @@ class MangaApp {
             console.error('❌ خطأ في تهيئة Firebase:', error);
             throw error;
         }
+    }
+    
+    async setupApp() {
+        this.setupAuth();
+        this.setupNotifications();
+        this.isInitialized = true;
+        console.log('✅ التطبيق جاهز للاستخدام');
     }
     
     setupUI() {
@@ -107,7 +89,7 @@ class MangaApp {
         const themeOptions = document.querySelectorAll('.theme-option');
         themeOptions.forEach(option => {
             option.addEventListener('click', (e) => {
-                const theme = e.target.getAttribute('data-theme');
+                const theme = e.target.closest('.theme-option').getAttribute('data-theme');
                 this.changeTheme(theme);
             });
         });
@@ -143,7 +125,6 @@ class MangaApp {
     }
     
     setupNotifications() {
-        // Initialize NotificationsManager
         this.notificationsManager = new NotificationsManager(this);
     }
 
@@ -188,14 +169,61 @@ class MangaApp {
     }
     
     setupAuth() {
-        this.auth.onAuthStateChanged((user) => {
-            this.currentUser = user;
-            this.updateAuthUI(user);
+    this.auth.onAuthStateChanged(async (user) => {
+        console.log('🔐 تغيير حالة المصادقة:', user ? `مسجل الدخول: ${user.uid}` : 'غير مسجل');
+        
+        this.currentUser = user;
+        
+        // تحديث الواجهة فوراً
+        this.updateAuthUI(user);
+        
+        if (user) {
+            // حفظ وتحميل البيانات مع معالجة محسنة
+            await this.saveUserData(user);
+            await this.loadUserData(user.uid);
             
-            if (user) {
-                this.loadUserData(user.uid);
+            // محاولة إضافية بعد ثانيتين للتأكد
+            setTimeout(async () => {
+                console.log('🔄 إعادة تحميل البيانات للتأكد...');
+                await this.loadUserData(user.uid);
+            }, 2000);
+
+            // محاولة ثالثة بعد 5 ثوانٍ
+            setTimeout(async () => {
+                console.log('🔄 محاولة أخيرة لتحميل البيانات...');
+                await this.loadUserData(user.uid);
+            }, 5000);
+        }
+    });
+}
+    
+    async saveUserData(user) {
+        try {
+            const snapshot = await this.db.ref('users/' + user.uid).once('value');
+            
+            if (!snapshot.exists()) {
+                const userData = {
+                    uid: user.uid,
+                    email: user.email,
+                    displayName: user.displayName || 'مستخدم',
+                    createdAt: Date.now(),
+                    lastLogin: Date.now(),
+                    profile: {
+                        avatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&background=4ECDC4&color=fff&size=150`,
+                        bio: ''
+                    }
+                };
+                
+                await this.db.ref('users/' + user.uid).set(userData);
+                console.log('✅ تم حفظ بيانات المستخدم في Firebase');
+            } else {
+                await this.db.ref('users/' + user.uid).update({
+                    lastLogin: Date.now()
+                });
             }
-        });
+        } catch (error) {
+            console.error('❌ خطأ في حفظ بيانات المستخدم:', error);
+        }
     }
     
     updateAuthUI(user) {
@@ -206,10 +234,10 @@ class MangaApp {
         if (user) {
             if (authBtn) authBtn.classList.add('hidden');
             if (logoutBtn) logoutBtn.classList.remove('hidden');
-            if (userInfo) userInfo.classList.remove('hidden');
-            
-            // تحديث معلومات المستخدم في الدراور
-            this.updateUserInfo(user);
+            if (userInfo) {
+                userInfo.classList.remove('hidden');
+                this.updateUserInfo(user);
+            }
         } else {
             if (authBtn) authBtn.classList.remove('hidden');
             if (logoutBtn) logoutBtn.classList.add('hidden');
@@ -218,44 +246,166 @@ class MangaApp {
     }
     
     async updateUserInfo(user) {
-        try {
-            const snapshot = await this.db.ref('users/' + user.uid).once('value');
-            const userData = snapshot.val();
+    try {
+        console.log('🔄 جاري تحميل بيانات المستخدم...', user.uid);
+        
+        // الطريقة 1: جلب البيانات مباشرة من المسار الصحيح
+        const snapshot = await this.db.ref('users/' + user.uid).once('value');
+        let userData = snapshot.val();
+        
+        console.log('📊 بيانات المستخدم من Firebase:', userData);
+
+        // إذا لم توجد البيانات في المسار الرئيسي، ابحث في جميع المستخدمين
+        if (!userData) {
+            console.log('🔍 البحث عن البيانات في جميع المستخدمين...');
+            const allUsersSnapshot = await this.db.ref('users').once('value');
+            const allUsers = allUsersSnapshot.val();
             
-            const userName = document.querySelector('.user-name');
-            const userEmail = document.querySelector('.user-email');
-            const userAvatar = document.querySelector('.user-avatar');
-            
-            if (userName) userName.textContent = userData?.displayName || user.displayName || 'مستخدم';
-            if (userEmail) userEmail.textContent = userData?.email || user.email || '';
-            if (userAvatar) {
-                userAvatar.src = userData?.profile?.avatar || 
-                    user.photoURL || 
-                    `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&background=4ECDC4&color=fff&size=150`;
+            if (allUsers) {
+                // البحث عن المستخدم بواسطة البريد الإلكتروني
+                for (const [key, userDataItem] of Object.entries(allUsers)) {
+                    if (userDataItem && userDataItem.email === user.email) {
+                        console.log('✅ تم العثور على البيانات باستخدام البريد:', key);
+                        userData = userDataItem;
+                        
+                        // نقل البيانات إلى المسار الصحيح
+                        await this.db.ref('users/' + user.uid).set(userData);
+                        await this.db.ref('users/' + key).remove();
+                        break;
+                    }
+                }
             }
-        } catch (error) {
-            console.error('Error loading user data:', error);
         }
+
+        // البحث عن عناصر الـ DOM في جميع الصفحات
+        const userNames = document.querySelectorAll('.user-name');
+        const userEmails = document.querySelectorAll('.user-email');
+        const userAvatars = document.querySelectorAll('.user-avatar');
+        
+        const displayName = userData?.displayName || user.displayName || 'مستخدم';
+        const email = userData?.email || user.email || '';
+        const avatarUrl = userData?.profile?.avatar || 
+                         user.photoURL || 
+                         `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4ECDC4&color=fff&size=150`;
+
+        console.log('🎯 البيانات النهائية:', { displayName, email, avatarUrl });
+
+        // تحديث جميع عناصر الاسم في الصفحة
+        userNames.forEach(userName => {
+            if (userName) {
+                userName.textContent = displayName;
+                console.log('✅ تم تحديث الاسم في العنصر:', userName);
+            }
+        });
+
+        // تحديث جميع عناصر البريد في الصفحة
+        userEmails.forEach(userEmail => {
+            if (userEmail) {
+                userEmail.textContent = email;
+                console.log('✅ تم تحديث البريد في العنصر:', userEmail);
+            }
+        });
+
+        // تحديث جميع عناصر الصورة في الصفحة
+        userAvatars.forEach(userAvatar => {
+            if (userAvatar) {
+                userAvatar.src = avatarUrl;
+                userAvatar.alt = displayName;
+                userAvatar.onerror = function() {
+                    this.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=4ECDC4&color=fff&size=150`;
+                };
+                console.log('✅ تم تحديث الصورة في العنصر:', userAvatar);
+            }
+        });
+
+        // إظهار عنصر userInfo إذا كان مخفياً
+        const userInfoElements = document.querySelectorAll('.user-info');
+        userInfoElements.forEach(userInfo => {
+            if (userInfo) {
+                userInfo.classList.remove('hidden');
+                console.log('✅ تم إظهار عنصر userInfo');
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ خطأ في تحميل بيانات المستخدم:', error);
     }
+}
     
     async loadUserData(userId) {
-        try {
-            const snapshot = await this.db.ref('users/' + userId).once('value');
-            const userData = snapshot.val();
+    try {
+        console.log('🔍 جاري تحميل بيانات المستخدم من Firebase...', userId);
+        
+        const snapshot = await this.db.ref('users/' + userId).once('value');
+        const userData = snapshot.val();
+        
+        console.log('📋 البيانات المحملة:', userData);
+        
+        if (userData) {
+            await this.updateUserInfo({ 
+                uid: userId, 
+                ...userData
+            });
+        } else {
+            console.log('⚠️ لا توجد بيانات للمستخدم في المسار الرئيسي');
             
-            if (userData) {
-                this.updateUserInfo({ uid: userId, ...userData });
+            // إذا لم توجد البيانات، ابحث عنها باستخدام البريد الإلكتروني
+            const user = this.auth.currentUser;
+            if (user && user.email) {
+                console.log('🔍 البحث عن البيانات باستخدام البريد الإلكتروني...');
+                const foundUser = await this.findUserDataByEmail(user);
+                if (foundUser) {
+                    console.log('✅ تم العثور على البيانات، جاري نقلها...');
+                    // نقل البيانات إلى المسار الصحيح
+                    await this.db.ref('users/' + userId).set(foundUser.userData);
+                    // حذف البيانات القديمة
+                    await this.db.ref('users/' + foundUser.userId).remove();
+                    // إعادة تحميل البيانات
+                    await this.updateUserInfo({ 
+                        uid: userId, 
+                        ...foundUser.userData
+                    });
+                }
             }
-        } catch (error) {
-            console.error('Error loading user data:', error);
         }
+    } catch (error) {
+        console.error('❌ خطأ في تحميل بيانات المستخدم:', error);
     }
+}
+// دالة مساعدة للبحث عن بيانات المستخدم في جميع السجلات
+async findUserDataByEmail(user) {
+    try {
+        console.log('🔍 البحث عن بيانات المستخدم بالبريد:', user.email);
+        
+        const allUsersSnapshot = await this.db.ref('users').once('value');
+        const allUsers = allUsersSnapshot.val();
+        
+        if (!allUsers) {
+            console.log('⚠️ لا توجد مستخدمين في قاعدة البيانات');
+            return null;
+        }
+
+        // البحث في جميع المستخدمين
+        for (const [userId, userData] of Object.entries(allUsers)) {
+            if (userData && userData.email === user.email) {
+                console.log('✅ تم العثور على المستخدم:', userId, userData);
+                return { userId, userData };
+            }
+        }
+        
+        console.log('❌ لم يتم العثور على المستخدم بالبريد:', user.email);
+        return null;
+    } catch (error) {
+        console.error('❌ خطأ في البحث عن المستخدم:', error);
+        return null;
+    }
+}
+
     
     async loadMangaData() {
         const mangaGrid = document.getElementById('mangaGrid');
         if (!mangaGrid) return;
         
-        // إظهار تأثير التحميل
         mangaGrid.innerHTML = this.createLoadingCards();
         
         try {

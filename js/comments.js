@@ -34,6 +34,33 @@ class CommentsManager {
         }
     }
 
+    async getUserData(userId) {
+        try {
+            const snapshot = await this.db.ref(`users/${userId}`).once('value');
+            const userData = snapshot.val();
+            
+            if (userData) {
+                return {
+                    displayName: userData.displayName || 'مستخدم',
+                    avatar: userData.profile?.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.displayName || 'مستخدم')}&size=150`
+                };
+            }
+            
+            const user = this.auth.currentUser;
+            return {
+                displayName: user?.displayName || 'مستخدم',
+                avatar: user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || 'مستخدم')}&size=150`
+            };
+        } catch (error) {
+            console.error('❌ خطأ في جلب بيانات المستخدم:', error);
+            const user = this.auth.currentUser;
+            return {
+                displayName: user?.displayName || 'مستخدم',
+                avatar: user?.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.displayName || 'مستخدم')}&size=150`
+            };
+        }
+    }
+
     async handleCommentSubmit(e) {
         e.preventDefault();
         
@@ -53,10 +80,12 @@ class CommentsManager {
 
         try {
             const user = this.auth.currentUser;
+            const userData = await this.getUserData(user.uid);
+            
             const newComment = {
                 userId: user.uid,
-                userName: user.displayName || 'مستخدم',
-                userAvatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&size=150`,
+                userName: userData.displayName,
+                userAvatar: userData.avatar,
                 text: commentText,
                 timestamp: Date.now(),
                 replies: {}
@@ -74,6 +103,7 @@ class CommentsManager {
     loadComments() {
         if (!this.commentsRef) return;
 
+        // العودة إلى استخدام value مع حفظ الحالة
         this.commentsRef.on('value', (snapshot) => {
             const commentsData = snapshot.val();
             this.renderComments(commentsData);
@@ -83,8 +113,11 @@ class CommentsManager {
         });
     }
 
-    renderComments(commentsData) {
+    async renderComments(commentsData) {
         if (!this.commentsContainer) return;
+        
+        // حفظ حالة الردود المفتوحة قبل التحديث
+        const openReplies = this.getOpenRepliesState();
         
         this.commentsContainer.innerHTML = '';
         
@@ -98,40 +131,72 @@ class CommentsManager {
             ...commentsData[key]
         })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
-        commentsArray.forEach(comment => {
-            const commentElement = this.createCommentElement(comment);
+        // إنشاء التعليقات
+        for (const comment of commentsArray) {
+            const enhancedComment = await this.enhanceCommentUserData(comment);
+            const commentElement = await this.createCommentElement(enhancedComment, openReplies);
             this.commentsContainer.appendChild(commentElement);
-        });
+        }
 
-        // التمرير إلى تعليق محدد إذا كان هناك hash في الرابط
-        const commentId = window.location.hash.substring(1);
-        if (commentId) {
-            const targetComment = document.getElementById(commentId);
-            if (targetComment) {
-                setTimeout(() => {
-                    targetComment.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    targetComment.classList.add('highlight');
-                }, 500);
+        // لا نحتاج لاستعادة الحالة لأننا نمررها أثناء الإنشاء
+    }
+
+    // دالة بسيطة لحفظ الحالة الحالية
+    getOpenRepliesState() {
+        const openReplies = new Set();
+        const openContainers = this.commentsContainer.querySelectorAll('.replies-container[style*="display: block"]');
+        
+        openContainers.forEach(container => {
+            const commentId = container.id.replace('replies-container-', '');
+            openReplies.add(commentId);
+        });
+        
+        return openReplies;
+    }
+
+    async enhanceCommentUserData(comment) {
+        try {
+            if ((comment.userName === 'مستخدم' || !comment.userName || comment.userName === 'undefined') && comment.userId) {
+                const userData = await this.getUserData(comment.userId);
+                return {
+                    ...comment,
+                    userName: userData.displayName,
+                    userAvatar: userData.avatar
+                };
             }
+            return comment;
+        } catch (error) {
+            console.error('Error enhancing comment data:', error);
+            return comment;
         }
     }
 
-    createCommentElement(comment) {
+    async createCommentElement(comment, openReplies = new Set()) {
         const commentEl = document.createElement('div');
         commentEl.className = 'comment';
         commentEl.id = `comment-${comment.id}`;
         
         const isOwner = this.auth.currentUser && this.auth.currentUser.uid === comment.userId;
         const timestamp = comment.timestamp ? Utils.formatTimestamp(comment.timestamp) : 'غير معروف';
+        const editedBadge = comment.edited ? '<span class="edited-badge">(تم التعديل)</span>' : '';
+
+        const repliesHTML = await this.renderReplies(comment.replies, comment.id);
+        const repliesCount = comment.replies ? Object.keys(comment.replies).length : 0;
+
+        // التحقق إذا كان هذا التعليق مفتوحاً
+        const isOpen = openReplies.has(comment.id);
+        const repliesDisplay = isOpen ? 'block' : 'none';
+        const toggleIcon = isOpen ? 'fa-chevron-up' : 'fa-chevron-down';
+        const toggleText = isOpen ? 'إخفاء' : 'عرض';
 
         commentEl.innerHTML = `
             <div class="comment-header">
                 <div class="comment-user">
                     <img src="${comment.userAvatar}" alt="${comment.userName}" class="user-avatar-small" 
                          onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(comment.userName)}&size=32'">
-                    <span class="user-name">${comment.userName}</span>
+                    <span class="user-name chapter-card-text">${comment.userName}</span>
                 </div>
-                <div class="comment-date">${timestamp}</div>
+                <div class="comment-date">${timestamp} ${editedBadge}</div>
             </div>
             <div class="comment-content">${comment.text}</div>
             <div class="comment-actions">
@@ -154,10 +219,15 @@ class CommentsManager {
                     <button type="button" class="btn btn-outline btn-sm cancel-reply" data-id="${comment.id}">إلغاء</button>
                 </div>
             </div>
-            ${this.renderRepliesToggle(comment.replies, comment.id)}
-            <div class="replies-container" id="replies-container-${comment.id}" style="display: none;">
+            ${repliesCount > 0 ? `
+                <button class="replies-toggle-btn ${isOpen ? 'active' : ''}" data-id="${comment.id}" data-count="${repliesCount}" id="replies-btn-${comment.id}">
+                    <i class="fas ${toggleIcon}"></i>
+                    ${toggleText} ${repliesCount} ${repliesCount === 1 ? 'رد' : 'ردود'}
+                </button>
+            ` : ''}
+            <div class="replies-container" id="replies-container-${comment.id}" style="display: ${repliesDisplay};">
                 <div class="replies" id="replies-${comment.id}">
-                    ${this.renderReplies(comment.replies, comment.id)}
+                    ${repliesHTML}
                 </div>
             </div>
         `;
@@ -165,21 +235,7 @@ class CommentsManager {
         return commentEl;
     }
 
-    renderRepliesToggle(replies, commentId) {
-        if (!replies) return '';
-        
-        const count = Object.keys(replies).length;
-        if (count === 0) return '';
-        
-        return `
-            <button class="replies-toggle-btn" data-id="${commentId}" data-count="${count}" id="replies-btn-${commentId}">
-                <i class="fas fa-chevron-down"></i>
-                عرض ${count} ردود
-            </button>
-        `;
-    }
-
-    renderReplies(replies, parentId) {
+    async renderReplies(replies, parentId) {
         if (!replies) return '';
         
         const repliesArray = Object.keys(replies).map(key => ({
@@ -188,34 +244,40 @@ class CommentsManager {
         })).sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
 
         let html = '';
-        repliesArray.forEach(reply => {
-            const isOwner = this.auth.currentUser && this.auth.currentUser.uid === reply.userId;
-            const timestamp = reply.timestamp ? Utils.formatTimestamp(reply.timestamp) : 'غير معروف';
+        
+        for (const reply of repliesArray) {
+            const enhancedReply = await this.enhanceCommentUserData(reply);
+            
+            const isOwner = this.auth.currentUser && this.auth.currentUser.uid === enhancedReply.userId;
+            const timestamp = enhancedReply.timestamp ? Utils.formatTimestamp(enhancedReply.timestamp) : 'غير معروف';
+            const editedBadge = enhancedReply.edited ? '<span class="edited-badge">(تم التعديل)</span>' : '';
             
             html += `
-                <div class="comment reply" id="reply-${reply.id}">
+                <div class="comment reply" id="reply-${enhancedReply.id}">
                     <div class="comment-header">
                         <div class="comment-user">
-                            <img src="${reply.userAvatar}" alt="${reply.userName}" class="user-avatar-small"
-                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(reply.userName)}&size=32'">
-                            <span class="user-name">${reply.userName}</span>
+                            <img src="${enhancedReply.userAvatar}" alt="${enhancedReply.userName}" class="user-avatar-small"
+                                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(enhancedReply.userName)}&size=32'">
+                            <span class="user-name chapter-card-text">${enhancedReply.userName}</span>
                         </div>
-                        <div class="comment-date">${timestamp}</div>
+                        <div class="comment-date">${timestamp} ${editedBadge}</div>
                     </div>
                     <div class="comment-content">
-                        ${reply.replyingTo ? `<span class="replying-to">@${reply.replyingTo}</span> ` : ''}
-                        ${reply.text}
+                        ${enhancedReply.text}
                     </div>
                     ${isOwner ? `
                         <div class="comment-actions">
-                            <button class="action-btn delete-btn delete-reply" data-parent-id="${parentId}" data-id="${reply.id}">
+                            <button class="action-btn edit-reply" data-parent-id="${parentId}" data-id="${enhancedReply.id}">
+                                <i class="fas fa-edit"></i> تعديل
+                            </button>
+                            <button class="action-btn delete-btn delete-reply" data-parent-id="${parentId}" data-id="${enhancedReply.id}">
                                 <i class="fas fa-trash"></i> حذف
                             </button>
                         </div>
                     ` : ''}
                 </div>
             `;
-        });
+        }
         
         return html;
     }
@@ -239,6 +301,8 @@ class CommentsManager {
             this.showDeleteReplyModal(parentId, commentId);
         } else if (target.classList.contains('edit-comment')) {
             this.showEditCommentModal(commentId);
+        } else if (target.classList.contains('edit-reply')) {
+            this.showEditReplyModal(parentId, commentId);
         } else if (target.classList.contains('replies-toggle-btn')) {
             this.toggleReplies(commentId);
         }
@@ -275,12 +339,13 @@ class CommentsManager {
             const parentSnapshot = await parentCommentRef.once('value');
             const parentComment = parentSnapshot.val();
 
+            const userData = await this.getUserData(user.uid);
+
             const newReply = {
                 userId: user.uid,
-                userName: user.displayName || 'مستخدم',
-                userAvatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&size=150`,
+                userName: userData.displayName,
+                userAvatar: userData.avatar,
                 text: replyText,
-                replyingTo: parentComment.userName,
                 timestamp: Date.now()
             };
 
@@ -291,13 +356,13 @@ class CommentsManager {
             this.toggleReplyForm(commentId, false);
             Utils.showMessage('تم إرسال الرد بنجاح.', 'success');
 
+            // تحديث العداد بعد إضافة الرد
+            this.updateRepliesToggle(commentId, 1);
+
             // إرسال إشعار لصاحب التعليق الأصلي
             if (parentComment.userId !== user.uid) {
                 this.sendReplyNotification(parentComment.userId, commentId, replyRef.key, newReply);
             }
-
-            // تحديث العداد بعد إضافة الرد
-            this.updateRepliesToggle(commentId, 1);
 
         } catch (error) {
             console.error('Error adding reply:', error);
@@ -311,7 +376,6 @@ class CommentsManager {
             return;
         }
 
-        // الحصول على بيانات التعليق لعرضها في الظيالوغ
         const commentRef = this.commentsRef.child(commentId);
         commentRef.once('value').then((snapshot) => {
             const comment = snapshot.val();
@@ -324,10 +388,38 @@ class CommentsManager {
                     userId: comment.userId
                 };
                 
-                // استخدام الظيالوغ من chapterPage
-                this.chapterPage.showEditModal(commentData);
+                if (this.chapterPage.mangaData) {
+                    this.chapterPage.showEditModal('comment', commentData);
+                } else {
+                    Utils.showMessage('بيانات الصفحة غير جاهزة بعد. يرجى المحاولة مرة أخرى.', 'warning');
+                }
             } else {
                 Utils.showMessage('لا يمكنك تعديل تعليقات الآخرين.', 'warning');
+            }
+        });
+    }
+
+    showEditReplyModal(parentId, replyId) {
+        if (!this.auth.currentUser) {
+            Utils.showMessage('يجب تسجيل الدخول لتعديل الرد.', 'warning');
+            return;
+        }
+
+        const replyRef = this.commentsRef.child(parentId).child('replies').child(replyId);
+        replyRef.once('value').then((snapshot) => {
+            const reply = snapshot.val();
+            if (reply && reply.userId === this.auth.currentUser.uid) {
+                const replyData = {
+                    id: replyId,
+                    text: reply.text,
+                    userName: reply.userName,
+                    timestamp: reply.timestamp,
+                    userId: reply.userId
+                };
+                
+                this.chapterPage.showEditModal('reply', replyData, { id: parentId });
+            } else {
+                Utils.showMessage('لا يمكنك تعديل ردود الآخرين.', 'warning');
             }
         });
     }
@@ -338,7 +430,6 @@ class CommentsManager {
             return;
         }
 
-        // الحصول على بيانات التعليق لعرضها في الظيالوغ
         const commentRef = this.commentsRef.child(commentId);
         commentRef.once('value').then((snapshot) => {
             const comment = snapshot.val();
@@ -351,10 +442,34 @@ class CommentsManager {
                     userId: comment.userId
                 };
                 
-                // استخدام الظيالوغ من chapterPage
                 this.chapterPage.showDeleteModal('comment', commentData);
             } else {
                 Utils.showMessage('لا يمكنك حذف تعليقات الآخرين.', 'warning');
+            }
+        });
+    }
+
+    showDeleteReplyModal(parentId, replyId) {
+        if (!this.auth.currentUser) {
+            Utils.showMessage('يجب تسجيل الدخول لحذف الرد.', 'warning');
+            return;
+        }
+
+        const replyRef = this.commentsRef.child(parentId).child('replies').child(replyId);
+        replyRef.once('value').then((snapshot) => {
+            const reply = snapshot.val();
+            if (reply && reply.userId === this.auth.currentUser.uid) {
+                const replyData = {
+                    id: replyId,
+                    text: reply.text,
+                    userName: reply.userName,
+                    timestamp: reply.timestamp,
+                    userId: reply.userId
+                };
+                
+                this.chapterPage.showDeleteModal('reply', replyData, { id: parentId });
+            } else {
+                Utils.showMessage('لا يمكنك حذف ردود الآخرين.', 'warning');
             }
         });
     }
@@ -364,11 +479,16 @@ class CommentsManager {
         if (toggleBtn) {
             let count = parseInt(toggleBtn.getAttribute('data-count')) + change;
             toggleBtn.setAttribute('data-count', count);
-            toggleBtn.innerHTML = `<i class="fas fa-chevron-down"></i> عرض ${count} ردود`;
+            
+            const container = document.getElementById(`replies-container-${commentId}`);
+            const isOpen = container && container.style.display === 'block';
+            const toggleIcon = isOpen ? 'fa-chevron-up' : 'fa-chevron-down';
+            const toggleText = isOpen ? 'إخفاء' : 'عرض';
+            
+            toggleBtn.innerHTML = `<i class="fas ${toggleIcon}"></i> ${toggleText} ${count} ${count === 1 ? 'رد' : 'ردود'}`;
             
             if (count <= 0) {
                 toggleBtn.style.display = 'none';
-                const container = document.getElementById(`replies-container-${commentId}`);
                 if (container) container.style.display = 'none';
             } else {
                 toggleBtn.style.display = 'block';
@@ -383,96 +503,39 @@ class CommentsManager {
             const isHidden = container.style.display === 'none';
             container.style.display = isHidden ? 'block' : 'none';
             
+            const count = parseInt(toggleBtn.getAttribute('data-count'));
             const icon = toggleBtn.querySelector('i');
             if (icon) {
                 icon.className = isHidden ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
             }
+            
+            toggleBtn.innerHTML = `<i class="fas ${isHidden ? 'fa-chevron-up' : 'fa-chevron-down'}"></i> ${isHidden ? 'إخفاء' : 'عرض'} ${count} ${count === 1 ? 'رد' : 'ردود'}`;
             toggleBtn.classList.toggle('active', isHidden);
         }
-    }
-
-    showDeleteReplyModal(parentId, replyId) {
-        if (!this.auth.currentUser) {
-            Utils.showMessage('يجب تسجيل الدخول لحذف الرد.', 'warning');
-            return;
-        }
-
-        // الحصول على بيانات الرد لعرضها في الظيالوغ
-        const replyRef = this.commentsRef.child(parentId).child('replies').child(replyId);
-        replyRef.once('value').then((snapshot) => {
-            const reply = snapshot.val();
-            if (reply && reply.userId === this.auth.currentUser.uid) {
-                const replyData = {
-                    id: replyId,
-                    text: reply.text,
-                    userName: reply.userName,
-                    timestamp: reply.timestamp,
-                    userId: reply.userId
-                };
-                
-                // استخدام الظيالوغ من chapterPage
-                this.chapterPage.showDeleteModal('reply', replyData, { id: parentId });
-            } else {
-                Utils.showMessage('لا يمكنك حذف ردود الآخرين.', 'warning');
-            }
-        });
     }
 
     async sendReplyNotification(parentCommentUserId, commentId, replyId, replyData) {
         try {
             const notificationRef = this.db.ref(`notifications/${parentCommentUserId}`).push();
             
+            const userData = await this.getUserData(this.auth.currentUser.uid);
+            
             const notification = {
                 type: 'reply',
                 senderId: this.auth.currentUser.uid,
-                senderName: this.auth.currentUser.displayName || 'مستخدم',
+                senderName: userData.displayName,
                 mangaId: this.mangaId,
                 chapterId: this.chapterNumber,
                 commentId: commentId,
                 replyId: replyId,
-                text: `رد ${this.auth.currentUser.displayName || 'مستخدم'} على تعليقك: "${replyData.text.substring(0, 100)}${replyData.text.length > 100 ? '...' : ''}"`,
+                text: `رد ${userData.displayName} على تعليقك: "${replyData.text.substring(0, 100)}${replyData.text.length > 100 ? '...' : ''}"`,
                 timestamp: Date.now(),
                 read: false
             };
             
             await notificationRef.set(notification);
-            console.log('تم إرسال الإشعار بنجاح إلى:', parentCommentUserId);
         } catch (error) {
             console.error('Error sending notification:', error);
-        }
-    }
-
-    // دالة جديدة لفتح الردود والتمرير تلقائياً
-    openRepliesAndScroll(commentId, replyId = null) {
-        const toggleBtn = document.getElementById(`replies-btn-${commentId}`);
-        const repliesContainer = document.getElementById(`replies-container-${commentId}`);
-        
-        if (toggleBtn && repliesContainer) {
-            // افتح الردود
-            repliesContainer.style.display = 'block';
-            toggleBtn.innerHTML = `<i class="fas fa-chevron-up"></i> إخفاء الردود`;
-            toggleBtn.classList.add('active');
-            
-            // إذا في رد معين نبي ننسكرول ليه
-            if (replyId) {
-                setTimeout(() => {
-                    const targetReply = document.getElementById(`reply-${replyId}`);
-                    if (targetReply) {
-                        targetReply.scrollIntoView({ 
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                        
-                        // إضافة highlight مؤقت
-                        targetReply.style.backgroundColor = '#f0f8ff';
-                        targetReply.classList.add('reply-highlight');
-                        setTimeout(() => {
-                            targetReply.style.backgroundColor = '';
-                            targetReply.classList.remove('reply-highlight');
-                        }, 3000);
-                    }
-                }, 500);
-            }
         }
     }
 }

@@ -116,9 +116,7 @@ class AuthPage {
         try {
             const result = await this.auth.signInWithEmailAndPassword(email, password);
             
-            await this.db.ref('users/' + result.user.uid).update({
-                lastLogin: Date.now()
-            });
+            await this.saveOrUpdateUserData(result.user);
             
             this.showFormMessage('تم تسجيل الدخول بنجاح!', 'success');
             
@@ -151,28 +149,7 @@ class AuthPage {
                 displayName: name
             });
             
-            const userData = {
-                displayName: name,
-                email: email,
-                createdAt: Date.now(),
-                lastLogin: Date.now(),
-                profile: {
-                    avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4ECDC4&color=fff&size=150`,
-                    bio: ''
-                },
-                preferences: {
-                    emailNotifications: false,
-                    notifications: true,
-                    theme: 'light'
-                },
-                stats: {
-                    commentsCount: 0,
-                    joinedDate: new Date().toISOString(),
-                    ratingsCount: 0
-                }
-            };
-            
-            await this.db.ref('users/' + result.user.uid).set(userData);
+            await this.saveUserData(result.user, name, email);
             
             this.showFormMessage('تم إنشاء الحساب بنجاح!', 'success');
             
@@ -184,6 +161,57 @@ class AuthPage {
             this.showFormMessage(this.getAuthErrorMessage(error), 'error');
         } finally {
             this.setButtonLoading(registerBtn, false);
+        }
+    }
+    
+    async saveUserData(user, name, email) {
+    const userData = {
+        uid: user.uid,
+        displayName: name,
+        email: email,
+        createdAt: Date.now(),
+        lastLogin: Date.now(),
+        profile: {
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4ECDC4&color=fff&size=150`,
+            bio: ''
+        },
+        preferences: {
+            emailNotifications: false,
+            notifications: true,
+            theme: 'light'
+        },
+        stats: {
+            commentsCount: 0,
+            joinedDate: new Date().toISOString(),
+            ratingsCount: 0
+        }
+    };
+    
+    // استخدم set بدلاً من update للتأكد من الحفظ الكامل
+    await this.db.ref('users/' + user.uid).set(userData);
+    console.log('✅ تم حفظ بيانات المستخدم في التسجيل:', userData);
+}
+    
+    async saveOrUpdateUserData(user) {
+        const snapshot = await this.db.ref('users/' + user.uid).once('value');
+        
+        if (!snapshot.exists()) {
+            const userData = {
+                uid: user.uid,
+                displayName: user.displayName || 'مستخدم',
+                email: user.email,
+                createdAt: Date.now(),
+                lastLogin: Date.now(),
+                profile: {
+                    avatar: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'مستخدم')}&background=4ECDC4&color=fff&size=150`,
+                    bio: ''
+                }
+            };
+            await this.db.ref('users/' + user.uid).set(userData);
+        } else {
+            await this.db.ref('users/' + user.uid).update({
+                lastLogin: Date.now()
+            });
         }
     }
     
@@ -199,11 +227,11 @@ class AuthPage {
         this.setButtonLoading(resetBtn, true);
         
         try {
-            // Fix: Add ActionCodeSettings to ensure the link works correctly
             const actionCodeSettings = {
-                url: window.location.origin + '/auth.html?mode=resetPassword', // Redirect back to auth page after reset
+                url: window.location.origin + '/auth.html?mode=resetPassword',
                 handleCodeInApp: true
             };
+            
             await this.auth.sendPasswordResetEmail(email, actionCodeSettings);
             this.showFormMessage('تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني', 'success');
             
@@ -302,6 +330,7 @@ class AuthPage {
         const formMessage = document.getElementById('formMessage');
         formMessage.textContent = message;
         formMessage.className = `form-message ${type}`;
+        formMessage.style.display = 'block';
     }
     
     clearFormMessage() {

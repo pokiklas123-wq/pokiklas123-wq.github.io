@@ -51,12 +51,328 @@ class ChapterPage {
         setTimeout(() => {
             if (typeof CommentsManager !== 'undefined') {
                 this.commentsManager = new CommentsManager(this);
-                
-                // في constructor أو حيث تنشئ CommentsManager
-
-window.commentsManager = this.commentsManager; // هذا السطر الجديد
+                window.commentsManager = this.commentsManager;
             }
         }, 2000);
+    }
+    
+    // دالة جديدة لعرض نافذة التعديل
+    showEditModal(type, item, parentComment = null) {
+        // إنشاء نافذة التعديل ديناميكياً إذا لم تكن موجودة
+        let editModal = document.getElementById('editModal');
+        if (!editModal) {
+            editModal = this.createEditModal();
+        }
+        
+        const editModalTitle = document.getElementById('editModalTitle');
+        const editModalTextarea = document.getElementById('editModalTextarea');
+        const editModalInfo = document.getElementById('editModalInfo');
+        const confirmEdit = document.getElementById('confirmEdit');
+        const cancelEdit = document.getElementById('cancelEdit');
+        const closeEditModal = document.getElementById('closeEditModal');
+        
+        const isReply = type === 'reply';
+        const userName = this.truncateText(item.userName || 'مستخدم', 15);
+        
+        if (isReply) {
+            editModalTitle.textContent = 'تعديل الرد';
+            editModalInfo.innerHTML = `
+                <i class="fas fa-user"></i>
+                <strong>رد "${userName}"</strong>
+            `;
+        } else {
+            editModalTitle.textContent = 'تعديل التعليق';
+            // استخدام اسم المانجا من البيانات المحملة أو الحصول عليه من جديد
+            const mangaName = this.getMangaName();
+            editModalInfo.innerHTML = `
+                <i class="fas fa-book"></i>
+                <strong>على مانجا "${mangaName}"</strong>
+            `;
+        }
+        
+        // تعيين النص الحالي في textarea
+        editModalTextarea.value = item.text;
+        
+        // إزالة المستمعين السابقين
+        confirmEdit.replaceWith(confirmEdit.cloneNode(true));
+        cancelEdit.replaceWith(cancelEdit.cloneNode(true));
+        closeEditModal.replaceWith(closeEditModal.cloneNode(true));
+        
+        // إضافة مستمعين جدد
+        document.getElementById('confirmEdit').addEventListener('click', () => {
+            this.executeEdit(type, item, parentComment, editModalTextarea.value);
+        });
+        
+        document.getElementById('cancelEdit').addEventListener('click', () => {
+            this.hideEditModal();
+        });
+        
+        document.getElementById('closeEditModal').addEventListener('click', () => {
+            this.hideEditModal();
+        });
+        
+        // إغلاق النافذة عند النقر خارج المحتوى
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                this.hideEditModal();
+            }
+        });
+        
+        editModal.classList.remove('hidden');
+        editModal.classList.add('open');
+        document.body.style.overflow = 'hidden';
+        
+        // التركيز على textarea
+        setTimeout(() => {
+            editModalTextarea.focus();
+            editModalTextarea.select();
+        }, 300);
+    }
+
+    // دالة مساعدة للحصول على اسم المانجا
+    getMangaName() {
+        if (this.mangaData && this.mangaData.name) {
+            return this.mangaData.name;
+        }
+        
+        // إذا لم تكن البيانات محملة، نحاول الحصول عليها من localStorage أو من العنوان
+        const pageTitle = document.querySelector('.chapter-title');
+        if (pageTitle) {
+            const titleText = pageTitle.textContent;
+            const parts = titleText.split(' - الفصل ');
+            if (parts.length > 0 && parts[0] !== 'undefined') {
+                return parts[0];
+            }
+        }
+        
+        return 'غير معروف';
+    }
+    
+    createEditModal() {
+        const modalHTML = `
+            <div id="editModal" class="edit-modal hidden">
+                <div class="edit-modal-content">
+                    <div class="edit-modal-header">
+                        <h3 id="editModalTitle">تعديل التعليق</h3>
+                        <button class="edit-modal-close" id="closeEditModal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="edit-modal-body">
+                        <textarea id="editModalTextarea" class="edit-modal-textarea" placeholder="اكتب النص المعدل هنا..." rows="4"></textarea>
+                        <div class="edit-info">
+                            <div id="editModalInfo"></div>
+                        </div>
+                    </div>
+                    <div class="edit-modal-actions">
+                        <button id="confirmEdit" class="btn btn-primary">حفظ التعديلات</button>
+                        <button id="cancelEdit" class="btn btn-outline">إلغاء</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // إضافة CSS للنافذة الجديدة
+        this.addEditModalStyles();
+        
+        return document.getElementById('editModal');
+    }
+    
+    addEditModalStyles() {
+        if (document.getElementById('editModalStyles')) return;
+        
+        const styles = `
+            <style id="editModalStyles">
+                .edit-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.5);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 1001;
+                    opacity: 0;
+                    visibility: hidden;
+                    transition: all 0.3s ease;
+                    backdrop-filter: blur(5px);
+                }
+
+                .edit-modal.open {
+                    opacity: 1;
+                    visibility: visible;
+                }
+
+                .edit-modal-content {
+                    background: var(--card-bg);
+                    border-radius: var(--border-radius);
+                    width: 90%;
+                    max-width: 500px;
+                    border: 1px solid var(--border-color);
+                    box-shadow: var(--shadow);
+                    transform: translateY(-20px);
+                    transition: transform 0.3s ease;
+                }
+
+                .edit-modal.open .edit-modal-content {
+                    transform: translateY(0);
+                }
+
+                .edit-modal-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 1.5rem;
+                    border-bottom: 1px solid var(--border-color);
+                }
+
+                .edit-modal-header h3 {
+                    margin: 0;
+                    color: var(--text-color);
+                    font-size: 1.25rem;
+                }
+
+                .edit-modal-close {
+                    background: none;
+                    border: none;
+                    color: var(--text-muted);
+                    cursor: pointer;
+                    font-size: 1.25rem;
+                    padding: 0.25rem;
+                    border-radius: 4px;
+                    transition: var(--transition);
+                }
+
+                .edit-modal-close:hover {
+                    background: var(--hover-color);
+                    color: var(--text-color);
+                }
+
+                .edit-modal-body {
+                    padding: 1.5rem;
+                }
+
+                .edit-modal-textarea {
+                    width: 100%;
+                    padding: 1rem;
+                    border: 1px solid var(--border-color);
+                    border-radius: var(--border-radius);
+                    background: var(--bg-color);
+                    color: var(--text-color);
+                    resize: vertical;
+                    min-height: 120px;
+                    font-family: inherit;
+                    margin-bottom: 1rem;
+                }
+
+                .edit-modal-textarea:focus {
+                    outline: none;
+                    border-color: var(--primary-color);
+                    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
+                }
+
+                .edit-info {
+                    background: var(--bg-color);
+                    padding: 1rem;
+                    border-radius: var(--border-radius);
+                    border: 1px solid var(--border-color);
+                    font-size: 0.9rem;
+                    color: var(--text-muted);
+                }
+
+                .edit-modal-actions {
+                    display: flex;
+                    gap: 1rem;
+                    justify-content: center;
+                    padding: 1rem 1.5rem;
+                    border-top: 1px solid var(--border-color);
+                }
+
+                @media (max-width: 768px) {
+                    .edit-modal-content {
+                        width: 95%;
+                        margin: 1rem;
+                    }
+                    .edit-modal-actions {
+                        flex-direction: column;
+                    }
+                }
+            </style>
+        `;
+        
+        document.head.insertAdjacentHTML('beforeend', styles);
+    }
+    
+    hideEditModal() {
+        const editModal = document.getElementById('editModal');
+        if (editModal) {
+            editModal.classList.remove('open');
+            editModal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    }
+    
+    async executeEdit(type, item, parentComment, newText) {
+        try {
+            const user = this.auth.currentUser;
+            if (!user) {
+                Utils.showMessage('يجب تسجيل الدخول لتعديل التعليق.', 'warning');
+                return;
+            }
+            
+            // التحقق من أن المستخدم هو صاحب التعليق
+            if (item.userId !== user.uid) {
+                Utils.showMessage('لا يمكنك تعديل تعليقات الآخرين.', 'warning');
+                this.hideEditModal();
+                return;
+            }
+            
+            if (!newText.trim()) {
+                Utils.showMessage('يرجى كتابة نص للتعليق.', 'warning');
+                return;
+            }
+            
+            if (type === 'comment') {
+                await this.updateComment(item.id, newText.trim());
+            } else if (type === 'reply') {
+                await this.updateReply(parentComment.id, item.id, newText.trim());
+            }
+            
+            this.hideEditModal();
+            
+            // إعادة تحميل التعليقات
+            if (this.commentsManager) {
+                this.commentsManager.loadComments();
+            }
+            
+            Utils.showMessage('تم تعديل التعليق بنجاح.', 'success');
+            
+        } catch (error) {
+            console.error('Error editing:', error);
+            Utils.showMessage('حدث خطأ أثناء التعديل.', 'error');
+        }
+    }
+    
+    async updateComment(commentId, newText) {
+        const commentRef = this.db.ref(`comments/${this.mangaId}/${this.chapterNumber}/${commentId}`);
+        await commentRef.update({
+            text: newText,
+            edited: true,
+            editTimestamp: Date.now()
+        });
+    }
+    
+    async updateReply(commentId, replyId, newText) {
+        const replyRef = this.db.ref(`comments/${this.mangaId}/${this.chapterNumber}/${commentId}/replies/${replyId}`);
+        await replyRef.update({
+            text: newText,
+            edited: true,
+            editTimestamp: Date.now()
+        });
     }
     
     showDeleteModal(type, item, parentComment = null) {
@@ -84,9 +400,11 @@ window.commentsManager = this.commentsManager; // هذا السطر الجديد
         } else {
             deleteModalTitle.textContent = 'حذف التعليق';
             deleteModalMessage.textContent = `هل تريد حذف التعليق "${itemText}"`;
+            // استخدام اسم المانجا من البيانات المحملة
+            const mangaName = this.getMangaName();
             deleteTargetInfo.innerHTML = `
                 <i class="fas fa-book"></i>
-                <strong>من مانجا "${this.mangaData?.name || 'غير معروف'}"</strong>
+                <strong>من مانجا "${mangaName}"</strong>
             `;
         }
         
@@ -136,13 +454,13 @@ window.commentsManager = this.commentsManager; // هذا السطر الجديد
         try {
             const user = this.auth.currentUser;
             if (!user) {
-                alert('يجب تسجيل الدخول لحذف التعليق');
+                Utils.showMessage('يجب تسجيل الدخول لحذف التعليق.', 'warning');
                 return;
             }
             
             // التحقق من أن المستخدم هو صاحب التعليق
             if (item.userId !== user.uid) {
-                alert('لا يمكنك حذف تعليقات الآخرين');
+                Utils.showMessage('لا يمكنك حذف تعليقات الآخرين.', 'warning');
                 this.hideDeleteModal();
                 return;
             }
@@ -160,9 +478,11 @@ window.commentsManager = this.commentsManager; // هذا السطر الجديد
                 this.commentsManager.loadComments();
             }
             
+            Utils.showMessage('تم الحذف بنجاح.', 'success');
+            
         } catch (error) {
             console.error('Error deleting:', error);
-            alert('حدث خطأ أثناء الحذف');
+            Utils.showMessage('حدث خطأ أثناء الحذف.', 'error');
         }
     }
     
@@ -240,15 +560,50 @@ window.commentsManager = this.commentsManager; // هذا السطر الجديد
         
         const { prevChapter, nextChapter } = this.getAdjacentChapters();
         
+        // التأكد من أن mangaData.name موجود
+        const mangaName = this.mangaData && this.mangaData.name ? this.mangaData.name : 'مانجا غير معروفة';
+        
         chapterContent.innerHTML = `
             <div class="chapter-header">
-                <h1 class="chapter-title">${this.mangaData.name} - الفصل ${this.chapterNumber}</h1>
+                <h1 class="chapter-title">${mangaName}</h1>
+               
+                
+                 
+               <h2 class="chapter-card-title">
+                    الفصل ${this.chapterNumber || 0}
+                    </h2>
+                    
+                    
                 <div class="chapter-meta">
-                    <span>عدد الصور: ${this.chapterData.images?.length || 0}</span>
-                </div>
+    <div class="chapter-card">
+        <h3 class="chapter-card-title">الوصف</h3>
+        
+        <p class="chapter-card-text">
+            ${this.chapterData.chapter_description || 'لا يوجد وصف متاح.'}
+        </p>
+        
+        <h3 class="chapter-card-title">  تم النشر: ${Utils.formatTimestamp(this.mangaData.updatedAt) || 'لا يوجد وقت متاح.'}</h3>
+      
+    </div>
+</div>
+
             </div>
             
-            <div class="chapter-nav">
+        
+            
+            <div class="chapter-images" id="chapterImages">
+                ${this.chapterData.images ? 
+                    this.chapterData.images.map((img, index) => 
+                        `<img src="${img}" alt="صفحة ${index + 1}" class="chapter-image" loading="lazy">`
+                    ).join('') : 
+                    '<div class="empty-state"><p>لا توجد صور متاحة لهذا الفصل</p></div>'
+                }
+                
+            </div>
+            
+            
+            
+                <div class="chapter-nav">
                 ${prevChapter ? 
                     `<a href="chapter.html?manga=${this.mangaId}&chapter=${prevChapter}" class="btn btn-outline">
                         <i class="fas fa-arrow-right"></i>
@@ -271,14 +626,22 @@ window.commentsManager = this.commentsManager; // هذا السطر الجديد
                 }
             </div>
             
-            <div class="chapter-images" id="chapterImages">
-                ${this.chapterData.images ? 
-                    this.chapterData.images.map((img, index) => 
-                        `<img src="${img}" alt="صفحة ${index + 1}" class="chapter-image" loading="lazy">`
-                    ).join('') : 
-                    '<div class="empty-state"><p>لا توجد صور متاحة لهذا الفصل</p></div>'
-                }
-            </div>
+            <!-- الدعم -->
+            
+            <div class="chapter-meta">
+    <div class="chapter-card">
+        <h3 class="chapter-card-title">دعم العاملين علا الفصل 🌟🌟</h3>
+        
+        <a class="chapter-card-text" href="financial_support.html?id=${this.mangaData.name}>
+            ${this.mangaData.name || 'لم يتم تضمين الرابط.'}
+        </a>
+        
+        <h3 class="chapter-card-title">توجه إلى رابط الدعم</h3>
+      
+    </div>
+</div>
+            
+            
         `;
     }
     
