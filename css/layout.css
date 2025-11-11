@@ -231,6 +231,7 @@ footer {
 .user-name {
     font-weight: bold;
     margin-bottom: 0.25rem;
+    color: var(--primary-color);
 }
 
 .user-email {

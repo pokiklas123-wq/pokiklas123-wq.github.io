@@ -1,6 +1,8 @@
 /* themes.css - الثيمات والمتغيرات المحدثة */
 :root {
     /* الثيم الداكن (الإفتراضي) */
+    --bg_btn_filter: #000000;
+    --redios-slct-color: #fff234;
     --primary-color: #009688;
     --secondary-color: #1a1a1a;
     --accent-color: #009688; /* تغيير من الأحمر إلى نفس primary-color */
