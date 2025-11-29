@@ -1,389 +1,263 @@
-
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="dark">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- SEO الأساسي -->
-    <title>جديد المانجا | أفضل موقع لقراءة المانجا العربية مجاناً</title>
-    <meta name="description" content="موقع جديد المانجا - منصة متكاملة لقراءة المانجا العربية والمانغا المترجمة مجاناً. آلاف السلاسل المصورة بأفضل جودة وترجمة عربية.">
-    <meta name="keywords" content="مانجا, مانغا, قصص مصورة, مانجا عربية, قراءة مانجا, manga arabic, مانجا اونلاين, مانغا مترجمة, موقع مانجا, قراءة مانجا مجانا">
-    <meta name="author" content="جديد المانجا">
-    <meta name="robots" content="index, follow">
-    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    
-    <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="جديد المانجا | أفضل موقع لقراءة المانجا العربية مجاناً">
-    <meta property="og:description" content="اقرأ أفضل المانجا العربية والمانغا المترجمة مجاناً على موقع جديد المانجا. آلاف السلاسل المصورة بتحديث يومي.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://manga-arabic.web.app/">
-    <meta property="og:image" content="https://manga-arabic.web.app/images/og-image.jpg">
-    <meta property="og:site_name" content="جديد المانجا">
-    <meta property="og:locale" content="ar_AR">
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="جديد المانجا | أفضل موقع لقراءة المانجا العربية">
-    <meta name="twitter:description" content="اقرأ المانجا العربية مجاناً على موقع جديد المانجا. آلاف السلاسل المصورة بأفضل جودة.">
-    <meta name="twitter:image" content="https://manga-arabic.web.app/images/og-image.jpg">
-    
-    <!-- Canonical URL مصحح -->
-    <link rel="canonical" href="https://manga-arabic.web.app/">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-    
-    <!-- Structured Data for SEO -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "جديد المانجا",
-        "url": "https://manga-arabic.web.app/",
-        "description": "موقع متكامل لقراءة المانجا العربية والمانغا المترجمة مجاناً",
-        "potentialAction": {
-            "@type": "SearchAction",
-            "target": "https://manga-arabic.web.app/?search={search_term_string}",
-            "query-input": "required name=search_term_string"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "جديد المانجا",
-            "logo": {
-                "@type": "ImageObject",
-                "url": "https://manga-arabic.web.app/images/logo.png"
-            }
-        }
-    }
-    </script>
-    
-    <!-- Google Search Console Verification -->
-    <meta name="google-site-verification" content="T4xp7a3-2XFFTweKUoIDPPE-OvQgtwpbGrHT-8nYCds" />
-    
-    <!-- الروابط -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    
+    <title>مستخرج روابط يوتيوب</title>
     <style>
-     
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        .link-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+        }
+        .quality {
+            font-weight: bold;
+            color: #007cba;
+        }
+        .type {
+            color: #28a745;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <header>
-        <button id="drawerToggle" class="btn btn-outline">
-            <i class="fas fa-bars"></i>
-        </button>
-        
-        <!-- شعار الموقع -->
-        <a href="index.html" class="logo">
-            <img src="images/logo.png" alt="جديد المانجا - موقع المانجا العربية" class="logo-img" width="40" height="40">
-            <span class="logo-text">جديد المانجا</span>
-        </a>
-        
-        <div class="header-actions">
-            <button id="notificationsBtn" class="btn btn-outline" style="position: relative;">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge hidden">0</span>
-            </button>
-            <button id="authBtn" class="btn">
-                <i class="fas fa-user"></i>
-                <span>تسجيل الدخول</span>
-            </button>
-        </div>
-        
-        <div class="nav-buttons">
-            <button class="btn search-btn search-icon-mobile" id="searchBtn">
-                <i class="fas fa-search"></i>
-            </button>
-        </div>
-    </header>
-
-    <!-- شريط البحث -->
-    <div class="search-container" id="searchContainer">
-        <input type="text" class="search-input" id="searchInput" placeholder="ابحث عن مانجا...">
-        <button class="search-close" id="closeSearch">
-            <i class="fas fa-times"></i>
-        </button>
-    </div>
-
-    <div class="drawer">
-        <div class="drawer-header">
-            <h2 class="drawer-title">القائمة</h2>
-            <button class="drawer-close">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div id="userInfo" class="user-info hidden">
-            <img src="" alt="صورة المستخدم" class="user-avatar">
-            <div class="user-details">
-                <div class="user-name">جاري التحميل...</div>
-                <div class="user-email">جاري التحميل...</div>
-            </div>
-        </div>
-        
-        <ul class="drawer-menu">
-            <li class="drawer-menu-item">
-                <a href="index.html" class="drawer-menu-link">
-                    <i class="fas fa-home"></i>
-                    <span>الصفحة الرئيسية</span>
-                </a>
-            </li>
-            <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link" data-filter="popular">
-                    <i class="fas fa-fire"></i>
-                    <span>الأكثر مشاهدة</span>
-                </a>
-            </li>
-            <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link" data-filter="rating">
-                    <i class="fas fa-star"></i>
-                    <span>الأعلى تقييماً</span>
-                </a>
-            </li>
-            <li class="drawer-menu-item">
-                <a href="#" class="drawer-menu-link" data-filter="latest">
-                    <i class="fas fa-history"></i>
-                    <span>الأحدث</span>
-                </a>
-            </li>
-            <li class="drawer-menu-item">
-                <a href="notifications.html" class="drawer-menu-link" id="notificationsDrawerBtn">
-                    <i class="fas fa-bell"></i>
-                    <span>الإشعارات</span>
-                </a>
-            </li>
-        </ul>
-        
-        <!-- قسم الثيمات المعدل -->
-        <div class="theme-selector">
-            <span>المظهر:</span>
-            <div class="theme-options">
-                <div class="theme-option theme-btn active" data-theme="dark">
-                    <i class="fas fa-moon"></i>
-                    <span>أسود</span>
-                </div>
-                <div class="theme-option theme-btn" data-theme="blue">
-                    <i class="fas fa-palette"></i>
-                    <span>أزرق</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="theme-selector" style="display: none;">
-            <span>المظهر</span>
-            <div class="theme-option active" data-theme="light">فاتح</div>
-            <div class="theme-option" data-theme="dark">مظلم</div>
-            <div class="theme-option" data-theme="blue">أزرق</div>
-        </div>
-        
-        <button id="logoutBtn" class="btn btn-outline hidden">
-            <i class="fas fa-sign-out-alt"></i>
-            <span>تسجيل الخروج</span>
-        </button>
-    </div>
-    <div class="drawer-overlay"></div>
-    
-    <!-- هاته oldest و latest لا تلمسه لئنه في القاعدة بلمقلوب -->
-    
     <div class="container">
-        <!-- الفلاتر وشبكة المانجا أولاً -->
-        <div class="filters">
-            <button class="filter-btn active" data-filter="latest">الأحدث</button>
-            <button class="filter-btn" data-filter="popular">الأكثر مشاهدة</button>
-            <button class="filter-btn" data-filter="rating">الأعلى تقييماً</button>
-            <button class="filter-btn" data-filter="oldest">الأقدم</button>
-        </div>
+        <h1>🎬 مستخرج روابط يوتيوب المباشرة</h1>
         
-        <div class="manga-grid" id="mangaGrid">
-            <!-- بداية: البطاقات الوهمية التي ستظهر أثناء التحميل -->
-            <!-- سيتم استبدال هذا المحتوى بالكامل عبر JavaScript بعد جلب البيانات -->
-            <div class="manga-card-skeleton">
-                <div class="skeleton-image shimmer-bg"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-text title shimmer-bg"></div>
-                    <div class="skeleton-text meta shimmer-bg"></div>
-                </div>
-            </div>
-            <div class="manga-card-skeleton">
-                <div class="skeleton-image shimmer-bg"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-text title shimmer-bg"></div>
-                    <div class="skeleton-text meta shimmer-bg"></div>
-                </div>
-            </div>
-            <div class="manga-card-skeleton">
-                <div class="skeleton-image shimmer-bg"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-text title shimmer-bg"></div>
-                    <div class="skeleton-text meta shimmer-bg"></div>
-                </div>
-            </div>
-            <div class="manga-card-skeleton">
-                <div class="skeleton-image shimmer-bg"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-text title shimmer-bg"></div>
-                    <div class="skeleton-text meta shimmer-bg"></div>
-                </div>
-            </div>
-            <div class="manga-card-skeleton">
-                <div class="skeleton-image shimmer-bg"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-text title shimmer-bg"></div>
-                    <div class="skeleton-text meta shimmer-bg"></div>
-                </div>
-            </div>
-            <div class="manga-card-skeleton">
-                <div class="skeleton-image shimmer-bg"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-text title shimmer-bg"></div>
-                    <div class="skeleton-text meta shimmer-bg"></div>
-                </div>
-            </div>
-            <div class="manga-card-skeleton">
-                <div class="skeleton-image shimmer-bg"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-text title shimmer-bg"></div>
-                    <div class="skeleton-text meta shimmer-bg"></div>
-                </div>
-            </div>
-            <div class="manga-card-skeleton">
-                <div class="skeleton-image shimmer-bg"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-text title shimmer-bg"></div>
-                    <div class="skeleton-text meta shimmer-bg"></div>
-                </div>
-            </div>
-            <div class="manga-card-skeleton">
-                <div class="skeleton-image shimmer-bg"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-text title shimmer-bg"></div>
-                    <div class="skeleton-text meta shimmer-bg"></div>
-                </div>
-            </div>
-            <div class="manga-card-skeleton">
-                <div class="skeleton-image shimmer-bg"></div>
-                <div class="skeleton-content">
-                    <div class="skeleton-text title shimmer-bg"></div>
-                    <div class="skeleton-text meta shimmer-bg"></div>
-                </div>
-            </div>
-            <!-- نهاية: البطاقات الوهمية -->
-        </div>
-        
-        <div class="loading-indicator" id="loadingIndicator" style="display: none;">
-            <span class="loading-text">جاري التحميل</span>
-            <div class="loading-progress">
-                <div class="spinner"></div>
-            </div>
+        <div class="input-section">
+            <input type="text" id="youtubeUrl" placeholder="أدخل رابط يوتيوب هنا..." value="https://youtu.be/">
+            <button onclick="extractLinks()">استخراج الروابط</button>
         </div>
 
-        <!-- قسم محتوى SEO في الأسفل -->
-        <div class="seo-content-section">
-            <div class="seo-text-content">
-                <h1>موقع جديد المانجا - أفضل منصة لقراءة المانجا العربية مجاناً</h1>
-                
-                <p>مرحبا بكم في <strong>موقع جديد المانجا</strong>، المنصة العربية المتكاملة لقراءة <strong>المانجا والمانغا</strong> مجاناً. نقدم لكم آلاف السلاسل المصورة المترجمة إلى العربية بأفضل جودة ممكنة وتحديثات يومية.</p>
-                
-                <h2>لماذا تختار موقع جديد المانجا؟</h2>
-                <div class="features-grid">
-                    <div class="feature-item">
-                        <i class="fas fa-book-open"></i>
-                        <h3>أكبر مكتبة مانجا عربية</h3>
-                        <p>آلاف السلاسل المتنوعة من مختلف الأنواع والتصنيفات</p>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fab fa-free-code-camp"></i>
-                        <h3>مجاني بالكامل</h3>
-                        <p>لا توجد رسوم اشتراك أو مدفوعات، كل المحتوى مجاني</p>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-mobile-alt"></i>
-                        <h3>متوافق مع جميع الأجهزة</h3>
-                        <p>تجربة قراءة سلسة على الجوال، التابلت، والكمبيوتر</p>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-sync"></i>
-                        <h3>تحديثات يومية</h3>
-                        <p>فصول جديدة تضاف باستمرار مع أحدث الإصدارات</p>
-                    </div>
-                </div>
-                
-                <h2>أنواع المانجا المتاحة</h2>
-                <ul class="manga-types-list">
-                    <li>📚 <strong>مانجا أكشن ومغامرات</strong> - قصص مليئة بالإثارة والتشويق</li>
-                    <li>💕 <strong>مانجا رومانسية ودراما</strong> - حكايات عاطفية مؤثرة</li>
-                    <li>😄 <strong>مانجا كوميدية وترفيهية</strong> - مواقف مضحكة ومسلية</li>
-                    <li>🔮 <strong>مانجا خيال علمي وفانتازيا</strong> - عوالم خيالية ساحرة</li>
-                    <li>⚽ <strong>مانجا رياضية وحياتية</strong> - قصص واقعية ملهمة</li>
-                </ul>
-                
-                <h2>كيفية استخدام الموقع</h2>
-                <ol class="usage-steps">
-                    <li>تصفح المكتبة الغنية من الصفحة الرئيسية</li>
-                    <li>استخدم خاصية البحث المتقدمة للعثور على مانجا محددة</li>
-                    <li>اختر المانجا المفضلة لديك من بين آلاف السلاسل</li>
-                    <li>ابدأ قراءة الفصول المتاحة مجاناً وبأفضل جودة</li>
-                </ol>
-                
-                <div class="cta-section">
-                    <h3>ابدأ رحلة قراءة المانجا الآن!</h3>
-                    <p>انضم إلى آلاف القراء الذين يستمتعون بقراءة المانجا العربية على موقعنا. اكتشف عالماً من القصص المصورة المثيرة.</p>
-                </div>
-            </div>
+        <div class="loading" id="loading">
+            <p>جاري استخراج الروابط... ⏳</p>
+        </div>
+
+        <div class="result" id="result">
+            <h3>الروابط المستخرجة:</h3>
+            <div id="linksContainer"></div>
         </div>
     </div>
 
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>جديد المانجا</h3>
-                <p>أفضل موقع لقراءة المانجا العربية. استمتع بأفضل القصص المصورة من مختلف الأنواع.</p>
-            </div>
-            <div class="footer-section">
-                <h3>روابط سريعة</h3>
-                <ul class="footer-links">
-                    <li><a href="index.html">الصفحة الرئيسية</a></li>
-                    <li><a href="#">المانجا الجديدة</a></li>
-                    <li><a href="#">الأكثر مشاهدة</a></li>
-                    <li><a href="#">الأعلى تقييماً</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h3>الدعم</h3>
-                <ul class="footer-links">
-                    <li><a href="https://wa.me/2130562622999">اتصل بنا WhatsApp</a></li>
-                    <li><a href="#">الأسئلة الشائعة</a></li>
-                    <li><a href="#">سياسة الخصوصية</a></li>
-                    <li><a href="#">شروط الاستخدام</a></li>
-                </ul>
-            </div>
-        </div>
-        <div class="copyright">
-            &copy; 2024 جديد المانجا. جميع الحقوق محفوظة.
-        </div>
-    </footer>
+    <!-- تضمين مكتبات مطلوبة -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <script>
+        // دالة استخراج الروابط
+        async function extractLinks() {
+            const url = document.getElementById('youtubeUrl').value;
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const linksContainer = document.getElementById('linksContainer');
 
-    <!-- السكريبتات -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+            if (!url || !url.includes('youtu')) {
+                alert('يرجى إدخال رابط يوتيوب صحيح');
+                return;
+            }
 
-    <script src="js/firebase-config.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/manga.js"></script>
-    <script src="js/comments.js"></script>
-    <script src="js/ratings.js"></script>
-    <script src="js/navigation.js"></script>
-    <!-- تم حذف ui.js المكرر -->
-    <script src="js/utils.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/notifications.js"></script>
+            // إظهار التحميل
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            linksContainer.innerHTML = '';
+
+            try {
+                // استخدام API البوت الذي على Railway
+                const apiUrl = `https://web-production-4621b.up.railway.app/extract?url=${encodeURIComponent(url)}`;
+                
+                const response = await axios.get(apiUrl);
+                const data = response.data;
+
+                // إخفاء التحميل
+                loading.style.display = 'none';
+
+                if (data.error) {
+                    linksContainer.innerHTML = `<p style="color: red;">خطأ: ${data.error}</p>`;
+                    result.style.display = 'block';
+                    return;
+                }
+
+                // عرض النتائج
+                let html = `
+                    <div class="link-item" style="background: #e7f3ff;">
+                        <strong>🎬 ${data.title}</strong><br>
+                        ⏰ المدة: ${data.duration} ثانية
+                    </div>
+                `;
+
+                if (data.links && data.links.length > 0) {
+                    data.links.forEach((link, index) => {
+                        html += `
+                            <div class="link-item">
+                                <span class="quality">📊 ${link.quality}</span> | 
+                                <span class="type">🎯 ${link.type}</span> | 
+                                <span class="ext">📁 ${link.ext}</span>
+                                <br>
+                                <input type="text" value="${link.url}" readonly 
+                                       style="width: 100%; margin: 5px 0; padding: 5px; font-size: 12px;">
+                                <button onclick="copyLink('${link.url.replace(/'/g, "\\'")}')" 
+                                        style="padding: 5px 10px; font-size: 12px; width: auto;">
+                                    نسخ الرابط
+                                </button>
+                                <button onclick="testLink('${link.url.replace(/'/g, "\\'")}')" 
+                                        style="padding: 5px 10px; font-size: 12px; width: auto; background: #28a745;">
+                                    اختبار الرابط
+                                </button>
+                            </div>
+                        `;
+                    });
+                } else {
+                    html += '<p>لم يتم العثور على روابط</p>';
+                }
+
+                linksContainer.innerHTML = html;
+                result.style.display = 'block';
+
+            } catch (error) {
+                loading.style.display = 'none';
+                linksContainer.innerHTML = `
+                    <p style="color: red;">خطأ في الاتصال: ${error.message}</p>
+                    <p>جرب استخدام الـ API البديل:</p>
+                    <button onclick="useAlternativeAPI()" style="width: auto;">استخدام API بديل</button>
+                `;
+                result.style.display = 'block';
+            }
+        }
+
+        // دالة نسخ الرابط
+        function copyLink(url) {
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✓ تم نسخ الرابط');
+            }).catch(() => {
+                // طريقة بديلة للنسخ
+                const tempInput = document.createElement('input');
+                tempInput.value = url;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                alert('✓ تم نسخ الرابط');
+            });
+        }
+
+        // دالة اختبار الرابط
+        function testLink(url) {
+            window.open(url, '_blank');
+        }
+
+        // API بديل باستخدام خدمة خارجية
+        async function useAlternativeAPI() {
+            const url = document.getElementById('youtubeUrl').value;
+            const loading = document.getElementById('loading');
+            const linksContainer = document.getElementById('linksContainer');
+
+            loading.style.display = 'block';
+
+            try {
+                // استخدام خدمة yt-dlp عبر CORS proxy
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const ytdlpApi = `http://youtube-dl.herokuapp.com/info?url=${encodeURIComponent(url)}`;
+                
+                const response = await axios.get(proxyUrl + encodeURIComponent(ytdlpApi));
+                const data = response.data;
+
+                let html = '<h4>الرواقع من API بديل:</h4>';
+                
+                if (data.formats) {
+                    data.formats.slice(0, 10).forEach(format => {
+                        if (format.url) {
+                            html += `
+                                <div class="link-item">
+                                    <span class="quality">📊 ${format.format_note || 'غير معروف'}</span> | 
+                                    <span class="ext">📁 ${format.ext}</span>
+                                    <br>
+                                    <input type="text" value="${format.url}" readonly 
+                                           style="width: 100%; margin: 5px 0; padding: 5px; font-size: 12px;">
+                                    <button onclick="copyLink('${format.url.replace(/'/g, "\\'")}')" 
+                                            style="padding: 5px 10px; font-size: 12px; width: auto;">
+                                        نسخ الرابط
+                                    </button>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+
+                linksContainer.innerHTML += html;
+                loading.style.display = 'none';
+
+            } catch (error) {
+                loading.style.display = 'none';
+                linksContainer.innerHTML += `<p style="color: red;">خطأ في API البديل: ${error.message}</p>`;
+            }
+        }
+
+        // السماح بالضغط على Enter
+        document.getElementById('youtubeUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                extractLinks();
+            }
+        });
+
+        // دالة لاستخدام yt-dlp محلياً (للتطبيقات المتقدمة)
+        async function useLocalYtdlp(videoUrl) {
+            // هذه الدالة للاستخدام في التطبيقات التي تحتوي على yt-dlp مدمج
+            try {
+                const response = await fetch('/api/extract', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: videoUrl })
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('Error using local yt-dlp:', error);
+                return null;
+            }
+        }
+    </script>
 </body>
 </html>
