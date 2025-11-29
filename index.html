@@ -406,6 +406,18 @@
             font-size: 0.8rem;
             font-weight: bold;
         }
+
+        .share-section {
+            background-color: #e7f3ff;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .share-btn {
+            margin: 5px;
+        }
     </style>
 </head>
 <body>
@@ -457,6 +469,14 @@
                     <div class="video-meta">
                         <span id="videoDuration"></span>
                     </div>
+                    <div class="share-section">
+                        <button class="btn btn-outline share-btn" onclick="shareVideo()">
+                            <i class="fas fa-share"></i> مشاركة رابط التحميل
+                        </button>
+                        <button class="btn btn-outline share-btn" onclick="copyVideoLink()">
+                            <i class="fas fa-link"></i> نسخ رابط هذه الصفحة مع الفيديو
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -479,6 +499,28 @@
     <div class="toast" id="toast">تم نسخ الرابط بنجاح!</div>
 
     <script>
+        // دالة لاستخراج معلمات URL
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+
+        // معالجة معلمة URL عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParam = getUrlParameter('url');
+            if (urlParam) {
+                // تنظيف الرابط من أي معلمات إضافية
+                let cleanUrl = urlParam.split('?')[0];
+                document.getElementById('videoUrl').value = cleanUrl;
+                fetchVideoData(cleanUrl);
+            } else {
+                // إضافة مثال رابط يوتيوب للحصول على تجربة أفضل
+                document.getElementById('videoUrl').value = 'https://www.youtube.com/watch?v=rKZT6y-dNwU';
+            }
+        });
+
         document.getElementById('videoForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const videoUrl = document.getElementById('videoUrl').value;
@@ -512,8 +554,11 @@
             document.getElementById('downloadOptions').classList.remove('active');
             
             try {
+                // تنظيف الرابط من أي معلمات إضافية
+                const cleanUrl = url.split('?')[0];
+                
                 // بناء رابط API مع الرابط المقدم
-                const apiUrl = `https://api.vidfly.ai/api/media/youtube/download?url=${encodeURIComponent(url)}`;
+                const apiUrl = `https://api.vidfly.ai/api/media/youtube/download?url=${encodeURIComponent(cleanUrl)}`;
                 
                 // جلب البيانات من API
                 const response = await fetch(apiUrl);
@@ -529,6 +574,9 @@
                     throw new Error('فشل في جلب بيانات الفيديو');
                 }
                 
+                // تحديث عنوان URL ليشمل معلمة الفيديو
+                updateUrlWithVideo(cleanUrl);
+                
                 // عرض بيانات الفيديو
                 displayVideoInfo(data.data);
                 
@@ -541,6 +589,11 @@
             } finally {
                 document.getElementById('loading').classList.remove('active');
             }
+        }
+
+        function updateUrlWithVideo(videoUrl) {
+            const newUrl = `${window.location.origin}${window.location.pathname}?url=${encodeURIComponent(videoUrl)}`;
+            window.history.replaceState({}, document.title, newUrl);
         }
 
         function displayVideoInfo(videoData) {
@@ -643,6 +696,28 @@
             document.body.removeChild(textArea);
         }
 
+        function shareVideo() {
+            const videoUrl = document.getElementById('videoUrl').value;
+            const pageUrl = `${window.location.origin}${window.location.pathname}?url=${encodeURIComponent(videoUrl)}`;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: document.getElementById('videoTitle').textContent,
+                    url: pageUrl
+                });
+            } else {
+                copyToClipboard(pageUrl);
+                showToast('تم نسخ رابط المشاركة!');
+            }
+        }
+
+        function copyVideoLink() {
+            const videoUrl = document.getElementById('videoUrl').value;
+            const pageUrl = `${window.location.origin}${window.location.pathname}?url=${encodeURIComponent(videoUrl)}`;
+            copyToClipboard(pageUrl);
+            showToast('تم نسخ رابط الصفحة مع الفيديو!');
+        }
+
         function showToast(message) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -663,11 +738,6 @@
             const errorElement = document.getElementById('errorMessage');
             errorElement.classList.remove('show');
         }
-
-        // إضافة مثال رابط يوتيوب للحصول على تجربة أفضل
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('videoUrl').value = 'https://www.youtube.com/watch?v=rKZT6y-dNwU';
-        });
     </script>
 </body>
 </html>
