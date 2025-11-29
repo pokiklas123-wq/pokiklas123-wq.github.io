@@ -6,258 +6,275 @@
     <title>مستخرج روابط يوتيوب</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: #f0f2f5;
+            color: #333;
         }
         .container {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        input, button {
+        h1 {
+            text-align: center;
+            color: #ff0000;
+            margin-bottom: 30px;
+        }
+        .input-section {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        input {
             width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
             font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input:focus {
+            border-color: #007cba;
+            outline: none;
         }
         button {
+            width: 100%;
+            padding: 15px;
             background: #007cba;
             color: white;
             border: none;
+            border-radius: 8px;
             cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background 0.3s;
         }
         button:hover {
             background: #005a87;
         }
         .result {
             margin-top: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 5px;
             display: none;
         }
+        .video-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-right: 4px solid #007cba;
+        }
         .link-item {
-            padding: 10px;
-            margin: 5px 0;
+            padding: 15px;
+            margin: 10px 0;
             background: white;
             border: 1px solid #e0e0e0;
-            border-radius: 5px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .quality {
+        .badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
             font-weight: bold;
-            color: #007cba;
         }
-        .type {
-            color: #28a745;
+        .quality { background: #e3f2fd; color: #1565c0; }
+        .type { background: #e8f5e9; color: #2e7d32; }
+        .ext { background: #fff3e0; color: #ef6c00; }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .btn-copy {
+            background: #6c757d;
+            flex: 1;
+        }
+        .btn-test {
+            background: #28a745;
+            flex: 1;
         }
         .loading {
             text-align: center;
             padding: 20px;
             display: none;
         }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #007cba;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎬 مستخرج روابط يوتيوب المباشرة</h1>
+        <h1>🎬 مستخرج روابط يوتيوب</h1>
         
         <div class="input-section">
-            <input type="text" id="youtubeUrl" placeholder="أدخل رابط يوتيوب هنا..." value="https://youtu.be/">
-            <button onclick="extractLinks()">استخراج الروابط</button>
+            <input type="text" id="youtubeUrl" placeholder="ضع رابط الفيديو هنا (مثال: https://youtu.be/...)" dir="ltr">
+            <button onclick="extractLinks()">🚀 استخراج الروابط</button>
         </div>
 
         <div class="loading" id="loading">
-            <p>جاري استخراج الروابط... ⏳</p>
+            <div class="spinner"></div>
+            <p>جاري تحليل الفيديو واستخراج الروابط... ⏳</p>
         </div>
 
         <div class="result" id="result">
-            <h3>الروابط المستخرجة:</h3>
+            <div id="videoMeta"></div>
+            <h3>📥 روابط التحميل المتاحة:</h3>
             <div id="linksContainer"></div>
         </div>
     </div>
 
-    <!-- تضمين مكتبات مطلوبة -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     
     <script>
-        // دالة استخراج الروابط
+        // هام جداً: استبدل هذا الرابط برابط السيرفر الخاص بك بعد رفع كود البايثون
+        // مثال: https://my-app-name.onrender.com
+        const API_BASE_URL = 'https://web-production-4621b.up.railway.app'; 
+
         async function extractLinks() {
-            const url = document.getElementById('youtubeUrl').value;
+            const urlInput = document.getElementById('youtubeUrl');
+            const url = urlInput.value.trim();
             const loading = document.getElementById('loading');
             const result = document.getElementById('result');
             const linksContainer = document.getElementById('linksContainer');
+            const videoMeta = document.getElementById('videoMeta');
 
-            if (!url || !url.includes('youtu')) {
-                alert('يرجى إدخال رابط يوتيوب صحيح');
+            if (!url) {
+                alert('يرجى إدخال رابط يوتيوب');
                 return;
             }
 
-            // إظهار التحميل
             loading.style.display = 'block';
             result.style.display = 'none';
             linksContainer.innerHTML = '';
 
             try {
-                // استخدام API البوت الذي على Railway
-                const apiUrl = `https://web-production-4621b.up.railway.app/extract?url=${encodeURIComponent(url)}`;
+                // الاتصال بالـ API الخاص بك (لاحظ استخدام /get_links بدلاً من /extract)
+                // إذا كنت تشغل السيرفر محلياً استخدم http://127.0.0.1:5000/get_links
+                const apiUrl = `${API_BASE_URL}/get_links?url=${encodeURIComponent(url)}`;
                 
+                console.log("Connecting to:", apiUrl); // للمساعدة في تتبع الأخطاء
+
                 const response = await axios.get(apiUrl);
                 const data = response.data;
 
-                // إخفاء التحميل
                 loading.style.display = 'none';
 
                 if (data.error) {
-                    linksContainer.innerHTML = `<p style="color: red;">خطأ: ${data.error}</p>`;
-                    result.style.display = 'block';
+                    alert('خطأ من السيرفر: ' + data.error);
                     return;
                 }
 
-                // عرض النتائج
-                let html = `
-                    <div class="link-item" style="background: #e7f3ff;">
-                        <strong>🎬 ${data.title}</strong><br>
-                        ⏰ المدة: ${data.duration} ثانية
+                // عرض معلومات الفيديو
+                videoMeta.innerHTML = `
+                    <div class="video-info">
+                        <h3 style="margin-top:0">${data.title}</h3>
+                        <p>👤 الناشر: ${data.uploader || 'غير معروف'}</p>
+                        <p>⏱️ المدة: ${formatDuration(data.duration)}</p>
                     </div>
                 `;
 
+                // عرض الروابط
                 if (data.links && data.links.length > 0) {
-                    data.links.forEach((link, index) => {
+                    let html = '';
+                    data.links.forEach(link => {
+                        // تحديد أيقونة النوع
+                        let typeIcon = '❓';
+                        if (link.type === 'Video+Audio') typeIcon = '🎬 فيديو وصوت';
+                        else if (link.type === 'Video_Only') typeIcon = '🔇 فيديو فقط';
+                        else if (link.type === 'Audio_Only') typeIcon = '🎵 صوت فقط';
+
                         html += `
                             <div class="link-item">
-                                <span class="quality">📊 ${link.quality}</span> | 
-                                <span class="type">🎯 ${link.type}</span> | 
-                                <span class="ext">📁 ${link.ext}</span>
-                                <br>
+                                <div class="badges">
+                                    <span class="badge quality">📊 ${link.quality}</span>
+                                    <span class="badge type">${typeIcon}</span>
+                                    <span class="badge ext">📁 ${link.ext}</span>
+                                    <span class="badge" style="background:#eee">💾 ${formatBytes(link.filesize)}</span>
+                                </div>
+                                
                                 <input type="text" value="${link.url}" readonly 
-                                       style="width: 100%; margin: 5px 0; padding: 5px; font-size: 12px;">
-                                <button onclick="copyLink('${link.url.replace(/'/g, "\\'")}')" 
-                                        style="padding: 5px 10px; font-size: 12px; width: auto;">
-                                    نسخ الرابط
-                                </button>
-                                <button onclick="testLink('${link.url.replace(/'/g, "\\'")}')" 
-                                        style="padding: 5px 10px; font-size: 12px; width: auto; background: #28a745;">
-                                    اختبار الرابط
-                                </button>
+                                       style="width: 100%; padding: 8px; font-size: 12px; background: #f8f9fa; border: 1px solid #ddd;"
+                                       onClick="this.select();">
+                                
+                                <div class="action-buttons">
+                                    <button class="btn-copy" onclick="copyLink('${link.url.replace(/'/g, "\\'")}')">
+                                        نسخ الرابط
+                                    </button>
+                                    <button class="btn-test" onclick="window.open('${link.url.replace(/'/g, "\\'")}', '_blank')">
+                                        فتح/تحميل
+                                    </button>
+                                </div>
                             </div>
                         `;
                     });
+                    linksContainer.innerHTML = html;
                 } else {
-                    html += '<p>لم يتم العثور على روابط</p>';
+                    linksContainer.innerHTML = '<p>لم يتم العثور على روابط صالحة.</p>';
                 }
 
-                linksContainer.innerHTML = html;
                 result.style.display = 'block';
 
             } catch (error) {
                 loading.style.display = 'none';
-                linksContainer.innerHTML = `
-                    <p style="color: red;">خطأ في الاتصال: ${error.message}</p>
-                    <p>جرب استخدام الـ API البديل:</p>
-                    <button onclick="useAlternativeAPI()" style="width: auto;">استخدام API بديل</button>
-                `;
-                result.style.display = 'block';
+                console.error(error);
+                let errorMsg = 'حدث خطأ أثناء الاتصال بالسيرفر.';
+                if (error.message === 'Network Error') {
+                    errorMsg += '\nتأكد من أن السيرفر (Backend) يعمل وأنك قمت بتفعيل CORS.';
+                }
+                alert(errorMsg);
             }
         }
 
-        // دالة نسخ الرابط
         function copyLink(url) {
             navigator.clipboard.writeText(url).then(() => {
-                alert('✓ تم نسخ الرابط');
-            }).catch(() => {
-                // طريقة بديلة للنسخ
-                const tempInput = document.createElement('input');
-                tempInput.value = url;
-                document.body.appendChild(tempInput);
-                tempInput.select();
-                document.execCommand('copy');
-                document.body.removeChild(tempInput);
-                alert('✓ تم نسخ الرابط');
+                alert('تم نسخ الرابط بنجاح! ✅');
+            }).catch(err => {
+                console.error('فشل النسخ', err);
+                alert('فشل النسخ التلقائي، يرجى تحديد الرابط ونسخه يدوياً.');
             });
         }
 
-        // دالة اختبار الرابط
-        function testLink(url) {
-            window.open(url, '_blank');
+        function formatDuration(seconds) {
+            if (!seconds) return 'غير معروف';
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = seconds % 60;
+            return `${h > 0 ? h + ':' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
         }
 
-        // API بديل باستخدام خدمة خارجية
-        async function useAlternativeAPI() {
-            const url = document.getElementById('youtubeUrl').value;
-            const loading = document.getElementById('loading');
-            const linksContainer = document.getElementById('linksContainer');
-
-            loading.style.display = 'block';
-
-            try {
-                // استخدام خدمة yt-dlp عبر CORS proxy
-                const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const ytdlpApi = `http://youtube-dl.herokuapp.com/info?url=${encodeURIComponent(url)}`;
-                
-                const response = await axios.get(proxyUrl + encodeURIComponent(ytdlpApi));
-                const data = response.data;
-
-                let html = '<h4>الرواقع من API بديل:</h4>';
-                
-                if (data.formats) {
-                    data.formats.slice(0, 10).forEach(format => {
-                        if (format.url) {
-                            html += `
-                                <div class="link-item">
-                                    <span class="quality">📊 ${format.format_note || 'غير معروف'}</span> | 
-                                    <span class="ext">📁 ${format.ext}</span>
-                                    <br>
-                                    <input type="text" value="${format.url}" readonly 
-                                           style="width: 100%; margin: 5px 0; padding: 5px; font-size: 12px;">
-                                    <button onclick="copyLink('${format.url.replace(/'/g, "\\'")}')" 
-                                            style="padding: 5px 10px; font-size: 12px; width: auto;">
-                                        نسخ الرابط
-                                    </button>
-                                </div>
-                            `;
-                        }
-                    });
-                }
-
-                linksContainer.innerHTML += html;
-                loading.style.display = 'none';
-
-            } catch (error) {
-                loading.style.display = 'none';
-                linksContainer.innerHTML += `<p style="color: red;">خطأ في API البديل: ${error.message}</p>`;
-            }
+        function formatBytes(bytes, decimals = 2) {
+            if (!bytes || bytes === 0) return 'غير معروف';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
         }
 
-        // السماح بالضغط على Enter
+        // تفعيل زر Enter
         document.getElementById('youtubeUrl').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                extractLinks();
-            }
+            if (e.key === 'Enter') extractLinks();
         });
-
-        // دالة لاستخدام yt-dlp محلياً (للتطبيقات المتقدمة)
-        async function useLocalYtdlp(videoUrl) {
-            // هذه الدالة للاستخدام في التطبيقات التي تحتوي على yt-dlp مدمج
-            try {
-                const response = await fetch('/api/extract', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ url: videoUrl })
-                });
-                return await response.json();
-            } catch (error) {
-                console.error('Error using local yt-dlp:', error);
-                return null;
-            }
-        }
     </script>
 </body>
 </html>
