@@ -418,6 +418,28 @@
         .share-btn {
             margin: 5px;
         }
+
+        .api-info {
+            background-color: #fff3cd;
+            border-left: 4px solid var(--warning);
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: var(--border-radius);
+        }
+
+        .api-info h4 {
+            color: var(--warning);
+            margin-bottom: 10px;
+        }
+
+        .api-url {
+            background-color: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -452,6 +474,13 @@
             </form>
             <p>مثال: https://www.youtube.com/watch?v=rKZT6y-dNwU</p>
             <div class="error-message" id="errorMessage"></div>
+
+            <div class="api-info">
+                <h4><i class="fas fa-code"></i> للمطورين - واجهة برمجة التطبيقات (API)</h4>
+                <p>يمكنك استخدام رابط API التالي للحصول على بيانات JSON:</p>
+                <div class="api-url" id="apiUrl">جاري تحميل رابط API...</div>
+                <p>مثال: <code id="apiExample"></code></p>
+            </div>
         </section>
 
         <div class="loading" id="loading">
@@ -507,8 +536,18 @@
             return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
         }
 
+        // تحديث رابط API في الواجهة
+        function updateApiUrl() {
+            const baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
+            const apiUrl = baseUrl + 'json.html';
+            document.getElementById('apiUrl').textContent = apiUrl;
+            document.getElementById('apiExample').textContent = apiUrl + '?url=https://youtu.be/vhELT66h2mI';
+        }
+
         // معالجة معلمة URL عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
+            updateApiUrl();
+            
             const urlParam = getUrlParameter('url');
             
             // إذا كانت هناك معلمة url، قم بإعادة التوجيه إلى json.html
@@ -593,6 +632,7 @@
         }
 
         function updateUrlWithVideo(videoUrl) {
+            // استخدام History API لتحديث الرابط بدون إعادة تحميل الصفحة
             const newUrl = `${window.location.origin}${window.location.pathname}?url=${encodeURIComponent(videoUrl)}`;
             window.history.replaceState({}, document.title, newUrl);
         }
