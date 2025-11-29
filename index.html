@@ -510,15 +510,16 @@
         // معالجة معلمة URL عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
             const urlParam = getUrlParameter('url');
+            
+            // إذا كانت هناك معلمة url، قم بإعادة التوجيه إلى json.html
             if (urlParam) {
-                // تنظيف الرابط من أي معلمات إضافية
-                let cleanUrl = urlParam.split('?')[0];
-                document.getElementById('videoUrl').value = cleanUrl;
-                fetchVideoData(cleanUrl);
-            } else {
-                // إضافة مثال رابط يوتيوب للحصول على تجربة أفضل
-                document.getElementById('videoUrl').value = 'https://www.youtube.com/watch?v=rKZT6y-dNwU';
+                const cleanUrl = urlParam.split('?')[0];
+                window.location.href = `json.html?url=${encodeURIComponent(cleanUrl)}`;
+                return; // أوقف التنفيذ الإضافي
             }
+            
+            // الكود الأصلي للموقع (عندما لا توجد معلمة url)
+            document.getElementById('videoUrl').value = 'https://www.youtube.com/watch?v=rKZT6y-dNwU';
         });
 
         document.getElementById('videoForm').addEventListener('submit', function(e) {
