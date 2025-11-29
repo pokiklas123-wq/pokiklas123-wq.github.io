@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>موقع تحميل فيديوهات يوتيوب</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
             --primary: #4a6cf7;
@@ -11,6 +12,7 @@
             --secondary: #6c757d;
             --success: #28a745;
             --danger: #dc3545;
+            --warning: #ffc107;
             --light: #f8f9fa;
             --dark: #343a40;
             --border-radius: 8px;
@@ -29,12 +31,16 @@
             background-color: #f5f7ff;
             color: #333;
             line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+            flex: 1;
         }
 
         header {
@@ -43,7 +49,6 @@
             padding: 2rem 0;
             text-align: center;
             margin-bottom: 2rem;
-            border-radius: 0 0 var(--border-radius) var(--border-radius);
             box-shadow: var(--box-shadow);
         }
 
@@ -55,6 +60,11 @@
         header p {
             font-size: 1.1rem;
             opacity: 0.9;
+        }
+
+        .logo {
+            font-size: 2rem;
+            margin-bottom: 1rem;
         }
 
         .search-section {
@@ -197,6 +207,9 @@
             color: var(--dark);
             padding-bottom: 0.5rem;
             border-bottom: 2px solid var(--light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .options-grid {
@@ -247,12 +260,24 @@
             color: var(--success);
         }
 
+        .type-video-audio {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: var(--warning);
+        }
+
         .option-details {
             display: flex;
-            gap: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
             margin-bottom: 1rem;
             color: var(--secondary);
             font-size: 0.9rem;
+        }
+
+        .option-detail {
+            background-color: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
         }
 
         .option-actions {
@@ -298,6 +323,7 @@
             font-size: 0.9rem;
             border-top: 1px solid #eaeaea;
             margin-top: 2rem;
+            background-color: white;
         }
 
         @media (max-width: 768px) {
@@ -350,11 +376,44 @@
         .error-message.show {
             display: block;
         }
+
+        .instructions {
+            background-color: #e7f3ff;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+        }
+
+        .instructions h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .instructions ol {
+            padding-right: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        .quality-badge {
+            background-color: var(--primary);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
     <header>
         <div class="container">
+            <div class="logo">
+                <i class="fab fa-youtube"></i>
+            </div>
             <h1>موقع تحميل فيديوهات يوتيوب</h1>
             <p>قم بتحميل أي فيديو من يوتيوب بجودة عالية وبسهولة</p>
         </div>
@@ -362,9 +421,20 @@
 
     <div class="container">
         <section class="search-section">
+            <div class="instructions">
+                <h3><i class="fas fa-info-circle"></i> طريقة الاستخدام</h3>
+                <ol>
+                    <li>انسخ رابط فيديو اليوتيوب من المتصفح</li>
+                    <li>الصق الرابط في الحقل أدناه</li>
+                    <li>انقر على زر "جلب روابط التحميل"</li>
+                    <li>اختر الجودة المناسبة وانقر على "نسخ الرابط" أو "فتح الرابط"</li>
+                </ol>
+            </div>
+            
             <form class="search-form" id="videoForm">
                 <input type="url" class="url-input" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." required>
                 <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-download"></i>
                     <span>جلب روابط التحميل</span>
                 </button>
             </form>
@@ -392,7 +462,7 @@
         </section>
 
         <section class="download-options" id="downloadOptions">
-            <h2 class="section-title">خيارات التحميل</h2>
+            <h2 class="section-title"><i class="fas fa-download"></i> خيارات التحميل</h2>
             <div class="options-grid" id="optionsGrid">
                 <!-- سيتم تعبئة هذا القسم بالبيانات -->
             </div>
@@ -402,6 +472,7 @@
     <footer>
         <div class="container">
             <p>© 2023 موقع تحميل فيديوهات يوتيوب - جميع الحقوق محفوظة</p>
+            <p>تم التطوير باستخدام VidFly API</p>
         </div>
     </footer>
 
@@ -417,11 +488,22 @@
                 return;
             }
             
+            // التحقق من صيغة الرابط
+            if (!isValidYouTubeUrl(videoUrl)) {
+                showError('يرجى إدخال رابط يوتيوب صحيح');
+                return;
+            }
+            
             // إخفاء أي رسالة خطأ سابقة
             hideError();
             
             fetchVideoData(videoUrl);
         });
+
+        function isValidYouTubeUrl(url) {
+            const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+            return pattern.test(url);
+        }
 
         async function fetchVideoData(url) {
             // إظهار مؤشر التحميل
@@ -477,23 +559,20 @@
             const optionsGrid = document.getElementById('optionsGrid');
             optionsGrid.innerHTML = '';
             
-            // تصنيف العناصر إلى فيديو وصوت
-            const videoItems = items.filter(item => item.type.includes('video') || item.type.includes('audio'));
-            const audioItems = items.filter(item => !item.type.includes('video') && item.type.includes('audio'));
+            // فرز العناصر حسب الجودة (من الأعلى إلى الأقل)
+            const sortedItems = [...items].sort((a, b) => {
+                // إعطاء الأولوية للفيديو مع الصوت
+                if (a.type === 'video_with_audio' && b.type !== 'video_with_audio') return -1;
+                if (b.type === 'video_with_audio' && a.type !== 'video_with_audio') return 1;
+                
+                // ثم فرز حسب الدقة
+                return b.height - a.height;
+            });
             
-            // عرض خيارات الفيديو
-            if (videoItems.length > 0) {
-                videoItems.forEach(item => {
-                    createOptionCard(item, optionsGrid);
-                });
-            }
-            
-            // عرض خيارات الصوت
-            if (audioItems.length > 0) {
-                audioItems.forEach(item => {
-                    createOptionCard(item, optionsGrid);
-                });
-            }
+            // عرض خيارات التحميل
+            sortedItems.forEach(item => {
+                createOptionCard(item, optionsGrid);
+            });
             
             document.getElementById('downloadOptions').classList.add('active');
         }
@@ -502,23 +581,44 @@
             const optionCard = document.createElement('div');
             optionCard.className = 'option-card';
             
-            const typeClass = item.type.includes('audio') ? 'type-audio' : 'type-video';
-            const typeText = item.type.includes('audio') ? 'صوت' : 'فيديو';
+            // تحديد نوع البطاقة بناءً على نوع المحتوى
+            let typeClass, typeText, icon;
+            if (item.type === 'video_with_audio') {
+                typeClass = 'type-video-audio';
+                typeText = 'فيديو مع صوت';
+                icon = '<i class="fas fa-film"></i>';
+            } else if (item.type === 'video') {
+                typeClass = 'type-video';
+                typeText = 'فيديو فقط';
+                icon = '<i class="fas fa-video"></i>';
+            } else if (item.type === 'audio') {
+                typeClass = 'type-audio';
+                typeText = 'صوت فقط';
+                icon = '<i class="fas fa-music"></i>';
+            } else {
+                typeClass = 'type-video';
+                typeText = 'فيديو';
+                icon = '<i class="fas fa-file-video"></i>';
+            }
             
             optionCard.innerHTML = `
                 <div class="option-header">
-                    <span class="option-label">${item.label}</span>
+                    <span class="option-label">${icon} ${item.label}</span>
                     <span class="option-type ${typeClass}">${typeText}</span>
                 </div>
                 <div class="option-details">
-                    <span>الصيغة: ${item.ext.toUpperCase()}</span>
-                    ${item.height > 0 ? `<span>الدقة: ${item.height}p</span>` : ''}
-                    ${item.fps > 0 ? `<span>معدل الإطارات: ${item.fps}</span>` : ''}
-                    ${item.width > 0 ? `<span>العرض: ${item.width}</span>` : ''}
+                    <span class="option-detail">الصيغة: ${item.ext.toUpperCase()}</span>
+                    ${item.height > 0 ? `<span class="option-detail">الدقة: ${item.height}p</span>` : ''}
+                    ${item.fps > 0 ? `<span class="option-detail">معدل الإطارات: ${item.fps}</span>` : ''}
+                    ${item.width > 0 ? `<span class="option-detail">العرض: ${item.width}px</span>` : ''}
                 </div>
                 <div class="option-actions">
-                    <button class="btn btn-primary btn-small" onclick="copyToClipboard('${item.url}')">نسخ الرابط</button>
-                    <a href="${item.url}" target="_blank" class="btn btn-outline btn-small">فتح الرابط</a>
+                    <button class="btn btn-primary btn-small" onclick="copyToClipboard('${item.url}')">
+                        <i class="fas fa-copy"></i> نسخ الرابط
+                    </button>
+                    <a href="${item.url}" target="_blank" class="btn btn-outline btn-small">
+                        <i class="fas fa-external-link-alt"></i> فتح الرابط
+                    </a>
                 </div>
             `;
             
@@ -526,12 +626,21 @@
         }
 
         function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
+            // إنشاء عنصر نصي مؤقت
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
                 showToast('تم نسخ الرابط بنجاح!');
-            }).catch(err => {
+            } catch (err) {
                 console.error('Failed to copy: ', err);
                 showToast('فشل نسخ الرابط');
-            });
+            }
+            
+            document.body.removeChild(textArea);
         }
 
         function showToast(message) {
@@ -554,6 +663,11 @@
             const errorElement = document.getElementById('errorMessage');
             errorElement.classList.remove('show');
         }
+
+        // إضافة مثال رابط يوتيوب للحصول على تجربة أفضل
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('videoUrl').value = 'https://www.youtube.com/watch?v=rKZT6y-dNwU';
+        });
     </script>
 </body>
 </html>
