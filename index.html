@@ -3,340 +3,944 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مستخرج روابط يوتيوب - موقعي الخاص</title>
-    <script>
-        // مكتبة yt-dlp محولة إلى JavaScript
-        class YouTubeExtractor {
-            async extractLinks(videoUrl) {
-                try {
-                    // استخراج video ID من الرابط
-                    const videoId = this.extractVideoId(videoUrl);
-                    if (!videoId) {
-                        throw new Error('رابط يوتيوب غير صحيح');
-                    }
-
-                    // إنشاء طلب إلى YouTube API الداخلية
-                    const response = await fetch(`https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            context: {
-                                client: {
-                                    clientName: 'ANDROID',
-                                    clientVersion: '17.31.35',
-                                    androidSdkVersion: 30,
-                                    userAgent: 'com.google.android.youtube/17.31.35 (Linux; U; Android 11) gzip'
-                                }
-                            },
-                            videoId: videoId,
-                            params: 'CgIIAdoDCgES'
-                        })
-                    });
-
-                    if (!response.ok) {
-                        throw new Error('فشل في جلب بيانات الفيديو');
-                    }
-
-                    const data = await response.json();
-                    return this.parseVideoData(data);
-                    
-                } catch (error) {
-                    throw new Error(`خطأ في الاستخراج: ${error.message}`);
-                }
-            }
-
-            extractVideoId(url) {
-                const patterns = [
-                    /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?\s]+)/,
-                    /youtube\.com\/embed\/([^&?\s]+)/,
-                    /youtube\.com\/v\/([^&?\s]+)/
-                ];
-                
-                for (let pattern of patterns) {
-                    const match = url.match(pattern);
-                    if (match) return match[1];
-                }
-                return null;
-            }
-
-            parseVideoData(playerData) {
-                const result = {
-                    title: playerData.videoDetails?.title || 'غير معروف',
-                    duration: playerData.videoDetails?.lengthSeconds || 0,
-                    links: []
-                };
-
-                // استخراج الروابط من streamingData
-                const streamingData = playerData.streamingData;
-                if (streamingData) {
-                    // الرواقع المباشرة
-                    if (streamingData.formats) {
-                        streamingData.formats.forEach(format => {
-                            if (format.url) {
-                                result.links.push({
-                                    url: format.url,
-                                    quality: format.qualityLabel || 'unknown',
-                                    type: 'video',
-                                    mimeType: format.mimeType
-                                });
-                            }
-                        });
-                    }
-
-                    // الرواقع التكيفية (فيديو وصوت منفصل)
-                    if (streamingData.adaptiveFormats) {
-                        streamingData.adaptiveFormats.forEach(format => {
-                            if (format.url) {
-                                const isAudio = format.mimeType?.includes('audio');
-                                result.links.push({
-                                    url: format.url,
-                                    quality: format.qualityLabel || (isAudio ? 'audio' : 'unknown'),
-                                    type: isAudio ? 'audio' : 'video',
-                                    mimeType: format.mimeType,
-                                    bitrate: format.bitrate
-                                });
-                            }
-                        });
-                    }
-                }
-
-                return result;
-            }
-        }
-
-        // المتغير العام للمستخرج
-        const extractor = new YouTubeExtractor();
-
-        // الدوال الرئيسية للواجهة
-        async function extractLinks() {
-            const url = document.getElementById('youtubeUrl').value;
-            const loading = document.getElementById('loading');
-            const result = document.getElementById('result');
-            const linksContainer = document.getElementById('linksContainer');
-
-            if (!url) {
-                alert('يرجى إدخال رابط اليوتيوب');
-                return;
-            }
-
-            loading.style.display = 'block';
-            result.style.display = 'none';
-            linksContainer.innerHTML = '';
-
-            try {
-                const data = await extractor.extractLinks(url);
-                
-                let html = `
-                    <div class="link-item" style="background: #e7f3ff;">
-                        <strong>🎬 ${data.title}</strong><br>
-                        ⏰ المدة: ${Math.round(data.duration / 60)} دقيقة
-                    </div>
-                    <br>
-                `;
-
-                if (data.links.length > 0) {
-                    // تصفية الروابط المكررة والعالية الجودة
-                    const uniqueLinks = this.filterUniqueLinks(data.links);
-                    
-                    uniqueLinks.forEach(link => {
-                        html += `
-                            <div class="link-item">
-                                <span class="quality">📊 ${link.quality}</span> | 
-                                <span class="type">${link.type === 'audio' ? '🎵 صوت' : '🎥 فيديو'}</span>
-                                <br>
-                                <input type="text" value="${link.url}" readonly 
-                                       style="width: 100%; margin: 8px 0; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                                <div>
-                                    <button onclick="copyLink('${link.url.replace(/'/g, "\\'")}')" 
-                                            style="padding: 6px 12px; margin: 2px; background: #007cba; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                        نسخ الرابط
-                                    </button>
-                                    <button onclick="testLink('${link.url.replace(/'/g, "\\'")}')" 
-                                            style="padding: 6px 12px; margin: 2px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                        اختبار
-                                    </button>
-                                    <button onclick="downloadLink('${link.url.replace(/'/g, "\\'")}', '${data.title}')" 
-                                            style="padding: 6px 12px; margin: 2px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                                        تحميل
-                                    </button>
-                                </div>
-                            </div>
-                            <br>
-                        `;
-                    });
-                } else {
-                    html += '<p>❌ لم يتم العثور على روابط مباشرة</p>';
-                }
-
-                linksContainer.innerHTML = html;
-                result.style.display = 'block';
-                loading.style.display = 'none';
-
-            } catch (error) {
-                loading.style.display = 'none';
-                linksContainer.innerHTML = `
-                    <div style="color: red; padding: 10px; background: #ffeaea; border-radius: 5px;">
-                        <strong>❌ خطأ:</strong> ${error.message}
-                        <br><br>
-                        <button onclick="retryWithAlternativeMethod('${url}')" 
-                                style="padding: 8px 16px; background: #ff6b6b; color: white; border: none; border-radius: 4px; cursor: pointer;">
-                            محاولة بطريقة بديلة
-                        </button>
-                    </div>
-                `;
-                result.style.display = 'block';
-            }
-        }
-
-        function filterUniqueLinks(links) {
-            const seen = new Set();
-            return links.filter(link => {
-                const key = `${link.quality}-${link.type}`;
-                if (!seen.has(key) && link.quality !== 'unknown') {
-                    seen.add(key);
-                    return true;
-                }
-                return false;
-            }).slice(0, 8); // إرجاع أول 8 روابط فريدة فقط
-        }
-
-        // الدوال المساعدة
-        function copyLink(url) {
-            navigator.clipboard.writeText(url).then(() => {
-                alert('✅ تم نسخ الرابط');
-            });
-        }
-
-        function testLink(url) {
-            window.open(url, '_blank');
-        }
-
-        function downloadLink(url, title) {
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `${title}.mp4`;
-            a.click();
-        }
-
-        async function retryWithAlternativeMethod(url) {
-            // طريقة بديلة باستخدام iframe
-            const videoId = extractor.extractVideoId(url);
-            if (videoId) {
-                const embedUrl = `https://www.youtube.com/embed/${videoId}`;
-                document.getElementById('linksContainer').innerHTML = `
-                    <div class="link-item">
-                        <p>🔧 جرب هذه الطريقة البديلة:</p>
-                        <iframe width="100%" height="315" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>
-                        <p>يمكنك استخدام أدوات المطورين (F12) لاستخراج الروابط</p>
-                    </div>
-                `;
-            }
-        }
-
-        // السماح بالضغط على Enter
-        document.getElementById('youtubeUrl').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') extractLinks();
-        });
-    </script>
+    <title>🎬 مستخرج روابط يوتيوب</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+        :root {
+            --primary: #c41e3a;
+            --secondary: #d4af37;
+            --accent: #1a472a;
+            --bg-light: #f8f5f0;
+            --bg-dark: #1a1a1a;
+            --text-light: #2c2c2c;
+            --text-dark: #e8e8e8;
+            --shadow: rgba(196, 30, 58, 0.2);
         }
-        .container {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        h1 {
-            color: #333;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        input {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
+
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
-        button {
-            width: 100%;
-            padding: 15px;
-            margin: 10px 0;
-            background: #007cba;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background: #005a87;
-        }
-        .result {
-            margin-top: 25px;
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, var(--bg-light) 0%, #e8dfd0 100%);
+            min-height: 100vh;
             padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            display: none;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow-x: hidden;
         }
-        .link-item {
-            padding: 15px;
-            margin: 10px 0;
+
+        body.dark {
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #2a2a2a 100%);
+            color: var(--text-dark);
+        }
+
+        /* خلفية زخرفية إسلامية */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 50px, rgba(196, 30, 58, 0.03) 50px, rgba(196, 30, 58, 0.03) 100px);
+            animation: rotate 60s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body.dark::before {
+            background-image:
+                repeating-linear-gradient(45deg, transparent, transparent 50px, rgba(212, 175, 55, 0.05) 50px, rgba(212, 175, 55, 0.05) 100px);
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-family: 'Amiri', serif;
+            font-size: 3.5em;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px var(--shadow);
+            letter-spacing: 2px;
+        }
+
+        .subtitle {
+            font-size: 1.2em;
+            color: var(--accent);
+            opacity: 0.8;
+        }
+
+        body.dark .subtitle {
+            color: var(--secondary);
+        }
+
+        .card {
             background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            border-radius: 25px;
+            padding: 40px;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(196, 30, 58, 0.1);
+            margin-bottom: 30px;
+            animation: fadeInUp 0.8s ease;
+            position: relative;
+            overflow: hidden;
         }
-        .quality {
-            font-weight: bold;
-            color: #007cba;
+
+        body.dark .card {
+            background: #2a2a2a;
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(212, 175, 55, 0.2);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* زخرفة زاوية الكارد */
+        .card::before {
+            content: '✦';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2em;
+            color: var(--secondary);
+            opacity: 0.2;
+        }
+
+        .card::after {
+            content: '✦';
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 2em;
+            color: var(--primary);
+            opacity: 0.2;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 1.1em;
+        }
+
+        body.dark .input-group label {
+            color: var(--secondary);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            color: var(--primary);
+            pointer-events: none;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 18px 55px 18px 20px;
+            border: 3px solid transparent;
+            border-radius: 15px;
             font-size: 16px;
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-light);
+            transition: all 0.3s ease;
+            outline: none;
         }
-        .type {
-            color: #28a745;
-            font-weight: bold;
+
+        body.dark input[type="text"] {
+            background: #1a1a1a;
+            color: var(--text-dark);
         }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+
+        body.dark input[type="text"]:focus {
+            background: #2a2a2a;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-weight: 700;
+            font-family: 'Cairo', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, #a01729 100%);
+            color: white;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px var(--shadow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .loading {
             text-align: center;
-            padding: 30px;
+            padding: 40px;
             display: none;
         }
-        .loading p {
-            font-size: 18px;
-            color: #666;
+
+        .loading.active {
+            display: block;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid var(--bg-light);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        body.dark .spinner {
+            border-color: #2a2a2a;
+            border-top-color: var(--secondary);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+        }
+
+        .result.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .video-info {
+            background: linear-gradient(135deg, var(--primary) 0%, #a01729 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .video-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .video-meta {
+            opacity: 0.9;
+            font-size: 1em;
+        }
+
+        .links-section {
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid var(--secondary);
+        }
+
+        body.dark .section-title {
+            color: var(--secondary);
+        }
+
+        .link-card {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        body.dark .link-card {
+            background: #1a1a1a;
+        }
+
+        .link-card:hover {
+            border-color: var(--primary);
+            transform: translateX(-5px);
+            box-shadow: 0 5px 20px var(--shadow);
+        }
+
+        .link-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .quality-badge {
+            background: linear-gradient(135deg, var(--primary) 0%, #a01729 100%);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .type-badge {
+            background: var(--accent);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+        }
+
+        .link-url {
+            background: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.85em;
+            word-break: break-all;
+            margin-bottom: 15px;
+            border: 2px solid var(--bg-light);
+        }
+
+        body.dark .link-url {
+            background: #2a2a2a;
+            border-color: #1a1a1a;
+            color: var(--text-dark);
+        }
+
+        .link-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+        }
+
+        .btn-copy {
+            background: #1a472a;
+            color: white;
+        }
+
+        .btn-copy:hover {
+            background: #0f2818;
+            transform: translateY(-2px);
+        }
+
+        .btn-download {
+            background: var(--secondary);
+            color: var(--text-light);
+        }
+
+        .btn-download:hover {
+            background: #c19b2b;
+            transform: translateY(-2px);
+        }
+
+        .error {
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 20px;
+            box-shadow: 0 10px 30px rgba(255, 68, 68, 0.3);
+        }
+
+        .error-title {
+            font-size: 1.3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            border: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        body.dark .theme-toggle {
+            background: #2a2a2a;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(20deg);
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, rgba(196, 30, 58, 0.1) 0%, rgba(212, 175, 55, 0.1) 100%);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border-right: 5px solid var(--primary);
+        }
+
+        .info-box p {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5em;
+            }
+
+            .card {
+                padding: 25px;
+            }
+
+            .link-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .link-actions {
+                flex-direction: column;
+            }
+
+            .btn-small {
+                width: 100%;
+            }
+
+            .theme-toggle {
+                bottom: 20px;
+                left: 20px;
+                width: 50px;
+                height: 50px;
+            }
+        }
+
+        /* تأثيرات إضافية */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        .shimmer {
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            background-size: 1000px 100%;
+            animation: shimmer 2s infinite;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎬 مستخرج روابط يوتيوب - موقعي الخاص</h1>
-        
-        <div class="input-section">
-            <input type="text" id="youtubeUrl" placeholder="أدخل رابط يوتيوب هنا..." 
-                   value="https://youtu.be/">
-            <button onclick="extractLinks()">🚀 استخراج الروابط المباشرة</button>
+        <div class="header">
+            <div class="logo">مُستخرِج اليوتيوب</div>
+            <div class="subtitle">✨ استخراج روابط ومعلومات الفيديو بذكاء ✨</div>
+        </div>
+
+        <div class="card">
+            <div class="input-group">
+                <label for="youtubeUrl">🔗 رابط الفيديو</label>
+                <div class="input-wrapper">
+                    <input type="text"
+                           id="youtubeUrl"
+                           placeholder="https://youtube.com/watch?v=..."
+                           value="https://youtu.be/vhELT66h2mI?t=24">
+                    <span class="input-icon">🎬</span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="extractVideo()" id="extractBtn">
+                🚀 استخراج المعلومات
+            </button>
+
+            <div class="info-box">
+                <p><strong>💡 كيف يعمل التطبيق؟</strong></p>
+                <p>يستخدم هذا التطبيق الذكاء الاصطناعي المتقدم لاستخراج معلومات الفيديو من يوتيوب بطريقة ذكية وآمنة.</p>
+                <p>📌 الصق رابط أي فيديو يوتيوب واضغط على زر الاستخراج!</p>
+            </div>
         </div>
 
         <div class="loading" id="loading">
-            <p>🔍 جاري استخراج الروابط من يوتيوب مباشرة...</p>
+            <div class="spinner"></div>
+            <h3>🔍 جاري معالجة الرابط...</h3>
+            <p>الذكاء الاصطناعي يعمل على استخراج المعلومات</p>
         </div>
 
-        <div class="result" id="result">
-            <h3>📥 الروابط المستخرجة:</h3>
-            <div id="linksContainer"></div>
-        </div>
+        <div class="result" id="result"></div>
     </div>
+
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙</button>
+
+    <script>
+        // إعداد Poe handlers
+        let videoData = null;
+
+        if (window.Poe) {
+            window.Poe.registerHandler("video-extractor", (result, context) => {
+                const response = result.responses[0];
+
+                if (response.status === "error") {
+                    showError("حدث خطأ: " + response.statusText);
+                    hideLoading();
+                } else if (response.status === "complete") {
+                    displayResults(response.content, context.url);
+                    hideLoading();
+                } else if (response.status === "incomplete") {
+                    // لا نحتاج لعرض شيء أثناء التحميل
+                }
+            });
+        }
+
+        async function extractVideo() {
+            const url = document.getElementById('youtubeUrl').value.trim();
+
+            if (!url) {
+                showError("⚠️ الرجاء إدخال رابط يوتيوب!");
+                return;
+            }
+
+            if (!isValidYoutubeUrl(url)) {
+                showError("⚠️ الرابط غير صحيح! الرجاء إدخال رابط يوتيوب صحيح.");
+                return;
+            }
+
+            showLoading();
+            document.getElementById('result').innerHTML = '';
+            document.getElementById('result').classList.remove('active');
+
+            if (!window.Poe) {
+                showError("⚠️ Poe API غير متوفر. يرجى فتح التطبيق في Poe.");
+                hideLoading();
+                return;
+            }
+
+            try {
+                const prompt = `أنت مساعد متخصص في استخراج معلومات فيديوهات يوتيوب.
+
+الرابط: ${url}
+
+المطلوب منك:
+1. استخراج معلومات الفيديو (العنوان، المدة، القناة، الوصف)
+2. تقديم المعلومات بتنسيق JSON صحيح فقط (بدون أي نص إضافي)
+
+يجب أن يكون الرد بهذا التنسيق JSON فقط:
+{
+  "title": "عنوان الفيديو",
+  "channel": "اسم القناة",
+  "duration": "المدة بالدقائق",
+  "description": "وصف مختصر",
+  "views": "عدد المشاهدات",
+  "publishDate": "تاريخ النشر",
+  "embedUrl": "رابط التضمين",
+  "thumbnailUrl": "رابط الصورة المصغرة"
+}
+
+مهم جداً: أرسل JSON فقط بدون أي نص آخر!`;
+
+                await window.Poe.sendUserMessage(prompt, {
+                    handler: "video-extractor",
+                    stream: false,
+                    openChat: false,
+                    handlerContext: { url: url }
+                });
+
+            } catch (error) {
+                showError("❌ حدث خطأ: " + error.message);
+                hideLoading();
+            }
+        }
+
+        function displayResults(content, url) {
+            try {
+                // محاولة استخراج JSON من الرد
+                let jsonMatch = content.match(/\{[\s\S]*\}/);
+                let data;
+
+                if (jsonMatch) {
+                    data = JSON.parse(jsonMatch[0]);
+                } else {
+                    // إذا لم يكن JSON، استخدم طريقة بديلة
+                    data = parseTextResponse(content, url);
+                }
+
+                const videoId = extractVideoId(url);
+                const embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
+
+                let html = `
+                    <div class="card">
+                        <div class="video-info">
+                            <div class="video-title">🎬 ${data.title || 'عنوان الفيديو'}</div>
+                            <div class="video-meta">
+                                ${data.channel ? '📺 ' + data.channel : ''}<br>
+                                ${data.duration ? '⏱️ المدة: ' + data.duration : ''}<br>
+                                ${data.views ? '👁️ المشاهدات: ' + data.views : ''}<br>
+                                ${data.publishDate ? '📅 تاريخ النشر: ' + data.publishDate : ''}
+                            </div>
+                        </div>
+
+                        ${data.description ? `
+                        <div class="info-box">
+                            <strong>📝 الوصف:</strong>
+                            <p>${data.description}</p>
+                        </div>
+                        ` : ''}
+
+                        <div class="links-section">
+                            <div class="section-title">🔗 الروابط المتاحة</div>
+
+                            <div class="link-card">
+                                <div class="link-header">
+                                    <span class="quality-badge">📺 رابط المشاهدة</span>
+                                    <span class="type-badge">YouTube</span>
+                                </div>
+                                <div class="link-url">${url}</div>
+                                <div class="link-actions">
+                                    <button class="btn-small btn-copy" onclick="copyToClipboard('${url.replace(/'/g, "\\'")}')">
+                                        📋 نسخ الرابط
+                                    </button>
+                                    <button class="btn-small btn-download" onclick="openLink('${url.replace(/'/g, "\\'")}')">
+                                        🔗 فتح في يوتيوب
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="link-card">
+                                <div class="link-header">
+                                    <span class="quality-badge">🎥 رابط التضمين</span>
+                                    <span class="type-badge">Embed</span>
+                                </div>
+                                <div class="link-url">${embedUrl}</div>
+                                <div class="link-actions">
+                                    <button class="btn-small btn-copy" onclick="copyToClipboard('${embedUrl}')">
+                                        📋 نسخ رابط التضمين
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="link-card">
+                                <div class="link-header">
+                                    <span class="quality-badge">🖼️ الصورة المصغرة</span>
+                                    <span class="type-badge">Thumbnail</span>
+                                </div>
+                                <div class="link-url">${thumbnailUrl}</div>
+                                <div class="link-actions">
+                                    <button class="btn-small btn-copy" onclick="copyToClipboard('${thumbnailUrl}')">
+                                        📋 نسخ رابط الصورة
+                                    </button>
+                                    <button class="btn-small btn-download" onclick="openLink('${thumbnailUrl}')">
+                                        🖼️ عرض الصورة
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 25px; border-radius: 15px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+                            <iframe width="100%" height="450" src="${embedUrl}"
+                                    frameborder="0" allowfullscreen
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                            </iframe>
+                        </div>
+
+                        <div class="info-box" style="margin-top: 20px;">
+                            <p><strong>💡 ملاحظة:</strong></p>
+                            <p>لتحميل الفيديو بجودات مختلفة، يمكنك استخدام مواقع متخصصة مثل:</p>
+                            <p>• savefrom.net • y2mate.com • yt1s.com</p>
+                            <p>فقط الصق الرابط في أحد هذه المواقع.</p>
+                        </div>
+                    </div>
+                `;
+
+                document.getElementById('result').innerHTML = html;
+                document.getElementById('result').classList.add('active');
+
+            } catch (error) {
+                showError("❌ حدث خطأ في معالجة البيانات: " + error.message);
+            }
+        }
+
+        function parseTextResponse(text, url) {
+            // محاولة استخراج المعلومات من النص
+            return {
+                title: extractFromText(text, 'title') || extractFromText(text, 'عنوان') || 'فيديو يوتيوب',
+                channel: extractFromText(text, 'channel') || extractFromText(text, 'قناة'),
+                duration: extractFromText(text, 'duration') || extractFromText(text, 'مدة'),
+                description: extractFromText(text, 'description') || extractFromText(text, 'وصف'),
+                views: extractFromText(text, 'views') || extractFromText(text, 'مشاهدات'),
+                publishDate: extractFromText(text, 'publishDate') || extractFromText(text, 'تاريخ')
+            };
+        }
+
+        function extractFromText(text, key) {
+            const patterns = [
+                new RegExp(`"${key}"\\s*:\\s*"([^"]*)"`, 'i'),
+                new RegExp(`${key}:\\s*([^\\n,}]+)`, 'i')
+            ];
+
+            for (let pattern of patterns) {
+                const match = text.match(pattern);
+                if (match) return match[1].trim();
+            }
+            return null;
+        }
+
+        function extractVideoId(url) {
+            const patterns = [
+                /(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?\s]+)/,
+                /youtube\.com\/embed\/([^&?\s]+)/,
+                /youtube\.com\/v\/([^&?\s]+)/
+            ];
+
+            for (let pattern of patterns) {
+                const match = url.match(pattern);
+                if (match) return match[1];
+            }
+            return null;
+        }
+
+        function isValidYoutubeUrl(url) {
+            return /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/.test(url);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('✅ تم النسخ بنجاح!');
+            }).catch(err => {
+                showToast('❌ فشل النسخ: ' + err);
+            });
+        }
+
+        function openLink(url) {
+            window.open(url, '_blank');
+        }
+
+        function showLoading() {
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('extractBtn').disabled = true;
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('active');
+            document.getElementById('extractBtn').disabled = false;
+        }
+
+        function showError(message) {
+            const html = `
+                <div class="card">
+                    <div class="error">
+                        <div class="error-title">⚠️ خطأ</div>
+                        <p>${message}</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('result').innerHTML = html;
+            document.getElementById('result').classList.add('active');
+        }
+
+        function showToast(message) {
+            // إنشاء toast بسيط
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #1a472a 0%, #0f2818 100%);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: slideDown 0.3s ease;
+                font-weight: 600;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Theme toggle (without localStorage)
+        let userThemePreference = null;
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            document.getElementById('themeBtn').textContent = isDark ? '☀️' : '🌙';
+            userThemePreference = isDark ? 'dark' : 'light';
+        }
+
+        // تطبيق الثيم بناءً على تفضيلات النظام
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.body.classList.add('dark');
+            document.getElementById('themeBtn').textContent = '☀️';
+        }
+
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (userThemePreference === null) {
+                if (event.matches) {
+                    document.body.classList.add('dark');
+                    document.getElementById('themeBtn').textContent = '☀️';
+                } else {
+                    document.body.classList.remove('dark');
+                    document.getElementById('themeBtn').textContent = '🌙';
+                }
+            }
+        });
+
+        // السماح بالضغط على Enter
+        document.getElementById('youtubeUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') extractVideo();
+        });
+
+        // إضافة أنماط الـ toast animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from {
+                    opacity: 0;
+                    transform: translate(-50%, -20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translate(-50%, 0);
+                }
+            }
+            @keyframes slideUp {
+                from {
+                    opacity: 1;
+                    transform: translate(-50%, 0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translate(-50%, -20px);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>
+
