@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>البث المباشر - المدرس</title>
+    <title>المدرس - البث المباشر</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, sans-serif; }
         body { margin: 0; padding: 20px; background: #f0f2f5; }
-        .container { max-width: 1200px; margin: auto; }
+        .container { max-width: 800px; margin: auto; }
         h1 { color: #1a73e8; text-align: center; }
         .video-container {
-            width: 100%; max-width: 800px; margin: 20px auto;
-            background: black; border-radius: 10px; overflow: hidden;
+            width: 100%; background: black; border-radius: 10px;
+            overflow: hidden; margin: 20px 0;
         }
-        video { width: 100%; height: auto; max-height: 500px; }
+        video { width: 100%; max-height: 400px; }
         .controls { text-align: center; margin: 20px 0; }
         button {
             background: #1a73e8; color: white; border: none;
@@ -21,31 +21,22 @@
             font-size: 18px; cursor: pointer;
         }
         button:disabled { background: #ccc; }
-        .url-box {
-            background: #e8f0fe; padding: 15px; border-radius: 5px;
-            margin: 20px 0; display: none;
-        }
-        .status {
-            padding: 10px; border-radius: 5px; margin: 10px 0;
-            text-align: center;
-        }
-        .active { background: #d4edda; color: #155724; }
-        .inactive { background: #f8d7da; color: #721c24; }
-        .viewers {
-            background: #fff3cd; padding: 10px; border-radius: 5px;
-            margin: 10px 0; text-align: center;
-        }
+        .status { padding: 10px; border-radius: 5px; margin: 10px 0; text-align: center; }
+        .active { background: #4CAF50; color: white; }
+        .inactive { background: #f44336; color: white; }
+        .info { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .url-box { background: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🎓 بث مباشر من صفحتك - المدرس</h1>
+        <h1>🎓 البث المباشر - المدرس</h1>
         
         <div class="video-container">
             <video id="localVideo" autoplay muted></video>
         </div>
         
-        <div class="viewers" id="viewersCount">👥 عدد المشاهدين: <span id="count">0</span></div>
+        <div class="status inactive" id="status">⚫ البث غير نشط</div>
         
         <div class="controls">
             <button onclick="startBroadcast()" id="startBtn">▶ بدء البث</button>
@@ -53,316 +44,193 @@
             <button onclick="toggleScreenShare()" id="screenBtn">🖥️ مشاركة الشاشة</button>
         </div>
         
-        <div class="status inactive" id="status">⚫ البث غير نشط</div>
-        
-        <div class="url-box" id="urlBox">
+        <div class="url-box" id="urlBox" style="display: none;">
             <h3>🔗 رابط المشاهدة للطلاب:</h3>
-            <p id="broadcastUrl">جاري إنشاء الرابط...</p>
+            <p id="broadcastUrl">...</p>
             <button onclick="copyUrl()">📋 نسخ الرابط</button>
-            <p style="color: #666; margin-top: 10px;">
-                أرسل هذا الرابط للطلاب لمشاهدة البث المباشر
-            </p>
+            <p style="color: #666;">أرسل هذا الرابط للطلاب لمشاهدة البث</p>
         </div>
         
-        <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin-top: 30px;">
-            <h3>🎯 كيف يعمل:</h3>
-            <p>1. اضغط "بدء البث" ← سيأخذ إذن الكاميرا والميكروفون</p>
+        <div class="info">
+            <h3>🎯 التعليمات:</h3>
+            <p>1. اضغط "بدء البث" ← سيأخذ إذن الكاميرا</p>
             <p>2. انسخ الرابط الذي سيظهر ← أرسله للطلاب</p>
             <p>3. تحدث بشكل طبيعي ← الطلاب سيشاهدون ويسمعون</p>
-            <p style="color: #d32f2f; font-weight: bold;">
-                ⚠️ يجب فتح صفحة المدرس أولاً قبل إرسال الرابط للطلاب
-            </p>
         </div>
     </div>
 
     <script>
         let localStream;
-        let peerConnections = new Map(); // خريطة لاتصالات الطلاب
-        let isBroadcasting = false;
-        let broadcastUrl = '';
-        let isScreenSharing = false;
-        let broadcastId;
+        let mediaRecorder;
         let ws;
+        let broadcastId;
+        let isBroadcasting = false;
+        let audioChunks = [];
         
-        // WebSocket للتواصل مع الطلاب
-        const wsUrl = 'wss://free.blr2.piesocket.com/v3/1?api_key=YOUR_API_KEY&notify_self=1';
-        // أو استخدم خادم محلي: 'ws://localhost:8080'
-        
-        // إنشاء معرف فريد للبث
+        // توليد معرف البث
         function generateBroadcastId() {
-            return 'class_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-        
-        // الاتصال بخادم WebSocket
-        function connectWebSocket() {
-            try {
-                // استخدام خادم WebSocket مجاني
-                ws = new WebSocket('wss://free.blr2.piesocket.com/v3/1?api_key=YOUR_API_KEY&notify_self=1');
-                
-                ws.onopen = () => {
-                    console.log('✅ اتصل بخادم WebSocket');
-                    broadcastId = generateBroadcastId();
-                    
-                    // إنشاء رابط البث
-                    const currentUrl = window.location.origin + window.location.pathname;
-                    const studentUrl = currentUrl.replace('teacher.html', '') + 
-                                      'student.html?room=' + broadcastId;
-                    
-                    broadcastUrl = studentUrl;
-                    
-                    // عرض رابط الطلاب
-                    document.getElementById('broadcastUrl').textContent = studentUrl;
-                    document.getElementById('urlBox').style.display = 'block';
-                    
-                    // إرسال رسالة إنشاء غرفة
-                    ws.send(JSON.stringify({
-                        type: 'create_room',
-                        roomId: broadcastId,
-                        from: 'teacher'
-                    }));
-                };
-                
-                ws.onmessage = (event) => {
-                    const data = JSON.parse(event.data);
-                    handleSignalingMessage(data);
-                };
-                
-                ws.onerror = (error) => {
-                    console.error('❌ خطأ في WebSocket:', error);
-                    // استخدم localStorage كبديل
-                    useLocalStorageFallback();
-                };
-                
-            } catch (error) {
-                console.error('❌ خطأ في الاتصال:', error);
-                useLocalStorageFallback();
-            }
-        }
-        
-        // بديل باستخدام localStorage
-        function useLocalStorageFallback() {
-            console.log('⚡ استخدام localStorage كبديل');
-            broadcastId = generateBroadcastId();
-            
-            // إنشاء رابط البث
-            const currentUrl = window.location.origin + window.location.pathname;
-            const studentUrl = currentUrl.replace('teacher.html', '') + 
-                              'student.html?room=' + broadcastId;
-            
-            broadcastUrl = studentUrl;
-            document.getElementById('broadcastUrl').textContent = studentUrl;
-            document.getElementById('urlBox').style.display = 'block';
-            
-            // تحديث العرض المحفوظ كل 2 ثانية
-            setInterval(() => {
-                if (isBroadcasting) {
-                    localStorage.setItem('broadcast_active_' + broadcastId, 'true');
-                    localStorage.setItem('broadcast_time_' + broadcastId, Date.now().toString());
-                }
-            }, 2000);
+            return 'class_' + Date.now();
         }
         
         async function startBroadcast() {
             try {
-                document.getElementById('startBtn').disabled = true;
-                document.getElementById('stopBtn').disabled = false;
-                
                 // طلب إذن الكاميرا والميكروفون
                 localStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 1280, height: 720 },
+                    video: { width: 640, height: 480 },
                     audio: true
                 });
                 
                 // عرض الفيديو المحلي
                 document.getElementById('localVideo').srcObject = localStream;
                 
-                // الاتصال بخادم الإشارة
-                connectWebSocket();
+                // إنشاء معرف البث
+                broadcastId = generateBroadcastId();
                 
-                // تحديث الحالة
-                isBroadcasting = true;
-                document.getElementById('status').className = 'status active';
-                document.getElementById('status').textContent = '🟢 البث نشط - جاري الإرسال';
+                // الاتصال بخادم WebSocket
+                const serverUrl = window.location.origin.replace('http', 'ws');
+                ws = new WebSocket(serverUrl);
                 
-                console.log('✅ البث بدأ! الرابط:', broadcastUrl);
+                ws.onopen = () => {
+                    // تسجيل كمدرس
+                    ws.send(JSON.stringify({
+                        type: 'register_teacher',
+                        broadcastId: broadcastId
+                    }));
+                    
+                    // إنشاء رابط البث
+                    const studentUrl = `${window.location.origin}/student?room=${broadcastId}`;
+                    document.getElementById('broadcastUrl').textContent = studentUrl;
+                    document.getElementById('urlBox').style.display = 'block';
+                    
+                    // بدء إرسال الفيديو
+                    startVideoStreaming();
+                    
+                    // بدء إرسال الصوت
+                    startAudioStreaming();
+                    
+                    // تحديث الحالة
+                    isBroadcasting = true;
+                    document.getElementById('status').className = 'status active';
+                    document.getElementById('status').textContent = '🟢 البث نشط';
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('stopBtn').disabled = false;
+                    
+                    console.log('✅ البث بدأ!');
+                };
+                
+                ws.onerror = (error) => {
+                    console.error('❌ خطأ في WebSocket:', error);
+                    alert('❌ خطأ في الاتصال بالخادم');
+                };
                 
             } catch (error) {
                 console.error('❌ خطأ في بدء البث:', error);
-                alert('❌ خطأ: ' + error.message + '\n\nتأكد من:'
-                    + '\n1. منح إذن الكاميرا والميكروفون'
-                    + '\n2. استخدام HTTPS'
-                    + '\n3. اتصال إنترنت جيد');
-                stopBroadcast();
+                alert('❌ خطأ: ' + error.message);
             }
         }
         
-        function handleSignalingMessage(data) {
-            if (data.type === 'join') {
-                // طالب جديد انضم
-                handleNewStudent(data.studentId);
-                updateViewerCount();
+        function startVideoStreaming() {
+            // التقاط فريمات الفيديو وإرسالها
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const video = document.getElementById('localVideo');
+            
+            canvas.width = 640;
+            canvas.height = 480;
+            
+            function captureFrame() {
+                if (!isBroadcasting) return;
                 
-            } else if (data.type === 'offer') {
-                // عرض من طالب
-                handleStudentOffer(data.studentId, data.offer);
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
-            } else if (data.type === 'answer') {
-                // إجابة من طالب
-                handleStudentAnswer(data.studentId, data.answer);
+                // تحويل إلى base64
+                canvas.toBlob((blob) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        // إرسال الفريم للخادم
+                        fetch('/stream', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ frame: reader.result })
+                        });
+                    };
+                    reader.readAsDataURL(blob);
+                }, 'image/jpeg', 0.5);
                 
-            } else if (data.type === 'ice_candidate') {
-                // مرشح ICE
-                handleICECandidate(data.studentId, data.candidate);
+                setTimeout(captureFrame, 100); // 10 فريمات في الثانية
             }
+            
+            captureFrame();
         }
         
-        async function handleNewStudent(studentId) {
-            // إنشاء اتصال WebRTC جديد لهذا الطالب
-            const pc = new RTCPeerConnection({
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' }
-                ]
-            });
+        function startAudioStreaming() {
+            // تسجيل الصوت وإرساله
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const source = audioContext.createMediaStreamSource(localStream);
+            const processor = audioContext.createScriptProcessor(1024, 1, 1);
             
-            // إضافة التدفق المحلي
-            localStream.getTracks().forEach(track => {
-                pc.addTrack(track, localStream);
-            });
+            source.connect(processor);
+            processor.connect(audioContext.destination);
             
-            // جمع مرشحي ICE
-            pc.onicecandidate = (event) => {
-                if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({
-                        type: 'ice_candidate',
-                        studentId: studentId,
-                        candidate: event.candidate,
-                        from: 'teacher'
-                    }));
+            processor.onaudioprocess = (e) => {
+                if (!isBroadcasting || !ws || ws.readyState !== WebSocket.OPEN) return;
+                
+                const inputData = e.inputBuffer.getChannelData(0);
+                const buffer = new Float32Array(inputData.length);
+                
+                for (let i = 0; i < inputData.length; i++) {
+                    buffer[i] = inputData[i];
                 }
-            };
-            
-            // حفظ الاتصال
-            peerConnections.set(studentId, pc);
-            
-            // إنشاء عرض وإرساله للطالب
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            
-            if (ws && ws.readyState === WebSocket.OPEN) {
+                
+                // إرسال جزء الصوت
                 ws.send(JSON.stringify({
-                    type: 'offer',
-                    studentId: studentId,
-                    offer: offer,
-                    from: 'teacher'
+                    type: 'audio_chunk',
+                    chunk: Array.from(buffer)
                 }));
-            }
-        }
-        
-        function handleStudentOffer(studentId, offer) {
-            // هذه الوظيفة للاتصال P2P بين الطلاب
-            // في نظام البث، المدرس فقط يرسل
-        }
-        
-        async function handleStudentAnswer(studentId, answer) {
-            const pc = peerConnections.get(studentId);
-            if (pc) {
-                await pc.setRemoteDescription(new RTCSessionDescription(answer));
-            }
-        }
-        
-        function handleICECandidate(studentId, candidate) {
-            const pc = peerConnections.get(studentId);
-            if (pc) {
-                pc.addIceCandidate(new RTCIceCandidate(candidate));
-            }
-        }
-        
-        function updateViewerCount() {
-            document.getElementById('count').textContent = peerConnections.size;
-        }
-        
-        async function toggleScreenShare() {
-            try {
-                if (isScreenSharing) {
-                    // العودة للكاميرا
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        video: true,
-                        audio: true
-                    });
-                    
-                    // استبدال التدفق في جميع الاتصالات
-                    replaceStream(stream);
-                    localStream = stream;
-                    
-                    document.getElementById('localVideo').srcObject = localStream;
-                    isScreenSharing = false;
-                    document.getElementById('screenBtn').textContent = '🖥️ مشاركة الشاشة';
-                    
-                } else {
-                    // مشاركة الشاشة
-                    const stream = await navigator.mediaDevices.getDisplayMedia({
-                        video: true,
-                        audio: true
-                    });
-                    
-                    // استبدال التدفق في جميع الاتصالات
-                    replaceStream(stream);
-                    localStream = stream;
-                    
-                    document.getElementById('localVideo').srcObject = localStream;
-                    isScreenSharing = true;
-                    document.getElementById('screenBtn').textContent = '📷 العودة للكاميرا';
-                }
-                
-            } catch (error) {
-                console.error('❌ خطأ في مشاركة الشاشة:', error);
-            }
-        }
-        
-        function replaceStream(newStream) {
-            // استبدال التدفق في جميع اتصالات الطلاب
-            peerConnections.forEach((pc, studentId) => {
-                const sender = pc.getSenders().find(s => 
-                    s.track && s.track.kind === 'video'
-                );
-                if (sender) {
-                    sender.replaceTrack(newStream.getVideoTracks()[0]);
-                }
-            });
+            };
         }
         
         function stopBroadcast() {
-            // إغلاق جميع الاتصالات
-            peerConnections.forEach((pc, studentId) => {
-                pc.close();
-            });
-            peerConnections.clear();
+            isBroadcasting = false;
             
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
             }
             
-            if (ws && ws.readyState === WebSocket.OPEN) {
+            if (ws) {
                 ws.close();
             }
             
-            isBroadcasting = false;
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = true;
             document.getElementById('status').className = 'status inactive';
             document.getElementById('status').textContent = '⚫ البث متوقف';
-            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
             document.getElementById('localVideo').srcObject = null;
-            document.getElementById('count').textContent = '0';
             
             console.log('⏹️ البث توقف');
         }
         
+        async function toggleScreenShare() {
+            try {
+                if (isBroadcasting) {
+                    const stream = await navigator.mediaDevices.getDisplayMedia({
+                        video: true,
+                        audio: true
+                    });
+                    
+                    localStream.getTracks().forEach(track => track.stop());
+                    localStream = stream;
+                    document.getElementById('localVideo').srcObject = localStream;
+                }
+            } catch (error) {
+                console.error('❌ خطأ في مشاركة الشاشة:', error);
+            }
+        }
+        
         function copyUrl() {
-            navigator.clipboard.writeText(broadcastUrl).then(() => {
-                alert('✅ تم نسخ رابط البث! أرسله للطلاب.');
+            const url = document.getElementById('broadcastUrl').textContent;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ تم نسخ رابط البث!');
             });
         }
         
@@ -374,4 +242,4 @@
         });
     </script>
 </body>
-</html>
+                </html>
