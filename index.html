@@ -1,30 +1,32 @@
-
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>البث المباشر</title>
     <style>
-        body { margin:0; background:#000; text-align:center; color:#fff; }
-        #localVideo { width:100%; max-width:640px; background:#333; }
-        button { padding:15px; margin:10px; font-size:16px; }
+        body { margin:0; background:#000; text-align:center; color:#fff; font-family:Arial; }
+        #localVideo { width:100%; max-width:640px; background:#333; border-radius:10px; }
+        button { padding:15px 25px; margin:10px; font-size:16px; border:none; border-radius:8px; cursor:pointer; }
+        #status { margin:15px; padding:10px; background:#222; border-radius:5px; }
     </style>
-    <!-- مكتبة Ant Media الرسمية للويب -->
-    <script src="https://ant-media-2kbz.onrender.com/LiveApp/js/webrtc_adaptor.js"></script>
+    <!-- المكتبات الأساسية -->
+    <script src="https://cdn.jsdelivr.net/npm/webrtc-adapter@latest/dist/adapter.js"></script>
+    <!-- مكتبة Ant Media البديلة -->
+    <script src="https://cdn.jsdelivr.net/gh/ant-media/StreamApp@master/src/main/webapp/js/webrtc_adaptor.js"></script>
 </head>
 <body>
-    <h3>🎥 بث مباشر عبر WebView</h3>
-    <!-- مكان عرض الفيديو المحلي -->
+    <h2>🎥 بث مباشر عبر WebView</h2>
     <video id="localVideo" autoplay playsinline muted></video>
     <br>
     <button onclick="startBroadcast()" style="background:#4CAF50;">▶ بدء البث</button>
     <button onclick="stopBroadcast()" style="background:#f44336;">⏹ إيقاف البث</button>
-    <p id="status">جاهز...</p>
+    <p id="status">جاهز للتوصيل...</p>
 
     <script>
         // ========== إعدادات الخادم ==========
-        const SERVER_URL = "https://ant-media-2kbz.onrender.com/LiveApp/websocket";
-        const STREAM_ID = "streamId_e0aSlxZbd"; // غير هذا الـ ID إذا أردت
+        const SERVER_URL = "wss://ant-media-2kbz.onrender.com/LiveApp/websocket";
+        const STREAM_ID = "streamId_e0aSlxZbd";
         
         let webRTCAdaptor;
         let localStream;
@@ -33,67 +35,97 @@
 
         // ========== دالة بدء البث ==========
         async function startBroadcast() {
-            statusEl.textContent = "جاري طلب الكاميرا...";
+            statusEl.textContent = "جاري طلب إذن الكاميرا والميكروفون...";
+            statusEl.style.color = "yellow";
             
             try {
-                // 1. الحصول على الكاميرا والصوت
+                // طلب الكاميرا والصوت
                 localStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480 },
-                    audio: true
+                    video: { width: { ideal: 640 }, height: { ideal: 480 } },
+                    audio: { echoCancellation: true, noiseSuppression: true }
                 });
                 
-                // 2. عرض الفيديو المحلي
+                // عرض الفيديو المحلي
                 localVideo.srcObject = localStream;
-                statusEl.textContent = "الكاميرا جاهزة، جاري الاتصال بالخادم...";
+                statusEl.textContent = "✅ الكاميرا جاهزة، جاري الاتصال...";
                 
-                // 3. الاتصال بخادم Ant Media
+                // إنشاء كائن WebRTCAdaptor
+                if (typeof WebRTCAdaptor === 'undefined') {
+                    throw new Error("مكتبة WebRTCAdaptor لم تحمل. تحقق من اتصال الإنترنت.");
+                }
+                
                 webRTCAdaptor = new WebRTCAdaptor({
                     websocket_url: SERVER_URL,
                     mediaConstraints: { video: true, audio: true },
-                    peerconnection_config: { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] },
-                    sdp_constraints: { OfferToReceiveAudio: false, OfferToReceiveVideo: false },
+                    peerconnection_config: { 
+                        iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+                    },
+                    sdp_constraints: { 
+                        OfferToReceiveAudio: false, 
+                        OfferToReceiveVideo: false 
+                    },
                     localVideoId: "localVideo",
                     debug: true,
                     
                     callback: (info, obj) => {
+                        console.log("Callback:", info, obj);
                         if (info === "initialized") {
-                            statusEl.textContent = "متصل، جاري بدء البث...";
+                            statusEl.textContent = "متصل بالخادم، جاري بدء البث...";
                             webRTCAdaptor.publish(STREAM_ID);
                         } else if (info === "publish_started") {
-                            statusEl.textContent = "✅ البث المباشر يعمل!";
+                            statusEl.textContent = "✅ البث المباشر يعمل بنجاح!";
+                            statusEl.style.color = "#4CAF50";
                         } else if (info === "publish_finished") {
-                            statusEl.textContent = "البث توقف";
+                            statusEl.textContent = "⏹ توقف البث";
+                            statusEl.style.color = "white";
                         }
                     },
                     
                     callbackError: (error, message) => {
-                        statusEl.textContent = "خطأ: " + error;
-                        console.error(error, message);
+                        console.error("WebRTC Error:", error, message);
+                        statusEl.textContent = `❌ خطأ: ${error} - ${message || ''}`;
+                        statusEl.style.color = "#ff6b6b";
                     }
                 });
                 
             } catch (err) {
-                statusEl.textContent = "خطأ: " + err.message;
+                statusEl.textContent = "❌ خطأ: " + err.message;
+                statusEl.style.color = "#ff6b6b";
+                console.error("Start Broadcast Error:", err);
             }
         }
 
         // ========== دالة إيقاف البث ==========
         function stopBroadcast() {
             if (webRTCAdaptor) {
-                webRTCAdaptor.stop(STREAM_ID);
-                statusEl.textContent = "تم إيقاف البث";
+                try {
+                    webRTCAdaptor.stop(STREAM_ID);
+                } catch (e) { console.warn("Stop error:", e); }
             }
             if (localStream) {
                 localStream.getTracks().forEach(track => track.stop());
             }
             localVideo.srcObject = null;
+            statusEl.textContent = "⏹ البث متوقف";
+            statusEl.style.color = "white";
         }
 
-        // عند إغلاق الصفحة، أوقف البث
+        // أوقف البث عند إغلاق الصفحة
         window.addEventListener('beforeunload', stopBroadcast);
+        
+        // إظهار رسالة إذا لم تتحمل المكتبة
+        setTimeout(() => {
+            if (typeof WebRTCAdaptor === 'undefined') {
+                statusEl.innerHTML = "⚠ تحذير: مكتبة البث لم تحمل.<br>جاري إعادة المحاولة...";
+                // إعادة تحميل المكتبة تلقائياً
+                const script = document.createElement('script');
+                script.src = "https://cdn.jsdelivr.net/gh/ant-media/StreamApp@master/src/main/webapp/js/webrtc_adaptor.js";
+                document.head.appendChild(script);
+            }
+        }, 3000);
     </script>
 </body>
-</html>
+    </html>
 
 
 
