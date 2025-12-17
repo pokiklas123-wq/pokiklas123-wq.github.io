@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مشاهدة البث المباشر - طالب</title>
+    <style>
+        * { box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { margin: 0; padding: 10px; background: #000; color: white; }
+        
+        .header {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .live-badge {
+            background: #ff0000;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .video-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        video {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        
+        .connection-status {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        
+        .connected { background: rgba(76,175,80,0.2); border: 2px solid #4CAF50; }
+        .disconnected { background: rgba(244,67,54,0.2); border: 2px solid #F44336; }
+        
+        .viewer-info {
+            background: rgba(255,255,255,0.05);
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="live-badge">● مباشر</div>
+        <h2>📚 البث التعليمي المباشر</h2>
+        <p style="color: #aaa; margin: 5px 0;">جاري الاتصال بالبث...</p>
+    </div>
+    
+    <div class="connection-status disconnected" id="connectionStatus">
+        🔴 جاري الاتصال...
+    </div>
+    
+    <div class="video-container">
+        <video id="remoteVideo" autoplay controls playsinline></video>
+    </div>
+    
+    <div class="controls">
+        <button onclick="toggleFullscreen()">📺 ملء الشاشة</button>
+        <button onclick="toggleAudio()" id="audioBtn">🔊 الصوت</button>
+        <button onclick="reconnect()">🔄 إعادة الاتصال</button>
+    </div>
+    
+    <div class="viewer-info">
+        <p>👁️ <span id="viewerCount">1</span> مشاهد</p>
+        <p>🕐 <span id="broadcastTime">00:00</span> مدة المشاهدة</p>
+    </div>
+    
+    <div style="text-align: center; margin-top: 20px; color: #888; font-size: 12px;">
+        <p>🔊 تأكد من تشغيل الصوت | 📱 يدعم جميع الأجهزة</p>
+        <p>لأي مشكلة: اضغط "إعادة الاتصال" أو أعد تحميل الصفحة</p>
+    </div>
+
+    <script>
+        let peerConnection;
+        let isConnected = false;
+        let startTime;
+        let audioMuted = false;
+        
+        // الحصول على معرف البث من الرابط
+        function getBroadcastId() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('id');
+        }
+        
+        // الاتصال بالبث
+        async function connectToBroadcast() {
+            const broadcastId = getBroadcastId();
+            
+            if (!broadcastId) {
+                document.getElementById('connectionStatus').innerHTML = 
+                    '❌ رابط غير صالح. اطلب الرابط الصحيح من المدرس.';
+                return;
+            }
+            
+            try {
+                // الحصول على العرض من localStorage (محاكاة للخادم)
+                const offerData = localStorage.getItem('broadcast_offer_' + broadcastId);
+                
+                if (!offerData) {
+                    document.getElementById('connectionStatus').innerHTML = 
+                        '⏳ انتظر حتى يبدأ المدرس البث...';
+                    setTimeout(connectToBroadcast, 3000);
+                    return;
+                }
+                
+                const offer = JSON.parse(offerData);
+                
+                // إنشاء اتصال WebRTC
+                peerConnection = new RTCPeerConnection({
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' }
+                    ]
+                });
+                
+                // عند استقبال تدفق
+                peerConnection.ontrack = (event) => {
+                    document.getElementById('remoteVideo').srcObject = event.streams[0];
+                    document.getElementById('connectionStatus').className = 'connection-status connected';
+                    document.getElementById('connectionStatus').innerHTML = '🟢 متصل - جاري البث';
+                    isConnected = true;
+                    startTime = new Date();
+                    updateBroadcastTime();
+                };
+                
+                peerConnection.onicecandidate = (event) => {
+                    // معالجة ICE candidates
+                };
+                
+                // إنشاء الإجابة
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                
+                // حفظ الإجابة (محاكاة للخادم)
+                localStorage.setItem('broadcast_answer_' + broadcastId, JSON.stringify(answer));
+                
+                // ضبط العرض البعيد
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+                
+                console.log('✅ اتصل بالبث بنجاح!');
+                
+            } catch (error) {
+                console.error('❌ خطأ في الاتصال:', error);
+                document.getElementById('connectionStatus').innerHTML = 
+                    '❌ خطأ في الاتصال: ' + error.message;
+                setTimeout(connectToBroadcast, 5000);
+            }
+        }
+        
+        function toggleFullscreen() {
+            const video = document.getElementById('remoteVideo');
+            
+            if (!document.fullscreenElement) {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        }
+        
+        function toggleAudio() {
+            const video = document.getElementById('remoteVideo');
+            const audioBtn = document.getElementById('audioBtn');
+            
+            if (audioMuted) {
+                video.muted = false;
+                audioBtn.textContent = '🔊 الصوت';
+                audioMuted = false;
+            } else {
+                video.muted = true;
+                audioBtn.textContent = '🔇 كتم';
+                audioMuted = true;
+            }
+        }
+        
+        function reconnect() {
+            if (peerConnection) {
+                peerConnection.close();
+            }
+            document.getElementById('connectionStatus').className = 'connection-status disconnected';
+            document.getElementById('connectionStatus').innerHTML = '🔄 جاري إعادة الاتصال...';
+            connectToBroadcast();
+        }
+        
+        function updateBroadcastTime() {
+            if (!startTime) return;
+            
+            setInterval(() => {
+                const now = new Date();
+                const diff = Math.floor((now - startTime) / 1000);
+                const hours = Math.floor(diff / 3600);
+                const minutes = Math.floor((diff % 3600) / 60);
+                const seconds = diff % 60;
+                
+                let timeStr = '';
+                if (hours > 0) {
+                    timeStr += hours.toString().padStart(2, '0') + ':';
+                }
+                timeStr += minutes.toString().padStart(2, '0') + ':' + 
+                          seconds.toString().padStart(2, '0');
+                
+                document.getElementById('broadcastTime').textContent = timeStr;
+            }, 1000);
+        }
+        
+        // تشغيل عند تحميل الصفحة
+        window.onload = () => {
+            connectToBroadcast();
+            
+            // تحقق من الاتصال كل 10 ثواني
+            setInterval(() => {
+                const video = document.getElementById('remoteVideo');
+                if (isConnected && video.srcObject && 
+                    video.srcObject.getTracks().length > 0) {
+                    // الاتصال جيد
+                } else if (isConnected) {
+                    reconnect();
+                }
+            }, 10000);
+        };
+        
+        // إغلاق الاتصال عند مغادرة الصفحة
+        window.addEventListener('beforeunload', () => {
+            if (peerConnection) {
+                peerConnection.close();
+            }
+        });
+    </script>
+</body>
+</html>
