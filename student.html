@@ -3,94 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مشاهدة البث المباشر - طالب</title>
+    <title>مشاهدة البث المباشر</title>
     <style>
         * { box-sizing: border-box; font-family: Arial, sans-serif; }
         body { margin: 0; padding: 10px; background: #000; color: white; }
-        
         .header {
-            text-align: center;
-            padding: 10px;
+            text-align: center; padding: 10px;
             background: rgba(255,255,255,0.1);
-            border-radius: 10px;
-            margin-bottom: 10px;
+            border-radius: 10px; margin-bottom: 10px;
         }
-        
         .live-badge {
-            background: #ff0000;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            display: inline-block;
+            background: #ff0000; color: white; padding: 5px 15px;
+            border-radius: 20px; display: inline-block;
             animation: pulse 1.5s infinite;
         }
-        
         @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
+            0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; }
         }
-        
         .video-container {
-            width: 100%;
-            max-width: 1200px;
-            margin: auto;
-            background: #000;
-            border-radius: 10px;
-            overflow: hidden;
+            width: 100%; max-width: 1200px; margin: auto;
+            background: #000; border-radius: 10px; overflow: hidden;
             position: relative;
         }
-        
-        video {
-            width: 100%;
-            height: auto;
-            max-height: 70vh;
-            background: #000;
-        }
-        
+        canvas { width: 100%; max-height: 70vh; background: #000; }
         .loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 20px;
-            border-radius: 10px;
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); text-align: center;
+            color: white; background: rgba(0,0,0,0.7);
+            padding: 20px; border-radius: 10px;
         }
-        
-        .controls {
-            text-align: center;
-            margin: 15px 0;
-        }
-        
+        .controls { text-align: center; margin: 15px 0; }
         button {
-            background: #1a73e8;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            margin: 5px;
-            cursor: pointer;
+            background: #1a73e8; color: white; border: none;
+            padding: 10px 20px; border-radius: 5px; margin: 5px; cursor: pointer;
         }
-        
-        .connection-status {
-            text-align: center;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-        }
-        
-        .connected { background: rgba(76,175,80,0.2); border: 2px solid #4CAF50; }
-        .disconnected { background: rgba(244,67,54,0.2); border: 2px solid #F44336; }
-        
-        .viewer-info {
-            background: rgba(255,255,255,0.05);
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 10px;
-            text-align: center;
+        .status {
+            text-align: center; padding: 10px; margin: 10px 0;
+            border-radius: 5px; background: rgba(255,255,255,0.1);
         }
     </style>
 </head>
@@ -98,20 +47,15 @@
     <div class="header">
         <div class="live-badge">● مباشر</div>
         <h2>📚 البث التعليمي المباشر</h2>
-        <p style="color: #aaa; margin: 5px 0;" id="statusText">جاري الاتصال بالبث...</p>
-    </div>
-    
-    <div class="connection-status disconnected" id="connectionStatus">
-        🔴 جاري الاتصال...
+        <div class="status" id="status">🔴 جاري الاتصال...</div>
     </div>
     
     <div class="video-container">
         <div class="loading" id="loading">
             <div style="font-size: 24px; margin-bottom: 10px;">⏳</div>
             <p>جاري الاتصال بالبث المباشر...</p>
-            <p style="font-size: 12px; color: #aaa;">قد يستغرق بضع ثواني</p>
         </div>
-        <video id="remoteVideo" autoplay playsinline></video>
+        <canvas id="videoCanvas"></canvas>
     </div>
     
     <div class="controls">
@@ -120,340 +64,163 @@
         <button onclick="reconnect()">🔄 إعادة الاتصال</button>
     </div>
     
-    <div class="viewer-info">
-        <p>👁️ أنت مشاهد <span id="viewerNumber">#1</span></p>
-        <p>🕐 <span id="broadcastTime">00:00</span> مدة المشاهدة</p>
-    </div>
-    
     <div style="text-align: center; margin-top: 20px; color: #888; font-size: 12px;">
-        <p>🔊 تأكد من تشغيل الصوت | 📱 يدعم جميع الأجهزة</p>
-        <p>لأي مشكلة: اضغط "إعادة الاتصال" أو أعد تحميل الصفحة</p>
+        <p>🔊 تأكد من تشغيل الصوت</p>
+        <p>لأي مشكلة: أعد تحميل الصفحة أو اطلب الرابط الجديد</p>
     </div>
 
     <script>
-        let peerConnection;
-        let isConnected = false;
-        let startTime;
-        let audioMuted = false;
         let ws;
-        let studentId;
-        let roomId;
+        let canvas, ctx;
+        let audioContext;
+        let audioQueue = [];
+        let isConnected = false;
         
-        // توليد معرف فريد للطالب
-        function generateStudentId() {
-            return 'student_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
-        
-        // الحصول على معرف الغرفة من الرابط
+        // الحصول على معرف الغرفة
         function getRoomId() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get('room');
         }
         
-        // الاتصال بخادم WebSocket
-        function connectWebSocket() {
-            roomId = getRoomId();
+        // الاتصال بالبث
+        function connectToBroadcast() {
+            const roomId = getRoomId();
             
             if (!roomId) {
-                showError('❌ رابط غير صالح. اطلب الرابط الصحيح من المدرس.');
+                document.getElementById('status').textContent = '❌ رابط غير صالح';
                 return;
             }
             
-            studentId = generateStudentId();
+            // إعداد Canvas
+            canvas = document.getElementById('videoCanvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = 640;
+            canvas.height = 480;
             
-            try {
-                // استخدام خادم WebSocket مجاني
-                ws = new WebSocket('wss://free.blr2.piesocket.com/v3/1?api_key=YOUR_API_KEY&notify_self=1');
+            // الاتصال بخادم WebSocket
+            const serverUrl = window.location.origin.replace('http', 'ws');
+            ws = new WebSocket(serverUrl);
+            
+            ws.onopen = () => {
+                console.log('✅ اتصل بالخادم');
+                ws.send(JSON.stringify({
+                    type: 'register_viewer',
+                    roomId: roomId
+                }));
                 
-                ws.onopen = () => {
-                    console.log('✅ اتصل بخادم WebSocket');
+                document.getElementById('status').textContent = '🟡 في انتظار البث...';
+                
+                // بدء تشغيل الصوت
+                initAudio();
+            };
+            
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'broadcast_info') {
+                    if (data.status === 'active') {
+                        document.getElementById('status').textContent = '🟢 متصل - جاري البث';
+                        document.getElementById('loading').style.display = 'none';
+                        isConnected = true;
+                    }
                     
-                    // الانضمام للغرفة
-                    ws.send(JSON.stringify({
-                        type: 'join',
-                        roomId: roomId,
-                        studentId: studentId,
-                        from: 'student'
-                    }));
+                } else if (data.type === 'video_frame') {
+                    // عرض الفريم
+                    displayVideoFrame(data.frame);
                     
-                    updateStatus('🟡 في انتظار بدء البث...');
-                };
-                
-                ws.onmessage = async (event) => {
-                    const data = JSON.parse(event.data);
-                    await handleSignalingMessage(data);
-                };
-                
-                ws.onerror = (error) => {
-                    console.error('❌ خطأ في WebSocket:', error);
-                    updateStatus('🔴 خطأ في الاتصال. جاري المحاولة...');
-                    setTimeout(connectWebSocket, 3000);
-                };
-                
-            } catch (error) {
+                } else if (data.type === 'audio_data') {
+                    // تشغيل الصوت
+                    playAudio(data.data);
+                    
+                } else if (data.type === 'broadcast_ended') {
+                    document.getElementById('status').textContent = '⏹️ انتهى البث';
+                    document.getElementById('loading').style.display = 'block';
+                    document.getElementById('loading').innerHTML = `
+                        <div style="font-size: 24px; margin-bottom: 10px;">🏁</div>
+                        <p>انتهى البث المباشر</p>
+                    `;
+                    isConnected = false;
+                }
+            };
+            
+            ws.onerror = (error) => {
                 console.error('❌ خطأ في الاتصال:', error);
-                useLocalStorageFallback();
-            }
-        }
-        
-        // بديل باستخدام localStorage
-        function useLocalStorageFallback() {
-            roomId = getRoomId();
+                document.getElementById('status').textContent = '🔴 خطأ في الاتصال';
+                setTimeout(connectToBroadcast, 3000);
+            };
             
-            if (!roomId) {
-                showError('❌ رابط غير صالح.');
-                return;
-            }
-            
-            // التحقق إذا كان البث نشط
-            const isActive = localStorage.getItem('broadcast_active_' + roomId);
-            const lastTime = localStorage.getItem('broadcast_time_' + roomId);
-            
-            if (!isActive || !lastTime) {
-                updateStatus('⏳ انتظر حتى يبدأ المدرس البث...');
-                setTimeout(useLocalStorageFallback, 3000);
-                return;
-            }
-            
-            // البث نشط، إنشاء اتصال WebRTC مباشر
-            createPeerConnection();
-            
-            // محاولة الاتصال كل 5 ثواني
-            setInterval(() => {
-                const stillActive = localStorage.getItem('broadcast_active_' + roomId);
-                if (!stillActive && isConnected) {
-                    showError('❌ توقف البث. سيتم إعادة المحاولة...');
-                    reconnect();
+            ws.onclose = () => {
+                if (isConnected) {
+                    document.getElementById('status').textContent = '🔴 انقطع الاتصال - جاري إعادة المحاولة...';
+                    setTimeout(connectToBroadcast, 2000);
                 }
-            }, 5000);
+            };
         }
         
-        async function handleSignalingMessage(data) {
-            if (data.type === 'offer' && data.studentId === studentId) {
-                // عرض من المدرس
-                await handleOffer(data.offer);
-                
-            } else if (data.type === 'ice_candidate' && data.studentId === studentId) {
-                // مرشح ICE من المدرس
-                await handleICECandidate(data.candidate);
-                
-            } else if (data.type === 'broadcast_started') {
-                // البث بدأ
-                updateStatus('🟢 البث بدأ! جاري الاتصال...');
-                
-            } else if (data.type === 'broadcast_ended') {
-                // البث انتهى
-                showError('⏹️ انتهى البث المباشر.');
-            }
+        function displayVideoFrame(frameData) {
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            };
+            img.src = frameData;
         }
         
-        async function createPeerConnection() {
+        function initAudio() {
             try {
-                peerConnection = new RTCPeerConnection({
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun2.l.google.com:19302' }
-                    ]
-                });
-                
-                // عند استقبال تدفق
-                peerConnection.ontrack = (event) => {
-                    console.log('✅ استلم تدفق فيديو/صوت');
-                    document.getElementById('remoteVideo').srcObject = event.streams[0];
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('connectionStatus').className = 'connection-status connected';
-                    document.getElementById('connectionStatus').innerHTML = '🟢 متصل - جاري البث';
-                    document.getElementById('statusText').textContent = 'البث المباشر جاري';
-                    isConnected = true;
-                    startTime = new Date();
-                    updateBroadcastTime();
-                };
-                
-                peerConnection.onicecandidate = (event) => {
-                    if (event.candidate && ws && ws.readyState === WebSocket.OPEN) {
-                        ws.send(JSON.stringify({
-                            type: 'ice_candidate',
-                            studentId: studentId,
-                            candidate: event.candidate,
-                            from: 'student'
-                        }));
-                    }
-                };
-                
-                peerConnection.oniceconnectionstatechange = () => {
-                    console.log('ICE connection state:', peerConnection.iceConnectionState);
-                    
-                    if (peerConnection.iceConnectionState === 'disconnected' ||
-                        peerConnection.iceConnectionState === 'failed') {
-                        updateStatus('🔴 انقطع الاتصال. جاري إعادة المحاولة...');
-                        setTimeout(reconnect, 3000);
-                    }
-                };
-                
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
             } catch (error) {
-                console.error('❌ خطأ في إنشاء الاتصال:', error);
-                showError('❌ خطأ في الاتصال: ' + error.message);
+                console.error('❌ لا يدعم الصوت:', error);
             }
         }
         
-        async function handleOffer(offer) {
+        function playAudio(audioData) {
+            if (!audioContext) return;
+            
             try {
-                if (!peerConnection) {
-                    await createPeerConnection();
-                }
+                const buffer = new Float32Array(audioData);
+                const audioBuffer = audioContext.createBuffer(1, buffer.length, 24000);
+                audioBuffer.copyToChannel(buffer, 0);
                 
-                await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-                
-                // إنشاء إجابة
-                const answer = await peerConnection.createAnswer();
-                await peerConnection.setLocalDescription(answer);
-                
-                // إرسال الإجابة للمدرس
-                if (ws && ws.readyState === WebSocket.OPEN) {
-                    ws.send(JSON.stringify({
-                        type: 'answer',
-                        studentId: studentId,
-                        answer: answer,
-                        from: 'student'
-                    }));
-                }
-                
-                updateStatus('🟢 متصل! جاري استقبال البث...');
-                
+                const source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(audioContext.destination);
+                source.start();
             } catch (error) {
-                console.error('❌ خطأ في معالجة العرض:', error);
-                showError('❌ خطأ في الاتصال: ' + error.message);
-            }
-        }
-        
-        async function handleICECandidate(candidate) {
-            try {
-                if (peerConnection && candidate) {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
-                }
-            } catch (error) {
-                console.error('❌ خطأ في إضافة مرشح ICE:', error);
+                console.error('❌ خطأ في تشغيل الصوت:', error);
             }
         }
         
         function toggleFullscreen() {
-            const video = document.getElementById('remoteVideo');
-            
             if (!document.fullscreenElement) {
-                if (video.requestFullscreen) {
-                    video.requestFullscreen();
-                } else if (video.webkitRequestFullscreen) {
-                    video.webkitRequestFullscreen();
-                } else if (video.mozRequestFullScreen) {
-                    video.mozRequestFullScreen();
-                }
+                canvas.requestFullscreen().catch(err => {
+                    console.error(`خطأ في ملء الشاشة: ${err.message}`);
+                });
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                }
+                document.exitFullscreen();
             }
         }
         
         function toggleAudio() {
-            const video = document.getElementById('remoteVideo');
-            const audioBtn = document.getElementById('audioBtn');
-            
-            if (audioMuted) {
-                video.muted = false;
-                audioBtn.textContent = '🔊 الصوت';
-                audioMuted = false;
+            const btn = document.getElementById('audioBtn');
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+                btn.textContent = '🔊 الصوت';
             } else {
-                video.muted = true;
-                audioBtn.textContent = '🔇 كتم';
-                audioMuted = true;
+                audioContext.suspend();
+                btn.textContent = '🔇 كتم';
             }
         }
         
         function reconnect() {
-            if (peerConnection) {
-                peerConnection.close();
-                peerConnection = null;
-            }
-            
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.close();
-            }
-            
-            isConnected = false;
-            document.getElementById('connectionStatus').className = 'connection-status disconnected';
-            document.getElementById('connectionStatus').innerHTML = '🔄 جاري إعادة الاتصال...';
+            if (ws) ws.close();
+            document.getElementById('status').textContent = '🔄 جاري إعادة الاتصال...';
             document.getElementById('loading').style.display = 'block';
-            document.getElementById('statusText').textContent = 'جاري إعادة الاتصال...';
-            
-            setTimeout(() => {
-                connectWebSocket();
-            }, 1000);
+            setTimeout(connectToBroadcast, 500);
         }
         
-        function updateBroadcastTime() {
-            if (!startTime) return;
-            
-            setInterval(() => {
-                const now = new Date();
-                const diff = Math.floor((now - startTime) / 1000);
-                const hours = Math.floor(diff / 3600);
-                const minutes = Math.floor((diff % 3600) / 60);
-                const seconds = diff % 60;
-                
-                let timeStr = '';
-                if (hours > 0) {
-                    timeStr += hours.toString().padStart(2, '0') + ':';
-                }
-                timeStr += minutes.toString().padStart(2, '0') + ':' + 
-                          seconds.toString().padStart(2, '0');
-                
-                document.getElementById('broadcastTime').textContent = timeStr;
-            }, 1000);
-        }
-        
-        function updateStatus(message) {
-            document.getElementById('statusText').textContent = message;
-        }
-        
-        function showError(message) {
-            document.getElementById('connectionStatus').className = 'connection-status disconnected';
-            document.getElementById('connectionStatus').innerHTML = message;
-            document.getElementById('statusText').textContent = message;
-        }
-        
-        // تشغيل عند تحميل الصفحة
-        window.onload = () => {
-            connectWebSocket();
-            
-            // تحديث رقم المشاهد عشوائي
-            const viewerNum = Math.floor(Math.random() * 100) + 1;
-            document.getElementById('viewerNumber').textContent = '#' + viewerNum;
-            
-            // تحقق من الاتصال كل 30 ثانية
-            setInterval(() => {
-                if (isConnected && peerConnection) {
-                    const state = peerConnection.iceConnectionState;
-                    if (state !== 'connected' && state !== 'completed') {
-                        reconnect();
-                    }
-                }
-            }, 30000);
-        };
-        
-        // إغلاق الاتصال عند مغادرة الصفحة
-        window.addEventListener('beforeunload', () => {
-            if (peerConnection) {
-                peerConnection.close();
-            }
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.close();
-            }
-        });
+        // بدء الاتصال عند تحميل الصفحة
+        window.onload = connectToBroadcast;
     </script>
 </body>
-    </html>
+</html>
