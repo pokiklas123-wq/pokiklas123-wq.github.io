@@ -3,243 +3,709 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>المدرس - البث المباشر</title>
+    <title>منصة البث التعليمي - كاملة</title>
     <style>
-        * { box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { margin: 0; padding: 20px; background: #f0f2f5; }
-        .container { max-width: 800px; margin: auto; }
-        h1 { color: #1a73e8; text-align: center; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background: #f0f2f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            background: #1a73e8;
+            color: white;
+            border-bottom: 3px solid #0d47a1;
+        }
+        
+        .tab:hover:not(.active) {
+            background: #f8f9fa;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            margin-bottom: 30px;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-right: 4px solid #1a73e8;
+        }
+        
+        .step-number {
+            display: inline-block;
+            background: #1a73e8;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-left: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .step h3 {
+            color: #1a73e8;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .step p {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        
+        .input-group {
+            margin: 20px 0;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 10px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input:focus {
+            outline: none;
+            border-color: #1a73e8;
+        }
+        
+        .button {
+            background: #1a73e8;
+            color: white;
+            border: none;
+            padding: 16px 35px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .button:hover {
+            background: #0d62d9;
+        }
+        
+        .button.secondary {
+            background: #34a853;
+        }
+        
+        .button.secondary:hover {
+            background: #2d9450;
+        }
+        
+        .link-box {
+            background: #e8f0fe;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 2px dashed #1a73e8;
+            display: none;
+        }
+        
+        .link-box h4 {
+            color: #1a73e8;
+            margin-bottom: 15px;
+        }
+        
+        .link-url {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            word-break: break-all;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+        }
+        
         .video-container {
-            width: 100%; background: black; border-radius: 10px;
-            overflow: hidden; margin: 20px 0;
+            width: 100%;
+            max-width: 1000px;
+            margin: 20px auto;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
         }
-        video { width: 100%; max-height: 400px; }
-        .controls { text-align: center; margin: 20px 0; }
-        button {
-            background: #1a73e8; color: white; border: none;
-            padding: 15px 30px; border-radius: 5px; margin: 10px;
-            font-size: 18px; cursor: pointer;
+        
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: none;
         }
-        button:disabled { background: #ccc; }
-        .status { padding: 10px; border-radius: 5px; margin: 10px 0; text-align: center; }
-        .active { background: #4CAF50; color: white; }
-        .inactive { background: #f44336; color: white; }
-        .info { background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0; }
-        .url-box { background: #e8f0fe; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .status.live {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffeaa7;
+        }
+        
+        .status.offline {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .instructions {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border-right: 4px solid #ffc107;
+        }
+        
+        .instructions h3 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ul {
+            padding-right: 20px;
+            color: #856404;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            iframe {
+                height: 300px;
+            }
+            
+            .tab {
+                padding: 15px;
+            }
+        }
+        
+        .alert {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid #f5c6cb;
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <div class="header">
+        <h1>🎓 منصة البث المباشر للتعليم</h1>
+        <p>نظام بث مباشر بسيط - يعمل على جميع الأجهزة</p>
+    </div>
+    
     <div class="container">
-        <h1>🎓 البث المباشر - المدرس</h1>
-        
-        <div class="video-container">
-            <video id="localVideo" autoplay muted></video>
+        <div class="tabs">
+            <div class="tab active" onclick="showTab('teacher')">👨‍🏫 المدرس</div>
+            <div class="tab" onclick="showTab('student')">👥 الطلاب</div>
         </div>
         
-        <div class="status inactive" id="status">⚫ البث غير نشط</div>
-        
-        <div class="controls">
-            <button onclick="startBroadcast()" id="startBtn">▶ بدء البث</button>
-            <button onclick="stopBroadcast()" id="stopBtn" disabled>⏹ إيقاف البث</button>
-            <button onclick="toggleScreenShare()" id="screenBtn">🖥️ مشاركة الشاشة</button>
+        <!-- تبويب المدرس -->
+        <div id="teacher-tab" class="tab-content active">
+            <h2 style="color: #1a73e8; margin-bottom: 25px; text-align: center;">بدء البث المباشر</h2>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <h3>اختر منصة البث</h3>
+                <p>اختر المنصة التي ستستخدمها للبث المباشر:</p>
+                <div style="margin: 20px 0;">
+                    <select id="platformSelect" style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
+                        <option value="youtube">📺 YouTube Live (يوتيوب)</option>
+                        <option value="facebook">📘 Facebook Live (فيسبوك)</option>
+                        <option value="custom">🔗 رابط بث مخصص</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="step">
+                <span class="step-number">2</span>
+                <h3>ابدأ البث على المنصة</h3>
+                <p id="platformInstructions">
+                    1. اذهب إلى <a href="https://studio.youtube.com" target="_blank" style="color: #1a73e8; text-decoration: none; font-weight: bold;">YouTube Studio</a><br>
+                    2. اضغط "إنشاء" → "بث مباشر"<br>
+                    3. ابدأ البث وانظر أسفل الشاشة<br>
+                    4. انسخ رابط البث الذي يظهر
+                </p>
+                <div class="input-group">
+                    <input type="text" id="broadcastUrl" placeholder="الصق رابط البث المباشر هنا..." />
+                    <button class="button" onclick="generateStudentLink()">
+                        <span>🔗</span>
+                        <span>توليد رابط الطلاب</span>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="step" id="studentLinkStep" style="display: none;">
+                <span class="step-number">3</span>
+                <h3>شارك مع طلابك</h3>
+                <p>انسخ هذا الرابط وأرسله لطلابك:</p>
+                <div class="link-box" id="linkBox">
+                    <h4>🔗 رابط المشاهدة للطلاب:</h4>
+                    <div class="link-url" id="studentLink">جاري توليد الرابط...</div>
+                    <button class="button secondary" onclick="copyStudentLink()">
+                        <span>📋</span>
+                        <span>نسخ الرابط</span>
+                    </button>
+                    <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
+                        يمكنك إرسال هذا الرابط عبر الواتساب، التليجرام، أو أي منصة أخرى
+                    </p>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3>🎯 تعليمات مهمة:</h3>
+                <ul>
+                    <li>يجب أن تبدأ البث على المنصة أولاً (يوتيوب/فيسبوك)</li>
+                    <li>الطلاب لا يحتاجون أي تثبيت - فقط المتصفح</li>
+                    <li>البث يعمل على جميع الأجهزة (موبايل، تابلت، كمبيوتر)</li>
+                    <li>لإيقاف البث: أوقف البث على المنصة الأساسية</li>
+                </ul>
+            </div>
         </div>
         
-        <div class="url-box" id="urlBox" style="display: none;">
-            <h3>🔗 رابط المشاهدة للطلاب:</h3>
-            <p id="broadcastUrl">...</p>
-            <button onclick="copyUrl()">📋 نسخ الرابط</button>
-            <p style="color: #666;">أرسل هذا الرابط للطلاب لمشاهدة البث</p>
+        <!-- تبويب الطلاب -->
+        <div id="student-tab" class="tab-content">
+            <h2 style="color: #1a73e8; margin-bottom: 25px; text-align: center;">مشاهدة البث المباشر</h2>
+            
+            <div class="status waiting" id="studentStatus">
+                ⏳ في انتظار رابط البث...
+            </div>
+            
+            <div id="videoPlayerContainer" style="display: none;">
+                <div class="video-container">
+                    <iframe id="videoPlayer" allowfullscreen></iframe>
+                </div>
+                
+                <div style="text-align: center; margin: 20px 0;">
+                    <button class="button" onclick="toggleFullscreen()">
+                        <span>📺</span>
+                        <span>ملء الشاشة</span>
+                    </button>
+                    <button class="button secondary" onclick="toggleChat()" id="chatButton" style="display: none;">
+                        <span>💬</span>
+                        <span>عرض الدردشة</span>
+                    </button>
+                </div>
+                
+                <div class="instructions">
+                    <h3>🎧 إرشادات المشاهدة:</h3>
+                    <ul>
+                        <li>تأكد من تشغيل الصوت في جهازك</li>
+                        <li>لأفضل جودة: استخدم اتصال إنترنت سريع</li>
+                        <li>يمكنك الضغط على "ملء الشاشة" لمشاهدة أفضل</li>
+                        <li>إذا تأخر البث: أعد تحميل الصفحة (F5)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="noStreamMessage" style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">📺</div>
+                <h3 style="color: #666; margin-bottom: 15px;">لا يوجد بث نشط حالياً</h3>
+                <p style="color: #888; margin-bottom: 25px;">انتظر حتى يرسل لك المدرس رابط البث</p>
+                <p style="color: #999; font-size: 0.9rem;">عندما يرسل لك المدرس الرابط:<br>1. افتح الرابط على متصفحك<br>2. شاهد البث مباشرة بدون أي تثبيت</p>
+            </div>
         </div>
         
-        <div class="info">
-            <h3>🎯 التعليمات:</h3>
-            <p>1. اضغط "بدء البث" ← سيأخذ إذن الكاميرا</p>
-            <p>2. انسخ الرابط الذي سيظهر ← أرسله للطلاب</p>
-            <p>3. تحدث بشكل طبيعي ← الطلاب سيشاهدون ويسمعون</p>
-        </div>
+        <div class="alert" id="errorAlert"></div>
     </div>
 
     <script>
-        let localStream;
-        let mediaRecorder;
-        let ws;
-        let broadcastId;
-        let isBroadcasting = false;
-        let audioChunks = [];
-        
-        // توليد معرف البث
-        function generateBroadcastId() {
-            return 'class_' + Date.now();
+        // التحكم في التبويبات
+        function showTab(tabName) {
+            // إخفاء جميع المحتويات
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // إخفاء جميع التبويبات
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // إظهار المحتوى المختار
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // تفعيل التبويب المختار
+            document.querySelectorAll('.tab').forEach(tab => {
+                if (tab.textContent.includes(tabName === 'teacher' ? 'المدرس' : 'الطلاب')) {
+                    tab.classList.add('active');
+                }
+            });
+            
+            // إذا كان تبويب الطلاب، تحقق من وجود رابط في الرابط
+            if (tabName === 'student') {
+                checkUrlForVideo();
+            }
         }
         
-        async function startBroadcast() {
+        // تحديث التعليمات بناءً على المنصة المختارة
+        document.getElementById('platformSelect').addEventListener('change', function() {
+            const platform = this.value;
+            const instructions = document.getElementById('platformInstructions');
+            
+            if (platform === 'youtube') {
+                instructions.innerHTML = `
+                    1. اذهب إلى <a href="https://studio.youtube.com" target="_blank" style="color: #1a73e8; text-decoration: none; font-weight: bold;">YouTube Studio</a><br>
+                    2. اضغط "إنشاء" → "بث مباشر"<br>
+                    3. ابدأ البث وانظر أسفل الشاشة<br>
+                    4. انسخ رابط البث الذي يظهر
+                `;
+            } else if (platform === 'facebook') {
+                instructions.innerHTML = `
+                    1. اذهب إلى <a href="https://www.facebook.com" target="_blank" style="color: #1a73e8; text-decoration: none; font-weight: bold;">Facebook</a><br>
+                    2. اضغط على "بث مباشر"<br>
+                    3. ابدأ البث على صفحتك<br>
+                    4. انسخ رابط البث من شريط العنوان
+                `;
+            } else if (platform === 'custom') {
+                instructions.innerHTML = `
+                    1. ابدأ البث على أي منصة تفضلها<br>
+                    2. احصل على رابط البث المباشر<br>
+                    3. الصق الرابط في المربع أدناه
+                `;
+            }
+        });
+        
+        // توليد رابط الطلاب
+        function generateStudentLink() {
+            const broadcastUrl = document.getElementById('broadcastUrl').value.trim();
+            
+            if (!broadcastUrl) {
+                showError('⚠️ الرجاء إدخال رابط البث المباشر أولاً');
+                return;
+            }
+            
+            // استخراج معرف الفيديو من الرابط
+            let videoId = extractVideoId(broadcastUrl);
+            
+            if (!videoId && document.getElementById('platformSelect').value === 'custom') {
+                // إذا كان رابط مخصص، استخدم الرابط كما هو
+                videoId = encodeURIComponent(broadcastUrl);
+            } else if (!videoId) {
+                showError('❌ رابط غير صالح. تأكد من نسخ رابط البث المباشر الصحيح');
+                return;
+            }
+            
+            const platform = document.getElementById('platformSelect').value;
+            
+            // إنشاء رابط الطالب
+            const currentUrl = window.location.origin + window.location.pathname;
+            const studentLink = `${currentUrl}#student?platform=${platform}&video=${videoId}`;
+            
+            // عرض الرابط
+            document.getElementById('studentLink').textContent = studentLink;
+            document.getElementById('linkBox').style.display = 'block';
+            document.getElementById('studentLinkStep').style.display = 'block';
+            
+            // حفظ في localStorage
+            localStorage.setItem('lastBroadcastUrl', broadcastUrl);
+            localStorage.setItem('lastStudentLink', studentLink);
+            
+            // عرض رسالة نجاح
+            document.getElementById('errorAlert').style.display = 'none';
+            
+            // الانتقال تلقائياً لتبويب الطلاب لعرض المعاينة
+            setTimeout(() => {
+                showTab('student');
+                loadStudentVideo(platform, videoId);
+            }, 500);
+        }
+        
+        // استخراج معرف الفيديو من الروابط الشائعة
+        function extractVideoId(url) {
             try {
-                // طلب إذن الكاميرا والميكروفون
-                localStream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480 },
-                    audio: true
-                });
-                
-                // عرض الفيديو المحلي
-                document.getElementById('localVideo').srcObject = localStream;
-                
-                // إنشاء معرف البث
-                broadcastId = generateBroadcastId();
-                
-                // الاتصال بخادم WebSocket
-                const serverUrl = window.location.origin.replace('http', 'ws');
-                ws = new WebSocket(serverUrl);
-                
-                ws.onopen = () => {
-                    // تسجيل كمدرس
-                    ws.send(JSON.stringify({
-                        type: 'register_teacher',
-                        broadcastId: broadcastId
-                    }));
-                    
-                    // إنشاء رابط البث
-                    const studentUrl = `${window.location.origin}/student?room=${broadcastId}`;
-                    document.getElementById('broadcastUrl').textContent = studentUrl;
-                    document.getElementById('urlBox').style.display = 'block';
-                    
-                    // بدء إرسال الفيديو
-                    startVideoStreaming();
-                    
-                    // بدء إرسال الصوت
-                    startAudioStreaming();
-                    
-                    // تحديث الحالة
-                    isBroadcasting = true;
-                    document.getElementById('status').className = 'status active';
-                    document.getElementById('status').textContent = '🟢 البث نشط';
-                    document.getElementById('startBtn').disabled = true;
-                    document.getElementById('stopBtn').disabled = false;
-                    
-                    console.log('✅ البث بدأ!');
-                };
-                
-                ws.onerror = (error) => {
-                    console.error('❌ خطأ في WebSocket:', error);
-                    alert('❌ خطأ في الاتصال بالخادم');
-                };
-                
-            } catch (error) {
-                console.error('❌ خطأ في بدء البث:', error);
-                alert('❌ خطأ: ' + error.message);
-            }
-        }
-        
-        function startVideoStreaming() {
-            // التقاط فريمات الفيديو وإرسالها
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const video = document.getElementById('localVideo');
-            
-            canvas.width = 640;
-            canvas.height = 480;
-            
-            function captureFrame() {
-                if (!isBroadcasting) return;
-                
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                // تحويل إلى base64
-                canvas.toBlob((blob) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        // إرسال الفريم للخادم
-                        fetch('/stream', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ frame: reader.result })
-                        });
-                    };
-                    reader.readAsDataURL(blob);
-                }, 'image/jpeg', 0.5);
-                
-                setTimeout(captureFrame, 100); // 10 فريمات في الثانية
-            }
-            
-            captureFrame();
-        }
-        
-        function startAudioStreaming() {
-            // تسجيل الصوت وإرساله
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const source = audioContext.createMediaStreamSource(localStream);
-            const processor = audioContext.createScriptProcessor(1024, 1, 1);
-            
-            source.connect(processor);
-            processor.connect(audioContext.destination);
-            
-            processor.onaudioprocess = (e) => {
-                if (!isBroadcasting || !ws || ws.readyState !== WebSocket.OPEN) return;
-                
-                const inputData = e.inputBuffer.getChannelData(0);
-                const buffer = new Float32Array(inputData.length);
-                
-                for (let i = 0; i < inputData.length; i++) {
-                    buffer[i] = inputData[i];
+                // لـ YouTube
+                if (url.includes('youtube.com') || url.includes('youtu.be')) {
+                    if (url.includes('youtu.be/')) {
+                        return url.split('youtu.be/')[1].split('?')[0];
+                    }
+                    if (url.includes('youtube.com/watch?v=')) {
+                        return url.split('v=')[1].split('&')[0];
+                    }
+                    if (url.includes('youtube.com/live/')) {
+                        return url.split('youtube.com/live/')[1].split('?')[0];
+                    }
                 }
                 
-                // إرسال جزء الصوت
-                ws.send(JSON.stringify({
-                    type: 'audio_chunk',
-                    chunk: Array.from(buffer)
-                }));
-            };
-        }
-        
-        function stopBroadcast() {
-            isBroadcasting = false;
-            
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop());
-            }
-            
-            if (ws) {
-                ws.close();
-            }
-            
-            document.getElementById('status').className = 'status inactive';
-            document.getElementById('status').textContent = '⚫ البث متوقف';
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('stopBtn').disabled = true;
-            document.getElementById('localVideo').srcObject = null;
-            
-            console.log('⏹️ البث توقف');
-        }
-        
-        async function toggleScreenShare() {
-            try {
-                if (isBroadcasting) {
-                    const stream = await navigator.mediaDevices.getDisplayMedia({
-                        video: true,
-                        audio: true
-                    });
-                    
-                    localStream.getTracks().forEach(track => track.stop());
-                    localStream = stream;
-                    document.getElementById('localVideo').srcObject = localStream;
+                // لـ Facebook
+                if (url.includes('facebook.com')) {
+                    const match = url.match(/videos?\/(\d+)/);
+                    return match ? match[1] : null;
                 }
+                
+                return null;
             } catch (error) {
-                console.error('❌ خطأ في مشاركة الشاشة:', error);
+                return null;
             }
         }
         
-        function copyUrl() {
-            const url = document.getElementById('broadcastUrl').textContent;
-            navigator.clipboard.writeText(url).then(() => {
-                alert('✅ تم نسخ رابط البث!');
+        // نسخ رابط الطلاب
+        function copyStudentLink() {
+            const link = document.getElementById('studentLink').textContent;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('✅ تم نسخ رابط الطلاب! يمكنك الآن مشاركته مع طلابك.');
+            }).catch(err => {
+                // طريقة بديلة إذا فشلت
+                const textArea = document.createElement('textarea');
+                textArea.value = link;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ تم نسخ رابط الطلاب!');
             });
         }
         
-        // إغلاق البث عند مغادرة الصفحة
-        window.addEventListener('beforeunload', () => {
-            if (isBroadcasting) {
-                stopBroadcast();
+        // تحميل الفيديو للطالب
+        function loadStudentVideo(platform, videoId) {
+            const playerContainer = document.getElementById('videoPlayerContainer');
+            const noStreamMessage = document.getElementById('noStreamMessage');
+            const statusElement = document.getElementById('studentStatus');
+            const videoPlayer = document.getElementById('videoPlayer');
+            
+            if (!videoId) {
+                playerContainer.style.display = 'none';
+                noStreamMessage.style.display = 'block';
+                statusElement.className = 'status offline';
+                statusElement.innerHTML = '❌ لا يوجد رابط بث';
+                return;
             }
+            
+            let embedUrl;
+            
+            if (platform === 'youtube') {
+                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+                document.getElementById('chatButton').style.display = 'inline-flex';
+            } else if (platform === 'facebook') {
+                embedUrl = `https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/watch/?v=${videoId}&show_text=false`;
+            } else if (platform === 'custom') {
+                // إذا كان رابط مخصص، فك الترميز وعرضه
+                const decodedUrl = decodeURIComponent(videoId);
+                if (decodedUrl.includes('youtube.com') || decodedUrl.includes('youtu.be')) {
+                    const customVideoId = extractVideoId(decodedUrl);
+                    if (customVideoId) {
+                        embedUrl = `https://www.youtube.com/embed/${customVideoId}?autoplay=1&rel=0`;
+                    } else {
+                        // إذا لم نستطع استخراج معرف يوتيوب، استخدم الرابط كما هو
+                        embedUrl = decodedUrl;
+                    }
+                } else {
+                    embedUrl = decodedUrl;
+                }
+            }
+            
+            videoPlayer.src = embedUrl;
+            playerContainer.style.display = 'block';
+            noStreamMessage.style.display = 'none';
+            statusElement.className = 'status live';
+            statusElement.innerHTML = '🟢 البث مباشر - جاري التشغيل';
+        }
+        
+        // التحقق من وجود رابط فيزيو في الرابط
+        function checkUrlForVideo() {
+            const hash = window.location.hash;
+            
+            if (hash.includes('student?')) {
+                const params = new URLSearchParams(hash.split('?')[1]);
+                const platform = params.get('platform');
+                const videoId = params.get('video');
+                
+                if (platform && videoId) {
+                    loadStudentVideo(platform, videoId);
+                }
+            }
+            
+            // تحقق من localStorage أيضًا
+            const lastStudentLink = localStorage.getItem('lastStudentLink');
+            if (lastStudentLink && lastStudentLink.includes('#student?')) {
+                const hashPart = lastStudentLink.split('#')[1];
+                const params = new URLSearchParams(hashPart.split('?')[1]);
+                const platform = params.get('platform');
+                const videoId = params.get('video');
+                
+                if (platform && videoId && !window.location.hash) {
+                    loadStudentVideo(platform, videoId);
+                }
+            }
+        }
+        
+        // عرض الخطأ
+        function showError(message) {
+            const errorAlert = document.getElementById('errorAlert');
+            errorAlert.textContent = message;
+            errorAlert.style.display = 'block';
+            
+            setTimeout(() => {
+                errorAlert.style.display = 'none';
+            }, 5000);
+        }
+        
+        // ملء الشاشة
+        function toggleFullscreen() {
+            const iframe = document.getElementById('videoPlayer');
+            
+            if (!document.fullscreenElement) {
+                if (iframe.requestFullscreen) {
+                    iframe.requestFullscreen();
+                } else if (iframe.webkitRequestFullscreen) {
+                    iframe.webkitRequestFullscreen();
+                } else if (iframe.mozRequestFullScreen) {
+                    iframe.mozRequestFullScreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                }
+            }
+        }
+        
+        // عرض الدردشة (لليوتيوب فقط)
+        function toggleChat() {
+            const platform = document.getElementById('platformSelect').value;
+            const broadcastUrl = document.getElementById('broadcastUrl').value;
+            
+            if (platform === 'youtube' && broadcastUrl) {
+                // افتح رابط البث الأصلي في نافذة جديدة للدردشة
+                window.open(broadcastUrl, '_blank');
+            } else {
+                alert('💬 الدردشة متاحة فقط لبثوات يوتيوب. افتح رابط البث الأصلي للدردشة.');
+            }
+        }
+        
+        // تحميل البيانات المحفوظة عند بدء التشغيل
+        window.onload = function() {
+            // استعادة رابط البث الأخير
+            const lastBroadcastUrl = localStorage.getItem('lastBroadcastUrl');
+            if (lastBroadcastUrl) {
+                document.getElementById('broadcastUrl').value = lastBroadcastUrl;
+            }
+            
+            // تحقق من وجود رابط فيزيو في الرابط الحالي
+            checkUrlForVideo();
+        };
+        
+        // إظهار رابط مثال عند التركيز على حقل الإدخال
+        document.getElementById('broadcastUrl').addEventListener('focus', function() {
+            const platform = document.getElementById('platformSelect').value;
+            let exampleUrl = '';
+            
+            if (platform === 'youtube') {
+                exampleUrl = 'مثال: https://www.youtube.com/live/AbCdEfGhIjK';
+            } else if (platform === 'facebook') {
+                exampleUrl = 'مثال: https://www.facebook.com/watch/live/?v=123456789';
+            }
+            
+            if (exampleUrl && !this.value) {
+                this.placeholder = exampleUrl;
+            }
+        });
+        
+        document.getElementById('broadcastUrl').addEventListener('blur', function() {
+            this.placeholder = 'الصق رابط البث المباشر هنا...';
         });
     </script>
 </body>
-                </html>
+    </html>
