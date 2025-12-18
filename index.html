@@ -1,711 +1,252 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة البث التعليمي - كاملة</title>
+    <title>المديع - بث مباشر</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
-        }
-        
-        body {
-            background: #f0f2f5;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .header {
-            background: linear-gradient(135deg, #1a73e8, #0d47a1);
-            color: white;
-            padding: 25px 20px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .header h1 {
-            font-size: 2.2rem;
-            margin-bottom: 10px;
-        }
-        
-        .header p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .tabs {
-            display: flex;
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        }
-        
-        .tab {
-            flex: 1;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: bold;
-            transition: all 0.3s;
-            border-bottom: 3px solid transparent;
-        }
-        
-        .tab.active {
-            background: #1a73e8;
-            color: white;
-            border-bottom: 3px solid #0d47a1;
-        }
-        
-        .tab:hover:not(.active) {
-            background: #f8f9fa;
-        }
-        
-        .tab-content {
-            display: none;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            margin-bottom: 30px;
-        }
-        
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .step {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 25px;
-            border-right: 4px solid #1a73e8;
-        }
-        
-        .step-number {
-            display: inline-block;
-            background: #1a73e8;
-            color: white;
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 35px;
-            font-weight: bold;
-            margin-left: 15px;
-            font-size: 1.2rem;
-        }
-        
-        .step h3 {
-            color: #1a73e8;
-            margin-bottom: 15px;
-            font-size: 1.3rem;
-        }
-        
-        .step p {
-            color: #555;
-            margin-bottom: 15px;
-        }
-        
-        .input-group {
-            margin: 20px 0;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            margin-bottom: 10px;
-            transition: border-color 0.3s;
-        }
-        
-        .input-group input:focus {
-            outline: none;
-            border-color: #1a73e8;
-        }
-        
-        .button {
-            background: #1a73e8;
-            color: white;
-            border: none;
-            padding: 16px 35px;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .button:hover {
-            background: #0d62d9;
-        }
-        
-        .button.secondary {
-            background: #34a853;
-        }
-        
-        .button.secondary:hover {
-            background: #2d9450;
-        }
-        
-        .link-box {
-            background: #e8f0fe;
-            border-radius: 8px;
-            padding: 25px;
-            margin: 25px 0;
-            border: 2px dashed #1a73e8;
-            display: none;
-        }
-        
-        .link-box h4 {
-            color: #1a73e8;
-            margin-bottom: 15px;
-        }
-        
-        .link-url {
-            background: white;
-            padding: 15px;
-            border-radius: 6px;
-            font-family: monospace;
-            word-break: break-all;
-            margin: 15px 0;
-            border: 1px solid #ddd;
-        }
-        
-        .video-container {
-            width: 100%;
-            max-width: 1000px;
-            margin: 20px auto;
-            background: #000;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        iframe {
-            width: 100%;
-            height: 500px;
-            border: none;
-        }
-        
-        .status {
-            padding: 15px;
-            border-radius: 8px;
-            margin: 20px 0;
-            text-align: center;
-            font-weight: bold;
-        }
-        
-        .status.live {
-            background: #d4edda;
-            color: #155724;
-            border: 2px solid #c3e6cb;
-        }
-        
-        .status.waiting {
-            background: #fff3cd;
-            color: #856404;
-            border: 2px solid #ffeaa7;
-        }
-        
-        .status.offline {
-            background: #f8d7da;
-            color: #721c24;
-            border: 2px solid #f5c6cb;
-        }
-        
-        .instructions {
-            background: #fff3cd;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 30px 0;
-            border-right: 4px solid #ffc107;
-        }
-        
-        .instructions h3 {
-            color: #856404;
-            margin-bottom: 15px;
-        }
-        
-        .instructions ul {
-            padding-right: 20px;
-            color: #856404;
-        }
-        
-        .instructions li {
-            margin-bottom: 10px;
-        }
-        
-        @media (max-width: 768px) {
-            .tabs {
-                flex-direction: column;
-            }
-            
-            .header h1 {
-                font-size: 1.8rem;
-            }
-            
-            iframe {
-                height: 300px;
-            }
-            
-            .tab {
-                padding: 15px;
-            }
-        }
-        
-        .alert {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 20px;
-            border-radius: 8px;
-            margin: 20px 0;
-            border: 2px solid #f5c6cb;
-            display: none;
-        }
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+        input, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 16px; }
+        video { width: 100%; background: black; border-radius: 5px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .connected { background: #d4edda; color: #155724; }
+        .disconnected { background: #f8d7da; color: #721c24; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>🎓 منصة البث المباشر للتعليم</h1>
-        <p>نظام بث مباشر بسيط - يعمل على جميع الأجهزة</p>
-    </div>
-    
     <div class="container">
-        <div class="tabs">
-            <div class="tab active" onclick="showTab('teacher')">👨‍🏫 المدرس</div>
-            <div class="tab" onclick="showTab('student')">👥 الطلاب</div>
+        <h2>🎥 المديع - بث مباشر</h2>
+        
+        <div>
+            <label>معرف البث:</label>
+            <input type="text" id="roomId" value="live-123">
+            <small>شارك هذا المعرف مع المشاهدين</small>
         </div>
         
-        <!-- تبويب المدرس -->
-        <div id="teacher-tab" class="tab-content active">
-            <h2 style="color: #1a73e8; margin-bottom: 25px; text-align: center;">بدء البث المباشر</h2>
-            
-            <div class="step">
-                <span class="step-number">1</span>
-                <h3>اختر منصة البث</h3>
-                <p>اختر المنصة التي ستستخدمها للبث المباشر:</p>
-                <div style="margin: 20px 0;">
-                    <select id="platformSelect" style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 8px; font-size: 1rem;">
-                        <option value="youtube">📺 YouTube Live (يوتيوب)</option>
-                        <option value="facebook">📘 Facebook Live (فيسبوك)</option>
-                        <option value="custom">🔗 رابط بث مخصص</option>
-                    </select>
-                </div>
+        <button id="startBtn">▶ بدء البث</button>
+        <button id="stopBtn" disabled>⏹ إيقاف البث</button>
+        
+        <div class="status disconnected" id="status">غير متصل</div>
+        
+        <div>
+            <label>رابط المشاهدين:</label>
+            <div id="broadcastLink" style="padding: 10px; background: #eee; border-radius: 5px; word-break: break-all;">
+                سيظهر هنا بعد بدء البث
             </div>
-            
-            <div class="step">
-                <span class="step-number">2</span>
-                <h3>ابدأ البث على المنصة</h3>
-                <p id="platformInstructions">
-                    1. اذهب إلى <a href="https://studio.youtube.com" target="_blank" style="color: #1a73e8; text-decoration: none; font-weight: bold;">YouTube Studio</a><br>
-                    2. اضغط "إنشاء" → "بث مباشر"<br>
-                    3. ابدأ البث وانظر أسفل الشاشة<br>
-                    4. انسخ رابط البث الذي يظهر
-                </p>
-                <div class="input-group">
-                    <input type="text" id="broadcastUrl" placeholder="الصق رابط البث المباشر هنا..." />
-                    <button class="button" onclick="generateStudentLink()">
-                        <span>🔗</span>
-                        <span>توليد رابط الطلاب</span>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="step" id="studentLinkStep" style="display: none;">
-                <span class="step-number">3</span>
-                <h3>شارك مع طلابك</h3>
-                <p>انسخ هذا الرابط وأرسله لطلابك:</p>
-                <div class="link-box" id="linkBox">
-                    <h4>🔗 رابط المشاهدة للطلاب:</h4>
-                    <div class="link-url" id="studentLink">جاري توليد الرابط...</div>
-                    <button class="button secondary" onclick="copyStudentLink()">
-                        <span>📋</span>
-                        <span>نسخ الرابط</span>
-                    </button>
-                    <p style="margin-top: 15px; color: #666; font-size: 0.9rem;">
-                        يمكنك إرسال هذا الرابط عبر الواتساب، التليجرام، أو أي منصة أخرى
-                    </p>
-                </div>
-            </div>
-            
-            <div class="instructions">
-                <h3>🎯 تعليمات مهمة:</h3>
-                <ul>
-                    <li>يجب أن تبدأ البث على المنصة أولاً (يوتيوب/فيسبوك)</li>
-                    <li>الطلاب لا يحتاجون أي تثبيت - فقط المتصفح</li>
-                    <li>البث يعمل على جميع الأجهزة (موبايل، تابلت، كمبيوتر)</li>
-                    <li>لإيقاف البث: أوقف البث على المنصة الأساسية</li>
-                </ul>
-            </div>
+            <button id="copyBtn" disabled>📋 نسخ الرابط</button>
         </div>
         
-        <!-- تبويب الطلاب -->
-        <div id="student-tab" class="tab-content">
-            <h2 style="color: #1a73e8; margin-bottom: 25px; text-align: center;">مشاهدة البث المباشر</h2>
-            
-            <div class="status waiting" id="studentStatus">
-                ⏳ في انتظار رابط البث...
-            </div>
-            
-            <div id="videoPlayerContainer" style="display: none;">
-                <div class="video-container">
-                    <iframe id="videoPlayer" allowfullscreen></iframe>
-                </div>
-                
-                <div style="text-align: center; margin: 20px 0;">
-                    <button class="button" onclick="toggleFullscreen()">
-                        <span>📺</span>
-                        <span>ملء الشاشة</span>
-                    </button>
-                    <button class="button secondary" onclick="toggleChat()" id="chatButton" style="display: none;">
-                        <span>💬</span>
-                        <span>عرض الدردشة</span>
-                    </button>
-                </div>
-                
-                <div class="instructions">
-                    <h3>🎧 إرشادات المشاهدة:</h3>
-                    <ul>
-                        <li>تأكد من تشغيل الصوت في جهازك</li>
-                        <li>لأفضل جودة: استخدم اتصال إنترنت سريع</li>
-                        <li>يمكنك الضغط على "ملء الشاشة" لمشاهدة أفضل</li>
-                        <li>إذا تأخر البث: أعد تحميل الصفحة (F5)</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div id="noStreamMessage" style="text-align: center; padding: 40px 20px;">
-                <div style="font-size: 4rem; margin-bottom: 20px;">📺</div>
-                <h3 style="color: #666; margin-bottom: 15px;">لا يوجد بث نشط حالياً</h3>
-                <p style="color: #888; margin-bottom: 25px;">انتظر حتى يرسل لك المدرس رابط البث</p>
-                <p style="color: #999; font-size: 0.9rem;">عندما يرسل لك المدرس الرابط:<br>1. افتح الرابط على متصفحك<br>2. شاهد البث مباشرة بدون أي تثبيت</p>
-            </div>
+        <div style="margin-top: 20px;">
+            <label>كاميرا المديع:</label>
+            <video id="localVideo" autoplay muted playsinline></video>
         </div>
-        
-        <div class="alert" id="errorAlert"></div>
     </div>
 
     <script>
-        // التحكم في التبويبات
-        function showTab(tabName) {
-            // إخفاء جميع المحتويات
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // إخفاء جميع التبويبات
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // إظهار المحتوى المختار
-            document.getElementById(tabName + '-tab').classList.add('active');
-            
-            // تفعيل التبويب المختار
-            document.querySelectorAll('.tab').forEach(tab => {
-                if (tab.textContent.includes(tabName === 'teacher' ? 'المدرس' : 'الطلاب')) {
-                    tab.classList.add('active');
-                }
-            });
-            
-            // إذا كان تبويب الطلاب، تحقق من وجود رابط في الرابط
-            if (tabName === 'student') {
-                checkUrlForVideo();
-            }
-        }
+        // العناصر الأساسية
+        const roomIdInput = document.getElementById('roomId');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusDiv = document.getElementById('status');
+        const broadcastLink = document.getElementById('broadcastLink');
+        const copyBtn = document.getElementById('copyBtn');
+        const localVideo = document.getElementById('localVideo');
         
-        // تحديث التعليمات بناءً على المنصة المختارة
-        document.getElementById('platformSelect').addEventListener('change', function() {
-            const platform = this.value;
-            const instructions = document.getElementById('platformInstructions');
-            
-            if (platform === 'youtube') {
-                instructions.innerHTML = `
-                    1. اذهب إلى <a href="https://studio.youtube.com" target="_blank" style="color: #1a73e8; text-decoration: none; font-weight: bold;">YouTube Studio</a><br>
-                    2. اضغط "إنشاء" → "بث مباشر"<br>
-                    3. ابدأ البث وانظر أسفل الشاشة<br>
-                    4. انسخ رابط البث الذي يظهر
-                `;
-            } else if (platform === 'facebook') {
-                instructions.innerHTML = `
-                    1. اذهب إلى <a href="https://www.facebook.com" target="_blank" style="color: #1a73e8; text-decoration: none; font-weight: bold;">Facebook</a><br>
-                    2. اضغط على "بث مباشر"<br>
-                    3. ابدأ البث على صفحتك<br>
-                    4. انسخ رابط البث من شريط العنوان
-                `;
-            } else if (platform === 'custom') {
-                instructions.innerHTML = `
-                    1. ابدأ البث على أي منصة تفضلها<br>
-                    2. احصل على رابط البث المباشر<br>
-                    3. الصق الرابط في المربع أدناه
-                `;
-            }
-        });
+        // المتغيرات
+        let localStream = null;
+        let peerConnections = new Map();
+        let socket = null;
+        let currentRoomId = '';
         
-        // توليد رابط الطلاب
-        function generateStudentLink() {
-            const broadcastUrl = document.getElementById('broadcastUrl').value.trim();
-            
-            if (!broadcastUrl) {
-                showError('⚠️ الرجاء إدخال رابط البث المباشر أولاً');
-                return;
-            }
-            
-            // استخراج معرف الفيديو من الرابط
-            let videoId = extractVideoId(broadcastUrl);
-            
-            if (!videoId && document.getElementById('platformSelect').value === 'custom') {
-                // إذا كان رابط مخصص، استخدم الرابط كما هو
-                videoId = encodeURIComponent(broadcastUrl);
-            } else if (!videoId) {
-                showError('❌ رابط غير صالح. تأكد من نسخ رابط البث المباشر الصحيح');
-                return;
-            }
-            
-            const platform = document.getElementById('platformSelect').value;
-            
-            // إنشاء رابط الطالب
-            const currentUrl = window.location.origin + window.location.pathname;
-            const studentLink = `${currentUrl}#student?platform=${platform}&video=${videoId}`;
-            
-            // عرض الرابط
-            document.getElementById('studentLink').textContent = studentLink;
-            document.getElementById('linkBox').style.display = 'block';
-            document.getElementById('studentLinkStep').style.display = 'block';
-            
-            // حفظ في localStorage
-            localStorage.setItem('lastBroadcastUrl', broadcastUrl);
-            localStorage.setItem('lastStudentLink', studentLink);
-            
-            // عرض رسالة نجاح
-            document.getElementById('errorAlert').style.display = 'none';
-            
-            // الانتقال تلقائياً لتبويب الطلاب لعرض المعاينة
-            setTimeout(() => {
-                showTab('student');
-                loadStudentVideo(platform, videoId);
-            }, 500);
-        }
-        
-        // استخراج معرف الفيديو من الروابط الشائعة
-        function extractVideoId(url) {
-            try {
-                // لـ YouTube
-                if (url.includes('youtube.com') || url.includes('youtu.be')) {
-                    if (url.includes('youtu.be/')) {
-                        return url.split('youtu.be/')[1].split('?')[0];
-                    }
-                    if (url.includes('youtube.com/watch?v=')) {
-                        return url.split('v=')[1].split('&')[0];
-                    }
-                    if (url.includes('youtube.com/live/')) {
-                        return url.split('youtube.com/live/')[1].split('?')[0];
-                    }
-                }
-                
-                // لـ Facebook
-                if (url.includes('facebook.com')) {
-                    const match = url.match(/videos?\/(\d+)/);
-                    return match ? match[1] : null;
-                }
-                
-                return null;
-            } catch (error) {
-                return null;
-            }
-        }
-        
-        // نسخ رابط الطلاب
-        function copyStudentLink() {
-            const link = document.getElementById('studentLink').textContent;
-            navigator.clipboard.writeText(link).then(() => {
-                alert('✅ تم نسخ رابط الطلاب! يمكنك الآن مشاركته مع طلابك.');
-            }).catch(err => {
-                // طريقة بديلة إذا فشلت
-                const textArea = document.createElement('textarea');
-                textArea.value = link;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                alert('✅ تم نسخ رابط الطلاب!');
-            });
-        }
-        
-        // تحميل الفيديو للطالب
-        function loadStudentVideo(platform, videoId) {
-            const playerContainer = document.getElementById('videoPlayerContainer');
-            const noStreamMessage = document.getElementById('noStreamMessage');
-            const statusElement = document.getElementById('studentStatus');
-            const videoPlayer = document.getElementById('videoPlayer');
-            
-            if (!videoId) {
-                playerContainer.style.display = 'none';
-                noStreamMessage.style.display = 'block';
-                statusElement.className = 'status offline';
-                statusElement.innerHTML = '❌ لا يوجد رابط بث';
-                return;
-            }
-            
-            let embedUrl;
-            
-            if (platform === 'youtube') {
-                embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-                document.getElementById('chatButton').style.display = 'inline-flex';
-            } else if (platform === 'facebook') {
-                embedUrl = `https://www.facebook.com/plugins/video.php?href=https://www.facebook.com/watch/?v=${videoId}&show_text=false`;
-            } else if (platform === 'custom') {
-                // إذا كان رابط مخصص، فك الترميز وعرضه
-                const decodedUrl = decodeURIComponent(videoId);
-                if (decodedUrl.includes('youtube.com') || decodedUrl.includes('youtu.be')) {
-                    const customVideoId = extractVideoId(decodedUrl);
-                    if (customVideoId) {
-                        embedUrl = `https://www.youtube.com/embed/${customVideoId}?autoplay=1&rel=0`;
-                    } else {
-                        // إذا لم نستطع استخراج معرف يوتيوب، استخدم الرابط كما هو
-                        embedUrl = decodedUrl;
-                    }
-                } else {
-                    embedUrl = decodedUrl;
-                }
-            }
-            
-            videoPlayer.src = embedUrl;
-            playerContainer.style.display = 'block';
-            noStreamMessage.style.display = 'none';
-            statusElement.className = 'status live';
-            statusElement.innerHTML = '🟢 البث مباشر - جاري التشغيل';
-        }
-        
-        // التحقق من وجود رابط فيزيو في الرابط
-        function checkUrlForVideo() {
-            const hash = window.location.hash;
-            
-            if (hash.includes('student?')) {
-                const params = new URLSearchParams(hash.split('?')[1]);
-                const platform = params.get('platform');
-                const videoId = params.get('video');
-                
-                if (platform && videoId) {
-                    loadStudentVideo(platform, videoId);
-                }
-            }
-            
-            // تحقق من localStorage أيضًا
-            const lastStudentLink = localStorage.getItem('lastStudentLink');
-            if (lastStudentLink && lastStudentLink.includes('#student?')) {
-                const hashPart = lastStudentLink.split('#')[1];
-                const params = new URLSearchParams(hashPart.split('?')[1]);
-                const platform = params.get('platform');
-                const videoId = params.get('video');
-                
-                if (platform && videoId && !window.location.hash) {
-                    loadStudentVideo(platform, videoId);
-                }
-            }
-        }
-        
-        // عرض الخطأ
-        function showError(message) {
-            const errorAlert = document.getElementById('errorAlert');
-            errorAlert.textContent = message;
-            errorAlert.style.display = 'block';
-            
-            setTimeout(() => {
-                errorAlert.style.display = 'none';
-            }, 5000);
-        }
-        
-        // ملء الشاشة
-        function toggleFullscreen() {
-            const iframe = document.getElementById('videoPlayer');
-            
-            if (!document.fullscreenElement) {
-                if (iframe.requestFullscreen) {
-                    iframe.requestFullscreen();
-                } else if (iframe.webkitRequestFullscreen) {
-                    iframe.webkitRequestFullscreen();
-                } else if (iframe.mozRequestFullScreen) {
-                    iframe.mozRequestFullScreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                }
-            }
-        }
-        
-        // عرض الدردشة (لليوتيوب فقط)
-        function toggleChat() {
-            const platform = document.getElementById('platformSelect').value;
-            const broadcastUrl = document.getElementById('broadcastUrl').value;
-            
-            if (platform === 'youtube' && broadcastUrl) {
-                // افتح رابط البث الأصلي في نافذة جديدة للدردشة
-                window.open(broadcastUrl, '_blank');
-            } else {
-                alert('💬 الدردشة متاحة فقط لبثوات يوتيوب. افتح رابط البث الأصلي للدردشة.');
-            }
-        }
-        
-        // تحميل البيانات المحفوظة عند بدء التشغيل
-        window.onload = function() {
-            // استعادة رابط البث الأخير
-            const lastBroadcastUrl = localStorage.getItem('lastBroadcastUrl');
-            if (lastBroadcastUrl) {
-                document.getElementById('broadcastUrl').value = lastBroadcastUrl;
-            }
-            
-            // تحقق من وجود رابط فيزيو في الرابط الحالي
-            checkUrlForVideo();
+        // إعدادات WebRTC
+        const config = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:stun1.l.google.com:19302' }
+            ]
         };
         
-        // إظهار رابط مثال عند التركيز على حقل الإدخال
-        document.getElementById('broadcastUrl').addEventListener('focus', function() {
-            const platform = document.getElementById('platformSelect').value;
-            let exampleUrl = '';
-            
-            if (platform === 'youtube') {
-                exampleUrl = 'مثال: https://www.youtube.com/live/AbCdEfGhIjK';
-            } else if (platform === 'facebook') {
-                exampleUrl = 'مثال: https://www.facebook.com/watch/live/?v=123456789';
-            }
-            
-            if (exampleUrl && !this.value) {
-                this.placeholder = exampleUrl;
-            }
-        });
+        // سيرفر الإشارة - استخدم الرابط الصحيح
+        const SIGNALING_SERVER = 'wss://cripanyt.onrender.com';
         
-        document.getElementById('broadcastUrl').addEventListener('blur', function() {
-            this.placeholder = 'الصق رابط البث المباشر هنا...';
-        });
+        // 1. بدء البث
+        startBtn.onclick = async () => {
+            try {
+                currentRoomId = roomIdInput.value.trim();
+                if (!currentRoomId) {
+                    alert('أدخل معرف البث');
+                    return;
+                }
+                
+                updateStatus('جاري الاتصال...', 'disconnected');
+                
+                // الاتصال بسيرفر الإشارة
+                connectToSignalingServer();
+                
+                // الحصول على الكاميرا والميكروفون
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+                
+                localVideo.srcObject = localStream;
+                
+                // إنشاء غرفة في السيرفر
+                setTimeout(() => {
+                    if (socket && socket.readyState === WebSocket.OPEN) {
+                        socket.send(JSON.stringify({
+                            type: 'create-room',
+                            roomId: currentRoomId
+                        }));
+                    }
+                }, 500);
+                
+                // تحديث الواجهة
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                copyBtn.disabled = false;
+                
+                // إنشاء رابط المشاهدة
+                const viewerUrl = `${window.location.origin}${window.location.pathname.replace('broadcaster.html', '')}viewer.html?room=${currentRoomId}`;
+                broadcastLink.textContent = viewerUrl;
+                
+                updateStatus(`البث مباشر - المعرف: ${currentRoomId}`, 'connected');
+                
+            } catch (error) {
+                console.error('خطأ:', error);
+                updateStatus('فشل بدء البث', 'disconnected');
+            }
+        };
+        
+        // 2. إيقاف البث
+        stopBtn.onclick = () => {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localVideo.srcObject = null;
+            }
+            
+            peerConnections.forEach(pc => pc.close());
+            peerConnections.clear();
+            
+            if (socket) {
+                socket.send(JSON.stringify({
+                    type: 'leave-room',
+                    roomId: currentRoomId
+                }));
+                socket.close();
+            }
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            copyBtn.disabled = true;
+            
+            updateStatus('تم إيقاف البث', 'disconnected');
+        };
+        
+        // 3. نسخ الرابط
+        copyBtn.onclick = async () => {
+            try {
+                await navigator.clipboard.writeText(broadcastLink.textContent);
+                alert('تم نسخ الرابط!');
+            } catch (err) {
+                console.error('فشل النسخ:', err);
+            }
+        };
+        
+        // 4. الاتصال بسيرفر الإشارة
+        function connectToSignalingServer() {
+            socket = new WebSocket(SIGNALING_SERVER);
+            
+            socket.onopen = () => {
+                console.log('✅ متصل بالسيرفر');
+            };
+            
+            socket.onmessage = async (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    
+                    switch (data.type) {
+                        case 'room-created':
+                            console.log('✅ تم إنشاء الغرفة');
+                            break;
+                            
+                        case 'new-viewer':
+                            console.log('👤 مشاهد جديد:', data.viewerId);
+                            createPeerConnection(data.viewerId);
+                            break;
+                            
+                        case 'ice-candidate':
+                            handleIceCandidate(data);
+                            break;
+                    }
+                } catch (error) {
+                    console.error('خطأ في معالجة الرسالة:', error);
+                }
+            };
+            
+            socket.onerror = (error) => {
+                console.error('❌ خطأ في الاتصال:', error);
+            };
+        };
+        
+        // 5. إنشاء اتصال WebRTC مع مشاهد
+        async function createPeerConnection(viewerId) {
+            const pc = new RTCPeerConnection(config);
+            
+            // إضافة تيار الوسائط
+            if (localStream) {
+                localStream.getTracks().forEach(track => {
+                    pc.addTrack(track, localStream);
+                });
+            }
+            
+            // إرسال مرشحات ICE
+            pc.onicecandidate = (event) => {
+                if (event.candidate && socket) {
+                    socket.send(JSON.stringify({
+                        type: 'ice-candidate',
+                        candidate: event.candidate,
+                        roomId: currentRoomId,
+                        targetId: viewerId
+                    }));
+                }
+            };
+            
+            // إنشاء وإرسال عرض
+            setTimeout(async () => {
+                try {
+                    const offer = await pc.createOffer();
+                    await pc.setLocalDescription(offer);
+                    
+                    if (socket) {
+                        socket.send(JSON.stringify({
+                            type: 'offer',
+                            offer: offer,
+                            roomId: currentRoomId,
+                            targetId: viewerId
+                        }));
+                    }
+                } catch (error) {
+                    console.error('خطأ في إنشاء العرض:', error);
+                }
+            }, 1000);
+            
+            peerConnections.set(viewerId, pc);
+        };
+        
+        // 6. معالجة مرشحات ICE
+        function handleIceCandidate(data) {
+            const pc = peerConnections.get(data.senderId);
+            if (pc && data.candidate) {
+                pc.addIceCandidate(new RTCIceCandidate(data.candidate))
+                    .catch(e => console.error('خطأ في ICE:', e));
+            }
+        };
+        
+        // 7. تحديث الحالة
+        function updateStatus(message, type) {
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        };
     </script>
 </body>
-    </html>
+</html>
