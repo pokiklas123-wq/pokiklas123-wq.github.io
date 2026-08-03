@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>محرر مانجا ويب - HTML واحد</title>
+  <title>محرر مانجا ويب - HTML واحد (نسخة الأداء العالي)</title>
   <style>
     :root{
       --bg:#0f1115;
@@ -243,6 +243,7 @@
         linear-gradient(-45deg,transparent 75%,#111722 75%);
       background-size:24px 24px;
       background-position:0 0,0 12px,12px -12px,-12px 0px;
+      will-change: scroll-position;
     }
 
     .canvas-wrap{
@@ -261,6 +262,8 @@
       box-shadow:0 20px 50px rgba(0,0,0,.45);
       touch-action:none;
       user-select:none;
+      /* تحسين الأداء على متصفحات الويب */
+      image-rendering: optimizeSpeed; 
     }
 
     .small-note{
@@ -372,18 +375,6 @@
       gap:10px;
     }
 
-    .warn{
-      color:#ffd089;
-    }
-
-    .ok{
-      color:#8ff0b2;
-    }
-
-    .danger{
-      color:#ff9898;
-    }
-
     @media (max-width:1100px){
       .main{
         grid-template-columns:1fr;
@@ -410,9 +401,9 @@
   <div class="app-header">
     <h1>🎨 محرر مانجا ويب متكامل <span id="saveStateBadge" class="badge">غير محفوظ</span></h1>
     <div class="header-badges">
+      <div class="badge">أداء عالي (مُحسّن) ⚡</div>
       <div class="badge">HTML واحد فقط</div>
       <div class="badge">CSS + JS مدموج</div>
-      <div class="badge">يدعم الخطوط والصور والمشاريع</div>
       <div class="badge">أفضل على Chrome / Edge</div>
     </div>
   </div>
@@ -433,7 +424,6 @@
         </div>
         <p class="small-note">
           عند الحفظ، سيطلب المتصفح الوصول إلى مجلد ليتم حفظ ملفات المشروع والخلفيات والخطوط والصور داخله.
-          إذا كان المتصفح لا يدعم الحفظ المباشر، سيتم استخدام تنزيل ملف احتياطي.
         </p>
       </div>
 
@@ -604,7 +594,9 @@
   <script>
     (() => {
       const editorCanvas = document.getElementById('editorCanvas');
-      const ctx = editorCanvas.getContext('2d');
+      // تحسين: تعطيل الألفا لتسريع الأداء إن أمكن، ولكن نحتاجها للشفافية
+      const ctx = editorCanvas.getContext('2d', { alpha: false }); 
+      
       const canvasScroll = document.getElementById('canvasScroll');
       const statusText = document.getElementById('statusText');
       const saveStateBadge = document.getElementById('saveStateBadge');
@@ -639,6 +631,9 @@
 
       const cropHeightRange = document.getElementById('cropHeightRange');
       const cropHeightValue = document.getElementById('cropHeightValue');
+      
+      // تحسين: إنشاء كانفاس القياس مرة واحدة فقط بدلا من كل مرة
+      const metricsCanvasCtx = document.createElement('canvas').getContext('2d');
 
       const state = {
         projectName: 'مشروع مانجا',
@@ -669,7 +664,7 @@
 
         textEditingId: null,
 
-        customFonts: {}, // key:name -> { family, dataUrl, fileName }
+        customFonts: {}, 
         systemFonts: [
           { name:'الافتراضي', family:'Tahoma, Arial, sans-serif' },
           { name:'عريض', family:'Arial Black, Tahoma, sans-serif' },
@@ -688,7 +683,10 @@
         projectDirHandle: null,
         projectFolderName: '',
 
-        unsaved: true
+        unsaved: true,
+        
+        // متغير لإدارة سرعة التحديث (الأداء)
+        renderPending: false 
       };
 
       const TEXT_COLORS = [
@@ -701,13 +699,27 @@
         '#e040fb','#00e5ff','#ffffff','#000000'
       ];
 
+      // --------- تحسين الأداء الأساسي: Request Animation Frame ---------
+      function requestRender() {
+        if (!state.renderPending) {
+          state.renderPending = true;
+          requestAnimationFrame(() => {
+            render();
+            state.renderPending = false;
+          });
+        }
+      }
+      // ----------------------------------------------------------------
+
       function setStatus(msg){ statusText.textContent = msg; }
+      
       function markUnsaved(){
         state.unsaved = true;
         saveStateBadge.textContent = 'غير محفوظ';
         saveStateBadge.style.background = '#512126';
         saveStateBadge.style.borderColor = '#7a313b';
       }
+      
       function markSaved(){
         state.unsaved = false;
         saveStateBadge.textContent = 'محفوظ';
@@ -731,8 +743,11 @@
         state.frameCanvas.height = state.frameHeight;
         state.drawingCanvas.width = state.frameWidth;
         state.drawingCanvas.height = state.frameHeight;
-        state.frameCtx = state.frameCanvas.getContext('2d');
+        
+        // تحسين الأداء بتعطيل الألفا للوحة الخلفية
+        state.frameCtx = state.frameCanvas.getContext('2d', { alpha: false });
         state.drawingCtx = state.drawingCanvas.getContext('2d');
+        
         editorCanvas.width = state.frameWidth;
         editorCanvas.height = state.frameHeight;
       }
@@ -751,10 +766,7 @@
       function deepCloneLayers(list){
         return list.map(layer => {
           if(layer.type === 'image'){
-            return {
-              ...layer,
-              image: layer.image
-            };
+            return { ...layer, image: layer.image };
           }
           return { ...layer };
         });
@@ -805,7 +817,7 @@
       function setSelected(id){
         state.selectedId = id;
         syncSelectedControls();
-        render();
+        requestRender(); // استخدام دالة الـ RAF
       }
 
       function getSelectedLayer(){
@@ -824,34 +836,15 @@
 
       function createImageLayer({image, dataUrl, name, x, y, scale = 0.5, rotation = 0, skewX = 0, skewY = 0}){
         return {
-          id: uid(),
-          type: 'image',
-          image,
-          dataUrl,
-          name: name || 'image',
-          x,
-          y,
-          scale,
-          rotation,
-          skewX,
-          skewY
+          id: uid(), type: 'image', image, dataUrl, name: name || 'image',
+          x, y, scale, rotation, skewX, skewY
         };
       }
 
       function createTextLayer({text, x, y, scale = 1, rotation = 0, skewX = 0, skewY = 0, color = '#ffffff', fontName = 'الافتراضي', fontFamily = 'Tahoma, Arial, sans-serif'}){
         return {
-          id: uid(),
-          type: 'text',
-          text,
-          x,
-          y,
-          scale,
-          rotation,
-          skewX,
-          skewY,
-          color,
-          fontName,
-          fontFamily
+          id: uid(), type: 'text', text, x, y, scale, rotation,
+          skewX, skewY, color, fontName, fontFamily
         };
       }
 
@@ -866,15 +859,6 @@
           };
           reader.onerror = reject;
           reader.readAsDataURL(file);
-        });
-      }
-
-      function loadImageFromDataUrl(dataUrl){
-        return new Promise((resolve,reject) => {
-          const img = new Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = dataUrl;
         });
       }
 
@@ -899,12 +883,8 @@
         const det = m.a*m.d - m.b*m.c;
         if(Math.abs(det) < 1e-9) return null;
         return {
-          a: m.d/det,
-          b: -m.b/det,
-          c: -m.c/det,
-          d: m.a/det,
-          e: (m.c*m.f - m.d*m.e)/det,
-          f: (m.b*m.e - m.a*m.f)/det
+          a: m.d/det, b: -m.b/det, c: -m.c/det, d: m.a/det,
+          e: (m.c*m.f - m.d*m.e)/det, f: (m.b*m.e - m.a*m.f)/det
         };
       }
 
@@ -915,8 +895,7 @@
           a: Math.cos(degToRad(layer.rotation)),
           b: Math.sin(degToRad(layer.rotation)),
           c: -Math.sin(degToRad(layer.rotation)),
-          d: Math.cos(degToRad(layer.rotation)),
-          e:0, f:0
+          d: Math.cos(degToRad(layer.rotation)), e:0, f:0
         };
         const t = { a:1,b:0,c:0,d:1,e:layer.x,f:layer.y };
         return matMul(t, matMul(r, matMul(k, s)));
@@ -928,15 +907,15 @@
           a: Math.cos(degToRad(layer.rotation)),
           b: Math.sin(degToRad(layer.rotation)),
           c: -Math.sin(degToRad(layer.rotation)),
-          d: Math.cos(degToRad(layer.rotation)),
-          e:0, f:0
+          d: Math.cos(degToRad(layer.rotation)), e:0, f:0
         };
         const t = { a:1,b:0,c:0,d:1,e:layer.x,f:layer.y };
         return matMul(t, matMul(r, k));
       }
 
       function getTextMetrics(layer){
-        const temp = document.createElement('canvas').getContext('2d');
+        // استخدام الكانفاس المخبأ مسبقا لتجنب خلق عناصر تستهلك الذاكرة
+        const temp = metricsCanvasCtx; 
         const fontPx = 80 * layer.scale;
         temp.font = `${fontPx}px ${layer.fontFamily}`;
         const lines = (layer.text || '').split('\n');
@@ -949,53 +928,36 @@
         return {
           width: maxWidth || 1,
           height: Math.max(lineHeight, lines.length * lineHeight),
-          lineHeight,
-          fontPx,
-          lines
+          lineHeight, fontPx, lines
         };
       }
 
       function getLayerBounds(layer){
+        let pts, m;
         if(layer.type === 'image'){
           const w = layer.image.width;
           const h = layer.image.height;
-          const m = imageMatrix(layer);
-          const pts = [
-            matApply(m,-w/2,-h/2),
-            matApply(m, w/2,-h/2),
-            matApply(m, w/2, h/2),
-            matApply(m,-w/2, h/2),
+          m = imageMatrix(layer);
+          pts = [
+            matApply(m,-w/2,-h/2), matApply(m, w/2,-h/2),
+            matApply(m, w/2, h/2), matApply(m,-w/2, h/2),
           ];
-          const xs = pts.map(p=>p.x);
-          const ys = pts.map(p=>p.y);
-          return {
-            minX: Math.min(...xs),
-            minY: Math.min(...ys),
-            maxX: Math.max(...xs),
-            maxY: Math.max(...ys),
-            corners: pts
-          };
         } else {
           const t = getTextMetrics(layer);
           const hw = t.width / 2;
           const hh = t.height / 2;
-          const m = textMatrix(layer);
-          const pts = [
-            matApply(m,-hw,-hh),
-            matApply(m, hw,-hh),
-            matApply(m, hw, hh),
-            matApply(m,-hw, hh),
+          m = textMatrix(layer);
+          pts = [
+            matApply(m,-hw,-hh), matApply(m, hw,-hh),
+            matApply(m, hw, hh), matApply(m,-hw, hh),
           ];
-          const xs = pts.map(p=>p.x);
-          const ys = pts.map(p=>p.y);
-          return {
-            minX: Math.min(...xs),
-            minY: Math.min(...ys),
-            maxX: Math.max(...xs),
-            maxY: Math.max(...ys),
-            corners: pts
-          };
         }
+        const xs = pts.map(p=>p.x);
+        const ys = pts.map(p=>p.y);
+        return {
+          minX: Math.min(...xs), minY: Math.min(...ys),
+          maxX: Math.max(...xs), maxY: Math.max(...ys), corners: pts
+        };
       }
 
       function clampLayerToBounds(layer){
@@ -1036,22 +998,21 @@
       }
 
       function containsLayer(layer, px, py, padding = 0){
+        let inv, halfW, halfH;
         if(layer.type === 'image'){
-          const inv = matInvert(imageMatrix(layer));
+          inv = matInvert(imageMatrix(layer));
           if(!inv) return false;
-          const p = matApply(inv, px, py);
-          const halfW = layer.image.width / 2 + padding;
-          const halfH = layer.image.height / 2 + padding;
-          return p.x >= -halfW && p.x <= halfW && p.y >= -halfH && p.y <= halfH;
+          halfW = layer.image.width / 2 + padding;
+          halfH = layer.image.height / 2 + padding;
         } else {
-          const inv = matInvert(textMatrix(layer));
+          inv = matInvert(textMatrix(layer));
           if(!inv) return false;
-          const p = matApply(inv, px, py);
           const t = getTextMetrics(layer);
-          const halfW = t.width / 2 + padding;
-          const halfH = t.height / 2 + padding;
-          return p.x >= -halfW && p.x <= halfW && p.y >= -halfH && p.y <= halfH;
+          halfW = t.width / 2 + padding;
+          halfH = t.height / 2 + padding;
         }
+        const p = matApply(inv, px, py);
+        return p.x >= -halfW && p.x <= halfW && p.y >= -halfH && p.y <= halfH;
       }
 
       function findTopLayerAt(x,y,padding=20){
@@ -1116,8 +1077,7 @@
       }
 
       function render(){
-        ctx.clearRect(0,0,state.frameWidth,state.frameHeight);
-
+        ctx.fillRect(0, 0, state.frameWidth, state.frameHeight); // أسرع من clearRect مع alpha: false
         ctx.drawImage(state.frameCanvas, 0, 0);
 
         for(const layer of state.layers){
@@ -1192,9 +1152,7 @@
 
         state.customFonts[file.name] = {
           name: file.name,
-          family,
-          dataUrl,
-          fileName: file.name
+          family, dataUrl, fileName: file.name
         };
         refreshFontSelect();
         setStatus(`✅ تم رفع الخط: ${file.name}`);
@@ -1232,21 +1190,14 @@
         textModal.classList.add('show');
       }
 
-      function closeTextModal(){
-        textModal.classList.remove('show');
-      }
+      function closeTextModal(){ textModal.classList.remove('show'); }
 
       function saveTextModal(){
         const text = textInput.value.trim();
-        if(!text){
-          alert('الرجاء إدخال نص');
-          return;
-        }
+        if(!text){ alert('الرجاء إدخال نص'); return; }
 
         let fontInfo = { name:'الافتراضي', family:'Tahoma, Arial, sans-serif' };
-        try{
-          fontInfo = JSON.parse(fontSelect.value);
-        }catch(e){}
+        try{ fontInfo = JSON.parse(fontSelect.value); }catch(e){}
 
         if(state.textEditingId){
           const layer = getSelectedLayer();
@@ -1262,12 +1213,9 @@
           pushLayersUndo();
           const center = getVisibleCenter();
           const layer = createTextLayer({
-            text,
-            x: center.x,
-            y: center.y,
+            text, x: center.x, y: center.y,
             color: state.selectedTextColor,
-            fontName: fontInfo.name,
-            fontFamily: fontInfo.family
+            fontName: fontInfo.name, fontFamily: fontInfo.family
           });
           clampLayerToBounds(layer);
           state.layers.push(layer);
@@ -1278,15 +1226,14 @@
         closeTextModal();
         markUnsaved();
         syncSelectedControls();
-        render();
+        requestRender();
       }
 
       function rebuildLayersModal(){
         layersList.innerHTML = '';
         if(state.layers.length === 0){
           const div = document.createElement('div');
-          div.className = 'small-note';
-          div.textContent = 'لا توجد عناصر حالياً.';
+          div.className = 'small-note'; div.textContent = 'لا توجد عناصر حالياً.';
           layersList.appendChild(div);
           return;
         }
@@ -1308,8 +1255,7 @@
           actions.className = 'layer-actions';
 
           const viewBtn = document.createElement('button');
-          viewBtn.className = 'btn-blue';
-          viewBtn.textContent = '🎯 تحديد';
+          viewBtn.className = 'btn-blue'; viewBtn.textContent = '🎯 تحديد';
           viewBtn.onclick = () => {
             setSelected(layer.id);
             scrollToLayer(layer);
@@ -1318,8 +1264,7 @@
           };
 
           const delBtn = document.createElement('button');
-          delBtn.className = 'btn-red';
-          delBtn.textContent = '🗑️ حذف';
+          delBtn.className = 'btn-red'; delBtn.textContent = '🗑️ حذف';
           delBtn.onclick = () => {
             if(confirm('هل تريد حذف هذا العنصر؟')){
               pushLayersUndo();
@@ -1327,7 +1272,7 @@
               if(state.selectedId === layer.id) state.selectedId = null;
               rebuildLayersModal();
               syncSelectedControls();
-              render();
+              requestRender();
               markUnsaved();
             }
           };
@@ -1336,8 +1281,7 @@
 
           if(layer.type === 'text'){
             const editBtn = document.createElement('button');
-            editBtn.className = 'btn-purple';
-            editBtn.textContent = '✏️ تعديل';
+            editBtn.className = 'btn-purple'; editBtn.textContent = '✏️ تعديل';
             editBtn.onclick = () => {
               setSelected(layer.id);
               layersModal.classList.remove('show');
@@ -1365,14 +1309,10 @@
       function syncSelectedControls(){
         const layer = getSelectedLayer();
         if(!layer){
-          scaleRange.value = 100;
-          scaleValue.textContent = '1.0x';
-          rotationRange.value = 0;
-          rotationValue.textContent = '0°';
-          skewXRange.value = 0;
-          skewYRange.value = 0;
-          skewXValue.textContent = '0.00';
-          skewYValue.textContent = '0.00';
+          scaleRange.value = 100; scaleValue.textContent = '1.0x';
+          rotationRange.value = 0; rotationValue.textContent = '0°';
+          skewXRange.value = 0; skewYRange.value = 0;
+          skewXValue.textContent = '0.00'; skewYValue.textContent = '0.00';
           return;
         }
 
@@ -1401,13 +1341,11 @@
         if(newHeight < minHeight) newHeight = minHeight;
 
         const oldFrame = document.createElement('canvas');
-        oldFrame.width = state.frameWidth;
-        oldFrame.height = state.frameHeight;
+        oldFrame.width = state.frameWidth; oldFrame.height = state.frameHeight;
         oldFrame.getContext('2d').drawImage(state.frameCanvas,0,0);
 
         const oldDrawing = document.createElement('canvas');
-        oldDrawing.width = state.frameWidth;
-        oldDrawing.height = state.frameHeight;
+        oldDrawing.width = state.frameWidth; oldDrawing.height = state.frameHeight;
         oldDrawing.getContext('2d').drawImage(state.drawingCanvas,0,0);
 
         state.frameHeight = newHeight;
@@ -1420,14 +1358,13 @@
 
         cropHeightRange.value = state.frameHeight;
         cropHeightValue.textContent = String(state.frameHeight);
-        render();
+        requestRender();
       }
 
       async function exportImage(format){
         const out = document.createElement('canvas');
-        out.width = state.frameWidth;
-        out.height = state.frameHeight;
-        const octx = out.getContext('2d');
+        out.width = state.frameWidth; out.height = state.frameHeight;
+        const octx = out.getContext('2d', { alpha: false });
 
         octx.drawImage(state.frameCanvas,0,0);
         for(const layer of state.layers){
@@ -1464,15 +1401,9 @@
           }
         }
 
-        let mime = 'image/png';
-        let ext = 'png';
-        if(format === 'jpg'){
-          mime = 'image/jpeg';
-          ext = 'jpg';
-        } else if(format === 'webp'){
-          mime = 'image/webp';
-          ext = 'webp';
-        }
+        let mime = 'image/png'; let ext = 'png';
+        if(format === 'jpg'){ mime = 'image/jpeg'; ext = 'jpg'; } 
+        else if(format === 'webp'){ mime = 'image/webp'; ext = 'webp'; }
 
         const blob = await new Promise(resolve => out.toBlob(resolve, mime, 0.95));
         downloadBlob(blob, `manga_${Date.now()}.${ext}`);
@@ -1483,11 +1414,9 @@
       function downloadBlob(blob, fileName){
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
+        a.href = url; a.download = fileName;
         document.body.appendChild(a);
-        a.click();
-        a.remove();
+        a.click(); a.remove();
         setTimeout(() => URL.revokeObjectURL(url), 1500);
       }
 
@@ -1502,9 +1431,7 @@
       }
 
       async function ensureProjectDirectory(){
-        if(!window.showDirectoryPicker){
-          return false;
-        }
+        if(!window.showDirectoryPicker) return false;
 
         state.projectName = sanitizeName(projectNameInput.value);
         projectNameInput.value = state.projectName;
@@ -1573,35 +1500,19 @@
             layers: state.layers.map((layer, index) => {
               if(layer.type === 'image'){
                 return {
-                  type:'image',
-                  x:layer.x,
-                  y:layer.y,
-                  scale:layer.scale,
-                  rotation:layer.rotation,
-                  skewX:layer.skewX,
-                  skewY:layer.skewY,
-                  file:`layer_${index}.png`,
-                  name:layer.name || `layer_${index}.png`
+                  type:'image', x:layer.x, y:layer.y, scale:layer.scale,
+                  rotation:layer.rotation, skewX:layer.skewX, skewY:layer.skewY,
+                  file:`layer_${index}.png`, name:layer.name || `layer_${index}.png`
                 };
               }
               return {
-                type:'text',
-                text:layer.text,
-                x:layer.x,
-                y:layer.y,
-                scale:layer.scale,
-                rotation:layer.rotation,
-                skewX:layer.skewX,
-                skewY:layer.skewY,
-                color:layer.color,
-                fontName:layer.fontName,
-                fontFamily:layer.fontFamily
+                type:'text', text:layer.text, x:layer.x, y:layer.y, scale:layer.scale,
+                rotation:layer.rotation, skewX:layer.skewX, skewY:layer.skewY,
+                color:layer.color, fontName:layer.fontName, fontFamily:layer.fontFamily
               };
             }),
             customFonts: Object.values(state.customFonts).map(f => ({
-              name:f.name,
-              fileName:f.fileName,
-              family:f.family
+              name:f.name, fileName:f.fileName, family:f.family
             }))
           };
 
@@ -1633,20 +1544,12 @@
           layers: state.layers.map(layer => {
             if(layer.type === 'image'){
               return {
-                type:'image',
-                x:layer.x,
-                y:layer.y,
-                scale:layer.scale,
-                rotation:layer.rotation,
-                skewX:layer.skewX,
-                skewY:layer.skewY,
-                dataUrl:layer.dataUrl,
-                name:layer.name
+                type:'image', x:layer.x, y:layer.y, scale:layer.scale,
+                rotation:layer.rotation, skewX:layer.skewX, skewY:layer.skewY,
+                dataUrl:layer.dataUrl, name:layer.name
               };
             }
-            return {
-              ...layer
-            };
+            return { ...layer };
           }),
           customFonts: state.customFonts
         };
@@ -1683,9 +1586,7 @@
             const { img } = await loadImageFromFile(bgFile);
             state.frameCtx.clearRect(0,0,state.frameWidth,state.frameHeight);
             state.frameCtx.drawImage(img,0,0,state.frameWidth,state.frameHeight);
-          }catch(e){
-            fillDefaultBackground();
-          }
+          }catch(e){ fillDefaultBackground(); }
 
           try{
             const drawHandle = await dir.getFileHandle('drawing.png');
@@ -1693,9 +1594,7 @@
             const { img } = await loadImageFromFile(drawFile);
             state.drawingCtx.clearRect(0,0,state.frameWidth,state.frameHeight);
             state.drawingCtx.drawImage(img,0,0,state.frameWidth,state.frameHeight);
-          }catch(e){
-            clearDrawingLayer();
-          }
+          }catch(e){ clearDrawingLayer(); }
 
           state.customFonts = {};
           if(Array.isArray(project.customFonts)){
@@ -1720,31 +1619,17 @@
                   const lf = await lh.getFile();
                   const { img, dataUrl } = await loadImageFromFile(lf);
                   const layer = createImageLayer({
-                    image: img,
-                    dataUrl,
-                    name: item.name || item.file,
-                    x: item.x,
-                    y: item.y,
-                    scale: item.scale,
-                    rotation: item.rotation,
-                    skewX: item.skewX,
-                    skewY: item.skewY
+                    image: img, dataUrl, name: item.name || item.file,
+                    x: item.x, y: item.y, scale: item.scale,
+                    rotation: item.rotation, skewX: item.skewX, skewY: item.skewY
                   });
                   state.layers.push(layer);
-                }catch(e){
-                  console.warn('تعذر تحميل طبقة صورة', item.file, e);
-                }
+                }catch(e){ console.warn('تعذر تحميل طبقة صورة', item.file, e); }
               } else if(item.type === 'text'){
                 const layer = createTextLayer({
-                  text: item.text,
-                  x: item.x,
-                  y: item.y,
-                  scale: item.scale,
-                  rotation: item.rotation,
-                  skewX: item.skewX,
-                  skewY: item.skewY,
-                  color: item.color,
-                  fontName: item.fontName || 'الافتراضي',
+                  text: item.text, x: item.x, y: item.y, scale: item.scale,
+                  rotation: item.rotation, skewX: item.skewX, skewY: item.skewY,
+                  color: item.color, fontName: item.fontName || 'الافتراضي',
                   fontFamily: item.fontFamily || 'Tahoma, Arial, sans-serif'
                 });
                 state.layers.push(layer);
@@ -1760,7 +1645,7 @@
           cropHeightRange.value = state.frameHeight;
           cropHeightValue.textContent = String(state.frameHeight);
 
-          render();
+          requestRender();
           refreshFontSelect();
           updateUndoRedoButtons();
           syncSelectedControls();
@@ -1782,10 +1667,7 @@
         document.fonts.add(font);
 
         state.customFonts[fileName] = {
-          name: fileName,
-          family,
-          dataUrl,
-          fileName
+          name: fileName, family, dataUrl, fileName
         };
       }
 
@@ -1798,7 +1680,7 @@
         }
         syncSelectedControls();
         updateUndoRedoButtons();
-        render();
+        requestRender();
         markUnsaved();
         setStatus('↩️ تم التراجع عن العناصر');
       }
@@ -1812,7 +1694,7 @@
         }
         syncSelectedControls();
         updateUndoRedoButtons();
-        render();
+        requestRender();
         markUnsaved();
         setStatus('↪️ تم إعادة العناصر');
       }
@@ -1823,7 +1705,7 @@
         const previous = state.drawingUndo.pop();
         await restoreDrawingFromDataUrl(previous);
         updateUndoRedoButtons();
-        render();
+        requestRender();
         markUnsaved();
         setStatus('↩️ تم التراجع عن الرسم');
       }
@@ -1834,7 +1716,7 @@
         const next = state.drawingRedo.pop();
         await restoreDrawingFromDataUrl(next);
         updateUndoRedoButtons();
-        render();
+        requestRender();
         markUnsaved();
         setStatus('↪️ تم إعادة الرسم');
       }
@@ -1881,14 +1763,8 @@
 
         document.getElementById('btnEditText').onclick = () => {
           const layer = getSelectedLayer();
-          if(!layer){
-            alert('اختر نصاً أولاً');
-            return;
-          }
-          if(layer.type !== 'text'){
-            alert('العنصر المحدد ليس نصاً');
-            return;
-          }
+          if(!layer){ alert('اختر نصاً أولاً'); return; }
+          if(layer.type !== 'text'){ alert('العنصر المحدد ليس نصاً'); return; }
           openTextModal(layer);
         };
 
@@ -1919,20 +1795,14 @@
 
         document.getElementById('btnDeleteLayer').onclick = () => {
           const layer = getSelectedLayer();
-          if(!layer){
-            alert('اختر عنصراً أولاً');
-            return;
-          }
-          if(state.isLocked){
-            alert('العناصر مقفلة');
-            return;
-          }
+          if(!layer){ alert('اختر عنصراً أولاً'); return; }
+          if(state.isLocked){ alert('العناصر مقفلة'); return; }
           if(confirm('هل تريد حذف العنصر المحدد؟')){
             pushLayersUndo();
             state.layers = state.layers.filter(l => l.id !== layer.id);
             state.selectedId = null;
             syncSelectedControls();
-            render();
+            requestRender();
             markUnsaved();
             setStatus('🗑️ تم حذف العنصر');
           }
@@ -1948,19 +1818,13 @@
           }
           updateModeButtons();
           syncSelectedControls();
-          render();
+          requestRender();
         };
 
         document.getElementById('btnTransform').onclick = () => {
-          if(state.isDrawingMode){
-            alert('أوقف وضع الرسم أولاً');
-            return;
-          }
+          if(state.isDrawingMode){ alert('أوقف وضع الرسم أولاً'); return; }
           const layer = getSelectedLayer();
-          if(!layer){
-            alert('اختر عنصراً أولاً');
-            return;
-          }
+          if(!layer){ alert('اختر عنصراً أولاً'); return; }
           state.isTransformMode = !state.isTransformMode;
           updateModeButtons();
           setStatus(state.isTransformMode ? '📐 وضع التشكيل مفعل' : '📐 تم إيقاف وضع التشكيل');
@@ -1977,19 +1841,12 @@
           }
           updateModeButtons();
           syncSelectedControls();
-          render();
+          requestRender();
         };
 
         document.getElementById('btnCrop').onclick = () => {
-          if(state.isDrawingMode){
-            alert('أوقف وضع الرسم أولاً');
-            return;
-          }
-          if(!state.isCropMode){
-            beginCropMode();
-          }else{
-            cancelCropMode();
-          }
+          if(state.isDrawingMode){ alert('أوقف وضع الرسم أولاً'); return; }
+          if(!state.isCropMode) beginCropMode(); else cancelCropMode();
         };
 
         document.getElementById('btnApplyCrop').onclick = applyCropMode;
@@ -2007,13 +1864,10 @@
           if(!layer) return;
           clampScaleToBounds(layer, s);
           syncSelectedControls();
-          render();
+          requestRender(); // استخدام دالة الـ RAF
           markUnsaved();
         };
-        scaleRange.onchange = () => {
-          const layer = getSelectedLayer();
-          if(layer) pushLayersUndo();
-        };
+        scaleRange.onchange = () => { const layer = getSelectedLayer(); if(layer) pushLayersUndo(); };
 
         rotationRange.oninput = () => {
           const layer = getSelectedLayer();
@@ -2022,13 +1876,10 @@
           if(!layer) return;
           layer.rotation = r;
           clampLayerToBounds(layer);
-          render();
+          requestRender(); // استخدام دالة الـ RAF
           markUnsaved();
         };
-        rotationRange.onchange = () => {
-          const layer = getSelectedLayer();
-          if(layer) pushLayersUndo();
-        };
+        rotationRange.onchange = () => { const layer = getSelectedLayer(); if(layer) pushLayersUndo(); };
 
         skewXRange.oninput = () => {
           const layer = getSelectedLayer();
@@ -2037,13 +1888,10 @@
           if(!layer) return;
           layer.skewX = v;
           clampLayerToBounds(layer);
-          render();
+          requestRender(); // استخدام دالة الـ RAF
           markUnsaved();
         };
-        skewXRange.onchange = () => {
-          const layer = getSelectedLayer();
-          if(layer) pushLayersUndo();
-        };
+        skewXRange.onchange = () => { const layer = getSelectedLayer(); if(layer) pushLayersUndo(); };
 
         skewYRange.oninput = () => {
           const layer = getSelectedLayer();
@@ -2052,13 +1900,10 @@
           if(!layer) return;
           layer.skewY = v;
           clampLayerToBounds(layer);
-          render();
+          requestRender(); // استخدام دالة الـ RAF
           markUnsaved();
         };
-        skewYRange.onchange = () => {
-          const layer = getSelectedLayer();
-          if(layer) pushLayersUndo();
-        };
+        skewYRange.onchange = () => { const layer = getSelectedLayer(); if(layer) pushLayersUndo(); };
 
         penSizeRange.oninput = () => {
           state.penSize = Number(penSizeRange.value);
@@ -2068,9 +1913,7 @@
         cropHeightRange.oninput = () => {
           const val = Number(cropHeightRange.value);
           cropHeightValue.textContent = String(val);
-          if(state.isCropMode){
-            resizeProjectHeight(val);
-          }
+          if(state.isCropMode){ resizeProjectHeight(val); }
         };
 
         document.querySelectorAll('.quick-rot').forEach(btn => {
@@ -2081,7 +1924,7 @@
             layer.rotation = Number(btn.dataset.rot);
             clampLayerToBounds(layer);
             syncSelectedControls();
-            render();
+            requestRender();
             markUnsaved();
           };
         });
@@ -2093,7 +1936,7 @@
           layer.rotation = 360;
           clampLayerToBounds(layer);
           syncSelectedControls();
-          render();
+          requestRender();
           markUnsaved();
         };
 
@@ -2101,14 +1944,12 @@
           const layer = getSelectedLayer();
           if(!layer) return;
           pushLayersUndo();
-          layer.rotation = 0;
-          layer.skewX = 0;
-          layer.skewY = 0;
+          layer.rotation = 0; layer.skewX = 0; layer.skewY = 0;
           if(layer.type === 'image') layer.scale = Math.max(0.1, Math.min(layer.scale, 1));
           else layer.scale = Math.max(0.2, Math.min(layer.scale, 1));
           clampLayerToBounds(layer);
           syncSelectedControls();
-          render();
+          requestRender();
           markUnsaved();
           setStatus('🔄 تم إعادة ضبط التشكيل');
         };
@@ -2120,12 +1961,10 @@
             const { img } = await loadImageFromFile(file);
             state.frameCtx.clearRect(0,0,state.frameWidth,state.frameHeight);
             state.frameCtx.drawImage(img,0,0,state.frameWidth,state.frameHeight);
-            render();
+            requestRender();
             markUnsaved();
             setStatus('✅ تم تغيير الخلفية');
-          }catch(err){
-            alert('فشل تحميل الخلفية');
-          }
+          }catch(err){ alert('فشل تحميل الخلفية'); }
           inputBackground.value = '';
         });
 
@@ -2137,33 +1976,24 @@
             pushLayersUndo();
             const center = getVisibleCenter();
             const layer = createImageLayer({
-              image: img,
-              dataUrl,
-              name: file.name,
-              x: center.x,
-              y: center.y
+              image: img, dataUrl, name: file.name,
+              x: center.x, y: center.y
             });
             clampLayerToBounds(layer);
             state.layers.push(layer);
             setSelected(layer.id);
-            render();
+            requestRender();
             markUnsaved();
             setStatus('✅ تم إضافة صورة جديدة');
-          }catch(err){
-            alert('فشل تحميل الصورة');
-          }
+          }catch(err){ alert('فشل تحميل الصورة'); }
           inputImage.value = '';
         });
 
         inputFont.addEventListener('change', async e => {
           const file = e.target.files[0];
           if(!file) return;
-          try{
-            await registerFontFile(file);
-          }catch(err){
-            console.error(err);
-            alert('فشل رفع الخط');
-          }
+          try{ await registerFontFile(file); }
+          catch(err){ console.error(err); alert('فشل رفع الخط'); }
           inputFont.value = '';
         });
 
@@ -2173,8 +2003,7 @@
           if(state.isDrawingMode){
             pushDrawingUndo();
             state.isDragging = false;
-            state.lastX = p.x;
-            state.lastY = p.y;
+            state.lastX = p.x; state.lastY = p.y;
             editorCanvas.setPointerCapture(e.pointerId);
             return;
           }
@@ -2186,8 +2015,7 @@
             pushLayersUndo();
             setSelected(hit.id);
             state.isDragging = true;
-            state.lastX = p.x;
-            state.lastY = p.y;
+            state.lastX = p.x; state.lastY = p.y;
             state.movedInGesture = false;
             editorCanvas.setPointerCapture(e.pointerId);
             setStatus(`✅ تم تحديد ${hit.type === 'image' ? 'صورة' : 'نص'} للتحريك`);
@@ -2213,9 +2041,8 @@
             paint.lineTo(p.x, p.y);
             paint.stroke();
             paint.restore();
-            state.lastX = p.x;
-            state.lastY = p.y;
-            render();
+            state.lastX = p.x; state.lastY = p.y;
+            requestRender(); // استخدام دالة الـ RAF
             return;
           }
 
@@ -2225,10 +2052,9 @@
             layer.x += (p.x - state.lastX);
             layer.y += (p.y - state.lastY);
             clampLayerToBounds(layer);
-            state.lastX = p.x;
-            state.lastY = p.y;
+            state.lastX = p.x; state.lastY = p.y;
             state.movedInGesture = true;
-            render();
+            requestRender(); // استخدام دالة الـ RAF
           }
         });
 
@@ -2276,7 +2102,7 @@
         setupCanvases();
         fillDefaultBackground();
         clearDrawingLayer();
-        render();
+        requestRender(); // الرسم الأولي
         updateTextColorsUI();
         updateDrawingColorsUI();
         refreshFontSelect();
