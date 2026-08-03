@@ -3,1941 +3,404 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محرر المانجا - Manga Editor</title>
+    <title>محرر المانجا الشامل</title>
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            user-select: none;
+            font-family: Tahoma, sans-serif;
         }
         body {
-            background: #1a1a1a;
+            background-color: #121212;
             color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-            height: 100vh;
-            overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
         }
-        .app-header {
-            background: #2a2a2a;
-            padding: 10px 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            border-bottom: 1px solid #444;
-            flex-shrink: 0;
-            min-height: 56px;
-            flex-wrap: wrap;
-            gap: 6px;
-        }
-        .app-header .title {
+        header {
+            background-color: #1f1f1f;
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #333;
             font-size: 18px;
             font-weight: bold;
-            color: #ff6b6b;
+        }
+        .main-container {
             display: flex;
-            align-items: center;
-            gap: 8px;
+            flex: 1;
+            overflow: hidden;
         }
-        .app-header .title small {
-            font-size: 12px;
-            color: #aaa;
-            font-weight: normal;
-        }
-        .top-buttons {
+        .sidebar {
+            width: 300px;
+            background-color: #1e1e1e;
+            border-left: 1px solid #333;
             display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+            overflow-y: auto;
         }
-        .top-buttons button {
-            background: #333;
-            border: none;
-            color: #fff;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-            white-space: nowrap;
-        }
-        .top-buttons button:hover {
-            background: #444;
-        }
-        .top-buttons button.green {
-            background: #2e7d32;
-        }
-        .top-buttons button.green:hover {
-            background: #388e3c;
-        }
-        .top-buttons button.red {
-            background: #c62828;
-        }
-        .top-buttons button.red:hover {
-            background: #d32f2f;
-        }
-        .top-buttons button.orange {
-            background: #e65100;
-        }
-        .top-buttons button.orange:hover {
-            background: #ef6c00;
-        }
-        .top-buttons button.blue {
-            background: #1565c0;
-        }
-        .top-buttons button.blue:hover {
-            background: #1976d2;
-        }
-        .top-buttons button.purple {
-            background: #6a1b9a;
-        }
-        .top-buttons button.purple:hover {
-            background: #7b1fa2;
-        }
-        .top-buttons button.locked {
-            background: #b71c1c;
-        }
-        .top-buttons button.locked:hover {
-            background: #c62828;
-        }
-        .top-buttons button.unlocked {
-            background: #2e7d32;
-        }
-        .top-buttons button.unlocked:hover {
-            background: #388e3c;
-        }
-
         .canvas-container {
             flex: 1;
-            overflow: auto;
-            background: #111;
-            position: relative;
+            background-color: #000;
             display: flex;
             justify-content: center;
-            align-items: flex-start;
-            padding: 20px;
-        }
-        .canvas-wrapper {
+            align-items: center;
+            overflow: auto;
             position: relative;
-            background: #000;
-            box-shadow: 0 0 30px rgba(0,0,0,0.8);
-            border: 2px solid #333;
-            border-radius: 4px;
-            image-rendering: auto;
         }
-        #mainCanvas {
-            display: block;
-            width: 100%;
-            height: auto;
-            max-width: 100%;
-            background: #000;
-            cursor: grab;
-            touch-action: none;
-        }
-        #mainCanvas.dragging {
-            cursor: grabbing;
-        }
-        #mainCanvas.drawing {
+        canvas {
+            background-color: #000;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
             cursor: crosshair;
         }
-
-        .bottom-tools {
-            background: #222;
-            border-top: 1px solid #444;
-            padding: 8px 16px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-            min-height: 64px;
-        }
-        .bottom-tools .group {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
-            padding: 4px 10px;
-            border-right: 1px solid #444;
-        }
-        .bottom-tools .group:last-child {
-            border-right: none;
-        }
-        .bottom-tools label {
-            font-size: 11px;
-            color: #aaa;
-        }
-        .bottom-tools input[type="range"] {
-            width: 80px;
-            accent-color: #ff6b6b;
-            background: #444;
-            height: 4px;
-            border-radius: 2px;
-        }
-        .bottom-tools input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            background: #ff6b6b;
-            cursor: pointer;
-        }
-        .bottom-tools .value {
-            font-size: 11px;
-            color: #fff;
-            min-width: 32px;
-            text-align: center;
-        }
-        .bottom-tools button {
-            background: #333;
-            border: none;
-            color: #fff;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .bottom-tools button:hover {
-            background: #444;
-        }
-        .bottom-tools button.active {
-            background: #2e7d32;
-        }
-        .bottom-tools button.danger {
-            background: #c62828;
-        }
-        .bottom-tools button.danger:hover {
-            background: #d32f2f;
-        }
-
-        .color-picker-group {
-            display: flex;
-            gap: 4px;
-            align-items: center;
-        }
-        .color-swatch {
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .color-swatch:hover {
-            transform: scale(1.1);
-        }
-        .color-swatch.selected {
-            border-color: #fff;
-            box-shadow: 0 0 8px rgba(255,255,255,0.5);
-        }
-
-        .drawing-tools {
-            display: none;
-        }
-        .drawing-tools.visible {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .transform-tools {
-            display: none;
-            background: #2a2a2a;
-            padding: 6px 12px;
-            border-radius: 6px;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-            border: 1px solid #555;
-        }
-        .transform-tools.visible {
-            display: flex;
-        }
-        .transform-tools input[type="range"] {
-            width: 60px;
-        }
-        .transform-tools .value {
-            font-size: 10px;
-            min-width: 28px;
-        }
-        .transform-tools input[type="text"] {
-            width: 44px;
-            background: #333;
-            border: 1px solid #555;
-            color: #fff;
-            border-radius: 4px;
-            padding: 2px 4px;
-            font-size: 11px;
-            text-align: center;
-        }
-        .transform-tools input[type="text"]:focus {
-            outline: none;
-            border-color: #ff6b6b;
-        }
-
-        .crop-tools {
-            display: none;
-            background: #2a2a2a;
-            padding: 6px 12px;
-            border-radius: 6px;
-            gap: 8px;
-            align-items: center;
-            border: 1px solid #ff6b6b;
-        }
-        .crop-tools.visible {
-            display: flex;
-        }
-
-        .status-bar {
-            background: #111;
-            padding: 4px 16px;
-            font-size: 12px;
-            color: #888;
-            border-top: 1px solid #333;
-            flex-shrink: 0;
-            display: flex;
-            justify-content: space-between;
-            min-height: 28px;
-            align-items: center;
-        }
-        .status-bar .info {
-            color: #aaa;
-        }
-        .status-bar .layer-info {
-            color: #4caf50;
-            font-weight: bold;
-        }
-
-        /* Modal Styles */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(4px);
-        }
-        .modal-overlay.active {
-            display: flex;
-        }
-        .modal-content {
-            background: #2a2a2a;
-            border-radius: 12px;
-            padding: 24px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
+        button, label.btn {
+            background-color: #2b2b2b;
+            color: white;
             border: 1px solid #444;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
-        }
-        .modal-content h3 {
-            margin-bottom: 16px;
-            color: #ff6b6b;
-            font-size: 18px;
-        }
-        .modal-content .close-btn {
-            float: left;
-            background: none;
-            border: none;
-            color: #888;
-            font-size: 20px;
+            padding: 8px 12px;
+            border-radius: 5px;
             cursor: pointer;
+            text-align: center;
+            font-size: 14px;
+            transition: background 0.2s;
         }
-        .modal-content .close-btn:hover {
-            color: #fff;
+        button:hover, label.btn:hover {
+            background-color: #3b3b3b;
         }
-        .modal-content input[type="text"],
-        .modal-content textarea {
+        .btn-primary { background-color: #1976D2; border-color: #115293; }
+        .btn-success { background-color: #388E3C; border-color: #2E7D32; }
+        .btn-danger { background-color: #D32F2F; border-color: #C62828; }
+        .tools-row {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+        .tools-row button {
+            flex: 1;
+            min-width: 45px;
+        }
+        input[type="range"], input[type="text"] {
             width: 100%;
-            padding: 10px;
-            background: #1a1a1a;
+            padding: 6px;
+            background: #2b2b2b;
             border: 1px solid #444;
-            color: #fff;
-            border-radius: 6px;
-            font-size: 14px;
-            margin-bottom: 12px;
-            font-family: inherit;
-        }
-        .modal-content textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        .modal-content input:focus,
-        .modal-content textarea:focus {
-            outline: none;
-            border-color: #ff6b6b;
-        }
-        .modal-content .btn-row {
-            display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-        .modal-content .btn-row button {
-            padding: 8px 20px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            transition: 0.2s;
-        }
-        .modal-content .btn-row .primary {
-            background: #2e7d32;
-            color: #fff;
-        }
-        .modal-content .btn-row .primary:hover {
-            background: #388e3c;
-        }
-        .modal-content .btn-row .secondary {
-            background: #555;
-            color: #fff;
-        }
-        .modal-content .btn-row .secondary:hover {
-            background: #666;
-        }
-        .modal-content .btn-row .danger {
-            background: #c62828;
-            color: #fff;
-        }
-        .modal-content .btn-row .danger:hover {
-            background: #d32f2f;
-        }
-
-        .layer-list-item {
-            background: #1a1a1a;
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-bottom: 8px;
-            border: 1px solid #333;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .layer-list-item:hover {
-            background: #252525;
-        }
-        .layer-list-item.selected {
-            border-color: #4caf50;
-            background: #1e2a1e;
-        }
-        .layer-list-item .row1 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .layer-list-item .row1 .name {
-            font-weight: bold;
-            font-size: 14px;
-        }
-        .layer-list-item .row1 .type {
-            font-size: 12px;
-            color: #888;
-        }
-        .layer-list-item .row2 {
-            display: flex;
-            gap: 6px;
-            margin-top: 6px;
-            flex-wrap: wrap;
-        }
-        .layer-list-item .row2 button {
-            padding: 2px 10px;
-            font-size: 11px;
-            border: none;
+            color: white;
             border-radius: 4px;
-            cursor: pointer;
-            color: #fff;
         }
-        .layer-list-item .row2 .edit {
-            background: #1565c0;
-        }
-        .layer-list-item .row2 .edit:hover {
-            background: #1976d2;
-        }
-        .layer-list-item .row2 .del {
-            background: #c62828;
-        }
-        .layer-list-item .row2 .del:hover {
-            background: #d32f2f;
-        }
-        .layer-list-item .row2 .view {
-            background: #2e7d32;
-        }
-        .layer-list-item .row2 .view:hover {
-            background: #388e3c;
-        }
-
-        .text-color-row {
+        .color-palette {
             display: flex;
-            gap: 6px;
-            margin: 8px 0;
-            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            margin: 5px 0;
         }
-        .text-color-row .swatch {
-            width: 36px;
-            height: 36px;
+        .color-box {
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
-            border: 2px solid transparent;
             cursor: pointer;
-            transition: 0.2s;
+            border: 2px solid #fff;
         }
-        .text-color-row .swatch:hover {
-            transform: scale(1.1);
-        }
-        .text-color-row .swatch.selected {
-            border-color: #fff;
-            box-shadow: 0 0 10px rgba(255,255,255,0.4);
-        }
-
-        .font-btn {
-            background: #333;
-            color: #fff;
-            border: none;
-            padding: 6px 14px;
-            border-radius: 4px;
-            cursor: pointer;
+        .info-panel {
             font-size: 12px;
-            margin: 4px 0;
-        }
-        .font-btn:hover {
-            background: #444;
-        }
-        .font-btn.active {
-            background: #2e7d32;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.85);
-            color: #fff;
-            padding: 10px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            z-index: 2000;
-            border: 1px solid #444;
-            pointer-events: none;
-            transition: opacity 0.3s;
-            opacity: 0;
-        }
-        .toast.show {
-            opacity: 1;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .app-header .title { font-size: 14px; }
-            .top-buttons button { font-size: 10px; padding: 4px 8px; }
-            .bottom-tools { gap: 4px; padding: 4px 8px; }
-            .bottom-tools .group { padding: 2px 6px; }
-            .bottom-tools input[type="range"] { width: 50px; }
-            .transform-tools input[type="range"] { width: 40px; }
-            .modal-content { padding: 16px; }
-            .canvas-container { padding: 8px; }
-        }
-        @media (max-width: 480px) {
-            .app-header { flex-direction: column; align-items: stretch; gap: 4px; }
-            .top-buttons { justify-content: center; }
-            .bottom-tools .group { border-right: none; border-bottom: 1px solid #333; width: 100%; justify-content: center; }
-            .bottom-tools .group:last-child { border-bottom: none; }
+            color: #aaa;
+            text-align: center;
+            margin-top: auto;
+            padding: 5px;
+            background: #111;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast"></div>
+    <header>محرر فريمات المانجا (نسخة الويب المتكاملة)</header>
 
-    <!-- Header -->
-    <div class="app-header">
-        <div class="title">
-            📘 محرر المانجا
-            <small id="projectName">مشروع جديد</small>
-        </div>
-        <div class="top-buttons">
-            <button class="blue" onclick="selectFrame()">🖼️ خلفية</button>
-            <button class="blue" onclick="addImage()">➕ صورة</button>
-            <button class="green" onclick="showAddTextDialog()">📝 نص</button>
-            <button class="orange" onclick="toggleTransformMode()">📐 تشكيل</button>
-            <button class="blue" onclick="showLayersDialog()">👁️ طبقات</button>
-            <button id="lockBtn" class="unlocked" onclick="toggleLock()">🔓 فتح</button>
-            <button id="drawBtn" onclick="toggleDrawingMode()">✏️ رسم</button>
-            <button class="green" onclick="saveProject()">💾 حفظ</button>
-        </div>
-    </div>
+    <div class="main-container">
+        <!-- لوحة التحكم الجانبية -->
+        <div class="sidebar">
+            <div class="tools-row">
+                <label class="btn btn-primary" for="bgInput">📁 اختر خلفية</label>
+                <input type="file" id="bgInput" accept="image/*" style="display: none;">
+                
+                <label class="btn btn-primary" for="imgInput">🖼️ إضافة صورة</label>
+                <input type="file" id="imgInput" accept="image/*" style="display: none;">
+            </div>
 
-    <!-- Canvas Area -->
-    <div class="canvas-container" id="canvasContainer">
-        <div class="canvas-wrapper" id="canvasWrapper">
-            <canvas id="mainCanvas"></canvas>
-        </div>
-    </div>
+            <button class="btn-success" onclick="openTextDialog()">📝 إضافة نص</button>
+            <button id="drawToggleBtn" onclick="toggleDrawingMode()">✏️ تفعيل الرسم الحر</button>
 
-    <!-- Bottom Tools -->
-    <div class="bottom-tools" id="bottomTools">
-        <div class="group">
-            <label>تحريك:</label>
-            <button id="moveUpBtn" onclick="undoLayer()" title="تراجع عنصر">↩️</button>
-            <button id="moveDownBtn" onclick="redoLayer()" title="إعادة عنصر">↪️</button>
-            <button id="deleteBtn" onclick="deleteSelected()" class="danger">🗑️</button>
-            <button id="editTextBtn" onclick="editSelectedText()">✏️ تعديل</button>
-        </div>
+            <hr style="border-color: #333;">
 
-        <div class="group">
-            <label>تكبير:</label>
-            <input type="range" id="scaleSlider" min="0" max="190" value="50">
-            <span class="value" id="scaleValue">0.5x</span>
-        </div>
+            <div>
+                <label>حجم القلم / الفرشاة: <span id="penSizeVal">10</span></label>
+                <input type="range" id="penSizeRange" min="2" max="50" value="10" oninput="penSize = this.value; document.getElementById('penSizeVal').innerText = penSize;">
+            </div>
 
-        <div class="group drawing-tools" id="drawingTools">
-            <label>قلم:</label>
-            <input type="range" id="penSizeSlider" min="2" max="50" value="10">
-            <span class="value" id="penSizeValue">10</span>
-            <div class="color-picker-group" id="drawingColors"></div>
-            <button id="undoDrawBtn" onclick="undoDraw()">↩️ رسم</button>
-            <button id="redoDrawBtn" onclick="redoDraw()">↪️ رسم</button>
-            <button onclick="exitDrawingMode()" class="danger">✖️ إيقاف</button>
+            <div class="color-palette" id="colorPalette">
+                <!-- ألوان الرسم -->
+                <div class="color-box" style="background: red;" onclick="selectedColor='red'"></div>
+                <div class="color-box" style="background: blue;" onclick="selectedColor='blue'"></div>
+                <div class="color-box" style="background: green;" onclick="selectedColor='green'"></div>
+                <div class="color-box" style="background: yellow;" onclick="selectedColor='yellow'"></div>
+                <div class="color-box" style="background: white;" onclick="selectedColor='white'"></div>
+                <div class="color-box" style="background: black;" onclick="selectedColor='black'"></div>
+            </div>
+
+            <hr style="border-color: #333;">
+
+            <div class="tools-row">
+                <button onclick="undo()" class="btn">↩️ تراجع</button>
+                <button onclick="deleteSelected()" class="btn btn-danger">🗑️ حذف المحدد</button>
+            </div>
+
+            <button class="btn btn-primary" onclick="exportImage()">💾 تصدير الصورة النهائية</button>
+
+            <div class="info-panel" id="infoText">👆 اضغط على أي عنصر لتحريكه وتحديده</div>
         </div>
 
-        <div class="group transform-tools" id="transformTools">
-            <label>تدوير:</label>
-            <input type="range" id="rotSlider" min="0" max="720" value="360">
-            <input type="text" id="rotInput" value="0°">
-            <button onclick="applyRot(-180)">-180°</button>
-            <button onclick="applyRot(0)">0°</button>
-            <button onclick="applyRot(180)">180°</button>
-            <button onclick="applyRot(360)">360°</button>
-            <label>انحراف X:</label>
-            <input type="range" id="skewXSlider" min="0" max="200" value="100">
-            <span class="value" id="skewXVal">0.00</span>
-            <label>انحراف Y:</label>
-            <input type="range" id="skewYSlider" min="0" max="200" value="100">
-            <span class="value" id="skewYVal">0.00</span>
-            <button onclick="resetTransform()">🔄 إعادة ضبط</button>
-            <button onclick="exitTransformMode()" class="danger">✖️ إغلاق</button>
-        </div>
-
-        <div class="group crop-tools" id="cropTools">
-            <label>قص الارتفاع:</label>
-            <input type="range" id="cropSlider" min="0" max="15700" value="7700">
-            <span class="value" id="cropValue">8000</span>
-            <button onclick="applyCrop()" class="green">✂️ تطبيق القص</button>
-            <button onclick="exitCropMode()" class="danger">✖️ إلغاء</button>
-        </div>
-    </div>
-
-    <!-- Status Bar -->
-    <div class="status-bar">
-        <span class="info" id="statusInfo">👆 اضغط على عنصر لتحريكه</span>
-        <span class="layer-info" id="layerInfo">العناصر: 0 | المحدد: لا شيء</span>
-    </div>
-
-    <!-- Modals -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-content" id="modalContent">
-            <button class="close-btn" onclick="closeModal()">✕</button>
-            <div id="modalBody"></div>
+        <!-- منطقة العمل ورسم الفريم -->
+        <div class="canvas-container" id="canvasContainer">
+            <canvas id="mangaCanvas" width="800" height="1200"></canvas>
         </div>
     </div>
 
     <script>
-        // ============================================================
-        //  MAIN APPLICATION
-        // ============================================================
-
-        // ---- State ----
-        const state = {
-            frameWidth: 1080,
-            frameHeight: 8000,
-            projectName: 'مشروع جديد',
-            isLocked: false,
-            isDrawingMode: false,
-            isTransformMode: false,
-            isCropMode: false,
-            isProjectSaved: true,
-
-            // Layers
-            layers: [],
-            selectedIndex: -1,
-
-            // Drawing
-            drawingBitmap: null,
-            drawingCanvas: null,
-            drawColor: '#ff0000',
-            penSize: 10,
-            undoDrawList: [],
-            redoDrawList: [],
-            maxUndo: 100,
-
-            // Text
-            textColor: '#ffffff',
-            fontName: 'الافتراضي',
-            fontPath: '',
-
-            // UI
-            isDragging: false,
-            dragStartX: 0,
-            dragStartY: 0,
-            dragLayerStartX: 0,
-            dragLayerStartY: 0,
-            hasMoved: false,
-
-            // Undo for layers
-            layersUndoList: [],
-            layersRedoList: [],
-        };
-
-        // ---- Canvas refs ----
-        const canvas = document.getElementById('mainCanvas');
+        const canvas = document.getElementById('mangaCanvas');
         const ctx = canvas.getContext('2d');
-        const container = document.getElementById('canvasContainer');
-        const wrapper = document.getElementById('canvasWrapper');
 
-        // ---- Utility ----
-        function getCanvasScale() {
-            const rect = canvas.getBoundingClientRect();
-            return { sx: state.frameWidth / rect.width, sy: state.frameHeight / rect.height };
-        }
+        let bgImage = null;
+        let layers = [];
+        let selectedLayer = null;
+        let isDrawing = false;
+        let drawingMode = false;
+        let selectedColor = 'red';
+        let penSize = 10;
+        let drawingPaths = [];
 
-        function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+        let startX, startY;
 
-        function showToast(msg, duration = 2000) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            clearTimeout(t._timeout);
-            t._timeout = setTimeout(() => t.classList.remove('show'), duration);
-        }
-
-        function updateStatus(info, layerInfo) {
-            document.getElementById('statusInfo').textContent = info || '👆 اضغط على عنصر لتحريكه';
-            document.getElementById('layerInfo').textContent = layerInfo || `العناصر: ${state.layers.length} | المحدد: ${state.selectedIndex >= 0 ? state.selectedIndex+1 : 'لا شيء'}`;
-        }
-
-        function markUnsaved() {
-            state.isProjectSaved = false;
-            document.getElementById('projectName').textContent = state.projectName + ' *';
-        }
-
-        function updateUndoButtons() {
-            document.getElementById('undoDrawBtn').disabled = state.undoDrawList.length === 0;
-            document.getElementById('redoDrawBtn').disabled = state.redoDrawList.length === 0;
-            document.getElementById('moveUpBtn').disabled = state.layersUndoList.length === 0;
-            document.getElementById('moveDownBtn').disabled = state.layersRedoList.length === 0;
-        }
-
-        // ============================================================
-        //  CANVAS RENDERING
-        // ============================================================
-
-        function render() {
-            const w = state.frameWidth;
-            const h = state.frameHeight;
-            canvas.width = w;
-            canvas.height = h;
-            canvas.style.width = '100%';
-            canvas.style.height = 'auto';
-
-            ctx.clearRect(0, 0, w, h);
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, w, h);
-
-            // Background image (simulated)
-            if (state.frameBitmap) {
-                ctx.drawImage(state.frameBitmap, 0, 0);
-            } else {
-                // Draw a simple grid background if no frame
-                ctx.fillStyle = '#1a1a2e';
-                ctx.fillRect(0, 0, w, h);
-                ctx.strokeStyle = '#333';
-                ctx.lineWidth = 1;
-                for (let x = 0; x < w; x += 100) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-                for (let y = 0; y < h; y += 100) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-                ctx.fillStyle = '#555';
-                ctx.font = '20px sans-serif';
-                ctx.fillText('📘 محرر المانجا', w/2-100, 50);
-                ctx.font = '14px sans-serif';
-                ctx.fillStyle = '#777';
-                ctx.fillText('اضغط "خلفية" لاختيار صورة', w/2-80, 90);
-            }
-
-            // Draw image layers
-            for (const layer of state.layers) {
-                if (layer.type === 'image') {
-                    drawImageLayer(ctx, layer);
+        // تحميل الخلفية
+        document.getElementById('bgInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        bgImage = img;
+                        redraw();
+                    }
+                    img.src = event.target.result;
                 }
+                reader.readAsDataURL(file);
             }
+        });
 
-            // Draw drawing layer
-            if (state.drawingBitmap) {
-                ctx.drawImage(state.drawingBitmap, 0, 0);
-            }
-
-            // Draw text layers
-            for (const layer of state.layers) {
-                if (layer.type === 'text') {
-                    drawTextLayer(ctx, layer);
-                }
-            }
-
-            // Draw selection border
-            if (state.selectedIndex >= 0 && !state.isLocked && !state.isDrawingMode) {
-                const layer = state.layers[state.selectedIndex];
-                if (layer) drawSelectionBorder(ctx, layer);
-            }
-        }
-
-        function drawImageLayer(ctx, layer) {
-            if (!layer.image) return;
-            const img = layer.image;
-            const cx = img.width / 2;
-            const cy = img.height / 2;
-            ctx.save();
-            ctx.translate(layer.x, layer.y);
-            ctx.rotate(layer.rotation * Math.PI / 180);
-            ctx.transform(1, layer.skewX, layer.skewY, 1, 0, 0);
-            ctx.scale(layer.scale, layer.scale);
-            ctx.drawImage(img, -cx, -cy);
-            ctx.restore();
-        }
-
-        function drawTextLayer(ctx, layer) {
-            if (!layer.text) return;
-            ctx.save();
-            ctx.translate(layer.x, layer.y);
-            ctx.rotate(layer.rotation * Math.PI / 180);
-            ctx.transform(1, layer.skewX, layer.skewY, 1, 0, 0);
-            ctx.scale(layer.scale, layer.scale);
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillStyle = layer.color || '#ffffff';
-            const fontSize = 80;
-            ctx.font = `bold ${fontSize}px "${layer.fontName || 'sans-serif'}"`;
-            const lines = layer.text.split('\n');
-            const lineHeight = fontSize * 1.2;
-            const totalHeight = lines.length * lineHeight;
-            lines.forEach((line, i) => {
-                ctx.fillText(line, 0, -totalHeight/2 + i * lineHeight + lineHeight/2);
-            });
-            ctx.restore();
-        }
-
-        function drawSelectionBorder(ctx, layer) {
-            let bounds;
-            if (layer.type === 'image') {
-                if (!layer.image) return;
-                const img = layer.image;
-                const w = img.width * layer.scale;
-                const h = img.height * layer.scale;
-                bounds = { x: layer.x - w/2, y: layer.y - h/2, w: w, h: h };
-            } else {
-                const fontSize = 80 * layer.scale;
-                const lines = layer.text.split('\n');
-                const maxW = Math.max(...lines.map(l => l.length)) * fontSize * 0.6;
-                const h = lines.length * fontSize * 1.2;
-                bounds = { x: layer.x - maxW/2, y: layer.y - h/2, w: maxW, h: h };
-            }
-
-            ctx.save();
-            ctx.translate(layer.x, layer.y);
-            ctx.rotate(layer.rotation * Math.PI / 180);
-            ctx.transform(1, layer.skewX, layer.skewY, 1, 0, 0);
-            ctx.strokeStyle = '#00e676';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([8, 6]);
-            const pad = 12;
-            const bx = -bounds.w/2 - pad;
-            const by = -bounds.h/2 - pad;
-            const bw = bounds.w + pad*2;
-            const bh = bounds.h + pad*2;
-            ctx.strokeRect(bx, by, bw, bh);
-            ctx.setLineDash([]);
-            // Corner handles
-            const corners = [[bx, by], [bx+bw, by], [bx+bw, by+bh], [bx, by+bh]];
-            ctx.fillStyle = '#ff5722';
-            for (const [cx, cy] of corners) {
-                ctx.beginPath();
-                ctx.arc(cx, cy, 8, 0, Math.PI*2);
-                ctx.fill();
-            }
-            ctx.restore();
-        }
-
-        // ============================================================
-        //  LAYER OPERATIONS
-        // ============================================================
-
-        function addLayer(layer) {
-            saveLayersUndoState();
-            state.layers.push(layer);
-            state.selectedIndex = state.layers.length - 1;
-            markUnsaved();
-            render();
-            updateStatus('✅ تم إضافة عنصر', `العناصر: ${state.layers.length} | المحدد: ${state.selectedIndex+1}`);
-            updateUI();
-        }
-
-        function deleteSelected() {
-            if (state.isDrawingMode) { showToast('✏️ قم بإيقاف الرسم أولاً'); return; }
-            if (state.isLocked) { showToast('🔒 العناصر مقفلة'); return; }
-            if (state.selectedIndex < 0) { showToast('⚠️ اختر عنصر أولاً'); return; }
-            saveLayersUndoState();
-            state.layers.splice(state.selectedIndex, 1);
-            state.selectedIndex = -1;
-            if (state.isTransformMode) exitTransformMode();
-            markUnsaved();
-            render();
-            updateStatus('🗑️ تم حذف العنصر', `العناصر: ${state.layers.length}`);
-            updateUI();
-            showToast('🗑️ تم حذف العنصر');
-        }
-
-        function getLayerAt(x, y, padding = 30) {
-            for (let i = state.layers.length - 1; i >= 0; i--) {
-                const layer = state.layers[i];
-                if (layerContains(layer, x, y, padding)) return i;
-            }
-            return -1;
-        }
-
-        function layerContains(layer, px, py, padding = 0) {
-            let bounds;
-            if (layer.type === 'image') {
-                if (!layer.image) return false;
-                const img = layer.image;
-                const w = img.width * layer.scale;
-                const h = img.height * layer.scale;
-                bounds = { x: layer.x - w/2, y: layer.y - h/2, w: w, h: h };
-            } else {
-                const fontSize = 80 * layer.scale;
-                const lines = layer.text.split('\n');
-                const maxW = Math.max(...lines.map(l => l.length)) * fontSize * 0.6;
-                const h = lines.length * fontSize * 1.2;
-                bounds = { x: layer.x - maxW/2, y: layer.y - h/2, w: maxW, h: h };
-            }
-            // Apply rotation and skew transform to point
-            const dx = px - layer.x;
-            const dy = py - layer.y;
-            const rot = -layer.rotation * Math.PI / 180;
-            const cos = Math.cos(rot);
-            const sin = Math.sin(rot);
-            let lx = dx * cos - dy * sin;
-            let ly = dx * sin + dy * cos;
-            // Inverse skew
-            const det = 1 - layer.skewX * layer.skewY;
-            if (Math.abs(det) > 0.001) {
-                const sx = (lx - layer.skewX * ly) / det;
-                const sy = (ly - layer.skewY * lx) / det;
-                lx = sx;
-                ly = sy;
-            }
-            const halfW = bounds.w/2 + padding;
-            const halfH = bounds.h/2 + padding;
-            return lx >= -halfW && lx <= halfW && ly >= -halfH && ly <= halfH;
-        }
-
-        function clampLayerToBounds(layer) {
-            // Simple clamp: keep center within frame
-            if (layer.type === 'image') {
-                if (!layer.image) return;
-                const w = layer.image.width * layer.scale / 2;
-                const h = layer.image.height * layer.scale / 2;
-                layer.x = clamp(layer.x, w, state.frameWidth - w);
-                layer.y = clamp(layer.y, h, state.frameHeight - h);
-            } else {
-                const fontSize = 80 * layer.scale;
-                const lines = layer.text.split('\n');
-                const maxW = Math.max(...lines.map(l => l.length)) * fontSize * 0.6 / 2;
-                const h = lines.length * fontSize * 1.2 / 2;
-                layer.x = clamp(layer.x, maxW, state.frameWidth - maxW);
-                layer.y = clamp(layer.y, h, state.frameHeight - h);
-            }
-        }
-
-        // ============================================================
-        //  UNDO / REDO FOR LAYERS
-        // ============================================================
-
-        function saveLayersUndoState() {
-            if (state.layersUndoList.length >= state.maxUndo) state.layersUndoList.shift();
-            state.layersUndoList.push(JSON.stringify(state.layers.map(l => ({
-                type: l.type,
-                x: l.x, y: l.y, scale: l.scale, rotation: l.rotation, skewX: l.skewX, skewY: l.skewY,
-                text: l.text, color: l.color, fontName: l.fontName,
-                image: l.type === 'image' ? l.image.src : null,
-            }))));
-            state.layersRedoList = [];
-            updateUndoButtons();
-        }
-
-        function undoLayer() {
-            if (state.isDrawingMode) { showToast('✏️ قم بإيقاف الرسم أولاً'); return; }
-            if (state.layersUndoList.length === 0) { showToast('⚠️ لا يوجد إجراء للتراجع'); return; }
-            state.layersRedoList.push(JSON.stringify(state.layers.map(l => ({
-                type: l.type,
-                x: l.x, y: l.y, scale: l.scale, rotation: l.rotation, skewX: l.skewX, skewY: l.skewY,
-                text: l.text, color: l.color, fontName: l.fontName,
-                image: l.type === 'image' ? l.image.src : null,
-            }))));
-            restoreLayersState(state.layersUndoList.pop());
-            markUnsaved();
-            render();
-            updateStatus('↩️ تم التراجع عن العنصر');
-            updateUI();
-            updateUndoButtons();
-        }
-
-        function redoLayer() {
-            if (state.isDrawingMode) { showToast('✏️ قم بإيقاف الرسم أولاً'); return; }
-            if (state.layersRedoList.length === 0) { showToast('⚠️ لا يوجد إجراء للإعادة'); return; }
-            state.layersUndoList.push(JSON.stringify(state.layers.map(l => ({
-                type: l.type,
-                x: l.x, y: l.y, scale: l.scale, rotation: l.rotation, skewX: l.skewX, skewY: l.skewY,
-                text: l.text, color: l.color, fontName: l.fontName,
-                image: l.type === 'image' ? l.image.src : null,
-            }))));
-            restoreLayersState(state.layersRedoList.pop());
-            markUnsaved();
-            render();
-            updateStatus('↪️ تم إعادة العنصر');
-            updateUI();
-            updateUndoButtons();
-        }
-
-        function restoreLayersState(jsonStr) {
-            try {
-                const data = JSON.parse(jsonStr);
-                const newLayers = [];
-                for (const item of data) {
-                    if (item.type === 'image') {
-                        const img = new Image();
-                        img.src = item.image;
-                        newLayers.push({
+        // إضافة صورة كطبقة
+        document.getElementById('imgInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = new Image();
+                    img.onload = function() {
+                        let layer = {
                             type: 'image',
-                            image: img,
-                            x: item.x, y: item.y,
-                            scale: item.scale || 0.5,
-                            rotation: item.rotation || 0,
-                            skewX: item.skewX || 0,
-                            skewY: item.skewY || 0,
-                        });
-                    } else {
-                        newLayers.push({
-                            type: 'text',
-                            text: item.text || '',
-                            x: item.x || state.frameWidth/2,
-                            y: item.y || state.frameHeight/2,
-                            scale: item.scale || 1,
-                            rotation: item.rotation || 0,
-                            skewX: item.skewX || 0,
-                            skewY: item.skewY || 0,
-                            color: item.color || '#ffffff',
-                            fontName: item.fontName || 'الافتراضي',
-                        });
+                            img: img,
+                            x: canvas.width / 2 - 100,
+                            y: canvas.height / 2 - 150,
+                            width: 200,
+                            height: 300,
+                            scale: 1
+                        };
+                        layers.push(layer);
+                        selectedLayer = layer;
+                        redraw();
+                    }
+                    img.src = event.target.result;
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // إضافة نص
+        function openTextDialog() {
+            let txt = prompt("أدخل النص المطلوب:");
+            if (txt) {
+                let layer = {
+                    type: 'text',
+                    text: txt,
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    color: 'white',
+                    size: 30,
+                    font: 'Arial'
+                };
+                layers.push(layer);
+                selectedLayer = layer;
+                redraw();
+            }
+        }
+
+        // تبديل وضع الرسم
+        function toggleDrawingMode() {
+            drawingMode = !drawingMode;
+            let btn = document.getElementById('drawToggleBtn');
+            if (drawingMode) {
+                btn.style.background = '#388E3C';
+                btn.innerText = "✏️ وضع الرسم مُفعّل";
+                selectedLayer = null;
+            } else {
+                btn.style.background = '#2b2b2b';
+                btn.innerText = "✏️ تفعيل الرسم الحر";
+            }
+            redraw();
+        }
+
+        // إدارة الفأرة واللمس على الكانفاس
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (drawingMode) {
+                isDrawing = true;
+                startX = x;
+                startY = y;
+                drawingPaths.push({type: 'begin', x, y, color: selectedColor, size: penSize});
+                return;
+            }
+
+            // البحث عن الطبقات المحددة (من الأعلى للأدنى)
+            selectedLayer = null;
+            for (let i = layers.length - 1; i >= 0; i--) {
+                let l = layers[i];
+                if (l.type === 'image') {
+                    if (x >= l.x && x <= l.x + l.width && y >= l.y && y <= l.y + l.height) {
+                        selectedLayer = l;
+                        break;
+                    }
+                } else if (l.type === 'text') {
+                    ctx.font = `${l.size}px ${l.font}`;
+                    let metrics = ctx.measureText(l.text);
+                    if (x >= l.x - metrics.width/2 && x <= l.x + metrics.width/2 && y >= l.y - l.size && y <= l.y) {
+                        selectedLayer = l;
+                        break;
                     }
                 }
-                state.layers = newLayers;
-                state.selectedIndex = state.layers.length > 0 ? 0 : -1;
-            } catch (e) {
-                console.error('Restore error:', e);
             }
-        }
+            startX = x;
+            startY = y;
+            redraw();
+        });
 
-        // ============================================================
-        //  DRAWING
-        // ============================================================
-
-        function initDrawing() {
-            if (!state.drawingBitmap) {
-                state.drawingBitmap = document.createElement('canvas');
-                state.drawingBitmap.width = state.frameWidth;
-                state.drawingBitmap.height = state.frameHeight;
-                state.drawingCanvas = state.drawingBitmap.getContext('2d');
-                state.drawingCanvas.fillStyle = 'transparent';
-                state.drawingCanvas.fillRect(0, 0, state.frameWidth, state.frameHeight);
-            }
-        }
-
-        function saveDrawUndo() {
-            if (!state.drawingBitmap) return;
-            if (state.undoDrawList.length >= state.maxUndo) state.undoDrawList.shift();
-            const copy = document.createElement('canvas');
-            copy.width = state.drawingBitmap.width;
-            copy.height = state.drawingBitmap.height;
-            const cctx = copy.getContext('2d');
-            cctx.drawImage(state.drawingBitmap, 0, 0);
-            state.undoDrawList.push(copy);
-            state.redoDrawList = [];
-            updateUndoButtons();
-        }
-
-        function undoDraw() {
-            if (state.undoDrawList.length === 0) { showToast('⚠️ لا يوجد رسم للتراجع'); return; }
-            if (state.drawingBitmap) {
-                const copy = document.createElement('canvas');
-                copy.width = state.drawingBitmap.width;
-                copy.height = state.drawingBitmap.height;
-                const cctx = copy.getContext('2d');
-                cctx.drawImage(state.drawingBitmap, 0, 0);
-                state.redoDrawList.push(copy);
-            }
-            state.drawingBitmap = state.undoDrawList.pop();
-            state.drawingCanvas = state.drawingBitmap.getContext('2d');
-            markUnsaved();
-            render();
-            updateUndoButtons();
-        }
-
-        function redoDraw() {
-            if (state.redoDrawList.length === 0) { showToast('⚠️ لا يوجد رسم للإعادة'); return; }
-            if (state.drawingBitmap) {
-                const copy = document.createElement('canvas');
-                copy.width = state.drawingBitmap.width;
-                copy.height = state.drawingBitmap.height;
-                const cctx = copy.getContext('2d');
-                cctx.drawImage(state.drawingBitmap, 0, 0);
-                state.undoDrawList.push(copy);
-            }
-            state.drawingBitmap = state.redoDrawList.pop();
-            state.drawingCanvas = state.drawingBitmap.getContext('2d');
-            markUnsaved();
-            render();
-            updateUndoButtons();
-        }
-
-        // ============================================================
-        //  UI CONTROLS
-        // ============================================================
-
-        function updateUI() {
-            const hasSelected = state.selectedIndex >= 0 && state.selectedIndex < state.layers.length;
-            document.getElementById('deleteBtn').style.opacity = hasSelected ? 1 : 0.4;
-            document.getElementById('editTextBtn').style.opacity = hasSelected ? 1 : 0.4;
-            if (hasSelected) {
-                const layer = state.layers[state.selectedIndex];
-                if (layer.type === 'text') {
-                    document.getElementById('editTextBtn').style.display = 'inline-block';
-                } else {
-                    document.getElementById('editTextBtn').style.display = 'none';
-                }
-                // Update scale slider
-                const val = Math.round((layer.scale - 0.1) / 1.9 * 100);
-                document.getElementById('scaleSlider').value = clamp(val, 0, 190);
-                document.getElementById('scaleValue').textContent = layer.scale.toFixed(1) + 'x';
-                // Update transform UI
-                if (state.isTransformMode) updateTransformUI();
-            } else {
-                document.getElementById('editTextBtn').style.display = 'none';
-            }
-            updateStatus(null, `العناصر: ${state.layers.length} | المحدد: ${state.selectedIndex >= 0 ? state.selectedIndex+1 : 'لا شيء'}`);
-            updateUndoButtons();
-        }
-
-        function toggleLock() {
-            if (state.isDrawingMode) { showToast('✏️ قم بإيقاف الرسم أولاً'); return; }
-            state.isLocked = !state.isLocked;
-            const btn = document.getElementById('lockBtn');
-            if (state.isLocked) {
-                btn.textContent = '🔒 مقفل';
-                btn.className = 'locked';
-                state.selectedIndex = -1;
-                updateStatus('🔒 العناصر مقفلة');
-            } else {
-                btn.textContent = '🔓 فتح';
-                btn.className = 'unlocked';
-                updateStatus('🔓 العناصر مفتوحة');
-            }
-            render();
-            updateUI();
-        }
-
-        function toggleDrawingMode() {
-            state.isDrawingMode = !state.isDrawingMode;
-            const btn = document.getElementById('drawBtn');
-            const tools = document.getElementById('drawingTools');
-            if (state.isDrawingMode) {
-                btn.textContent = '✏️ رسم مفعل';
-                btn.className = 'green';
-                tools.classList.add('visible');
-                canvas.classList.add('drawing');
-                state.selectedIndex = -1;
-                if (state.isTransformMode) exitTransformMode();
-                if (state.isCropMode) exitCropMode();
-                initDrawing();
-                updateStatus('✏️ وضع الرسم مفعل - اسحب للرسم');
-                render();
-            } else {
-                exitDrawingMode();
-            }
-            updateUI();
-        }
-
-        function exitDrawingMode() {
-            state.isDrawingMode = false;
-            const btn = document.getElementById('drawBtn');
-            const tools = document.getElementById('drawingTools');
-            btn.textContent = '✏️ رسم';
-            btn.className = '';
-            tools.classList.remove('visible');
-            canvas.classList.remove('drawing');
-            updateStatus('👆 اضغط على عنصر لتحريكه');
-            render();
-            updateUI();
-        }
-
-        function toggleTransformMode() {
-            if (state.isDrawingMode) { showToast('✏️ قم بإيقاف الرسم أولاً'); return; }
-            if (state.selectedIndex < 0) { showToast('⚠️ يرجى اختيار عنصر أولاً للتشكيل'); return; }
-            state.isTransformMode = !state.isTransformMode;
-            const tools = document.getElementById('transformTools');
-            if (state.isTransformMode) {
-                tools.classList.add('visible');
-                if (state.isCropMode) exitCropMode();
-                updateTransformUI();
-                updateStatus('📐 وضع التشكيل مفعل - تحكم بالتدوير والاعوجاج');
-            } else {
-                tools.classList.remove('visible');
-                updateStatus('👆 اضغط على عنصر لتحريكه | 📐 للتشكيل');
-            }
-            render();
-            updateUI();
-        }
-
-        function exitTransformMode() {
-            state.isTransformMode = false;
-            document.getElementById('transformTools').classList.remove('visible');
-            updateStatus('👆 اضغط على عنصر لتحريكه | 📐 للتشكيل');
-            render();
-            updateUI();
-        }
-
-        function updateTransformUI() {
-            if (state.selectedIndex < 0) return;
-            const layer = state.layers[state.selectedIndex];
-            const rot = layer.rotation || 0;
-            const skX = layer.skewX || 0;
-            const skY = layer.skewY || 0;
-            document.getElementById('rotSlider').value = rot + 360;
-            document.getElementById('rotInput').value = Math.round(rot) + '°';
-            document.getElementById('skewXSlider').value = skX * 100 + 100;
-            document.getElementById('skewYSlider').value = skY * 100 + 100;
-            document.getElementById('skewXVal').textContent = skX.toFixed(2);
-            document.getElementById('skewYVal').textContent = skY.toFixed(2);
-        }
-
-        function applyRot(deg) {
-            if (state.selectedIndex < 0) return;
-            saveLayersUndoState();
-            state.layers[state.selectedIndex].rotation = deg;
-            markUnsaved();
-            updateTransformUI();
-            render();
-            updateUI();
-        }
-
-        function resetTransform() {
-            if (state.selectedIndex < 0) return;
-            saveLayersUndoState();
-            const layer = state.layers[state.selectedIndex];
-            layer.rotation = 0;
-            layer.skewX = 0;
-            layer.skewY = 0;
-            markUnsaved();
-            updateTransformUI();
-            render();
-            updateUI();
-            showToast('🔄 تم إعادة ضبط التشكيل');
-        }
-
-        // ============================================================
-        //  CROP MODE
-        // ============================================================
-
-        function toggleCropMode() {
-            if (state.isDrawingMode) { showToast('✏️ قم بإيقاف الرسم أولاً'); return; }
-            state.isCropMode = !state.isCropMode;
-            const tools = document.getElementById('cropTools');
-            if (state.isCropMode) {
-                tools.classList.add('visible');
-                if (state.isTransformMode) exitTransformMode();
-                state.isLocked = true;
-                document.getElementById('lockBtn').textContent = '🔒 مقفل';
-                document.getElementById('lockBtn').className = 'locked';
-                document.getElementById('cropSlider').max = 16000 - 300;
-                const minH = getMinFrameHeight();
-                document.getElementById('cropSlider').value = Math.max(state.frameHeight - 300, minH - 300);
-                document.getElementById('cropValue').textContent = state.frameHeight;
-                updateStatus('✂️ وضع القص - اسحب لتغيير الارتفاع من الأسفل');
-            } else {
-                exitCropMode();
-            }
-            render();
-            updateUI();
-        }
-
-        function exitCropMode() {
-            state.isCropMode = false;
-            document.getElementById('cropTools').classList.remove('visible');
-            state.isLocked = false;
-            document.getElementById('lockBtn').textContent = '🔓 فتح';
-            document.getElementById('lockBtn').className = 'unlocked';
-            updateStatus('👆 اضغط على عنصر لتحريكه | 📐 للتشكيل');
-            render();
-            updateUI();
-        }
-
-        function applyCrop() {
-            const val = parseInt(document.getElementById('cropSlider').value) + 300;
-            const minH = getMinFrameHeight();
-            const newH = Math.max(val, minH);
-            state.frameHeight = newH;
-            document.getElementById('cropValue').textContent = newH;
-            // Resize drawing layer
-            if (state.drawingBitmap) {
-                const old = state.drawingBitmap;
-                const newCanvas = document.createElement('canvas');
-                newCanvas.width = state.frameWidth;
-                newCanvas.height = newH;
-                const nctx = newCanvas.getContext('2d');
-                nctx.drawImage(old, 0, 0);
-                state.drawingBitmap = newCanvas;
-                state.drawingCanvas = nctx;
-            }
-            // Clamp layers
-            for (const layer of state.layers) {
-                clampLayerToBounds(layer);
-            }
-            markUnsaved();
-            render();
-            updateUI();
-            showToast('✅ تم القص - الارتفاع: ' + newH);
-        }
-
-        function getMinFrameHeight() {
-            let minY = 300;
-            for (const layer of state.layers) {
-                let bottom = 0;
-                if (layer.type === 'image' && layer.image) {
-                    bottom = layer.y + layer.image.height * layer.scale / 2;
-                } else if (layer.type === 'text') {
-                    const lines = layer.text.split('\n');
-                    const fontSize = 80 * layer.scale;
-                    bottom = layer.y + lines.length * fontSize * 1.2 / 2;
-                }
-                if (bottom > minY) minY = bottom;
-            }
-            return Math.min(Math.ceil(minY + 50), 16000);
-        }
-
-        // ============================================================
-        //  TEXT DIALOGS
-        // ============================================================
-
-        function showAddTextDialog() {
-            if (state.isDrawingMode) { showToast('✏️ قم بإيقاف الرسم أولاً'); return; }
-            state.textColor = '#ffffff';
-            state.fontName = 'الافتراضي';
-            document.getElementById('modalBody').innerHTML = `
-                <h3>📝 إضافة نص</h3>
-                <textarea id="textInput" placeholder="اكتب النص هنا..." rows="4"></textarea>
-                <div class="text-color-row" id="textColorRow"></div>
-                <button class="font-btn" onclick="showFontDialog()">التخطيط: ${state.fontName}</button>
-                <div class="btn-row">
-                    <button class="primary" onclick="addTextConfirm()">✅ حفظ</button>
-                    <button class="secondary" onclick="closeModal()">إلغاء</button>
-                </div>
-            `;
-            document.getElementById('modalOverlay').classList.add('active');
-            buildTextColorPicker();
-            // Focus textarea after render
-            setTimeout(() => document.getElementById('textInput')?.focus(), 100);
-        }
-
-        function buildTextColorPicker() {
-            const colors = ['#ffffff', '#000000', '#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-            const row = document.getElementById('textColorRow');
-            if (!row) return;
-            row.innerHTML = '';
-            for (const c of colors) {
-                const div = document.createElement('div');
-                div.className = 'swatch' + (c === state.textColor ? ' selected' : '');
-                div.style.background = c;
-                if (c === '#ffffff' || c === '#ffff00' || c === '#00ffff') div.style.borderColor = '#888';
-                div.onclick = () => {
-                    state.textColor = c;
-                    buildTextColorPicker();
-                };
-                row.appendChild(div);
-            }
-        }
-
-        function showFontDialog() {
-            const fonts = ['الافتراضي', 'عريض', 'مسافات أحادية', 'بلا سيريف', 'سيريف'];
-            const body = document.getElementById('modalBody');
-            const oldContent = body.innerHTML;
-            body.innerHTML = `
-                <h3>📐 اختيار التخطيط</h3>
-                <div style="display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;">
-                    ${fonts.map(f => `<button class="font-btn ${f === state.fontName ? 'active' : ''}" onclick="selectFont('${f}')">${f}</button>`).join('')}
-                </div>
-                <div style="margin:8px 0;border-top:1px solid #444;padding-top:12px;">
-                    <button class="font-btn" onclick="uploadFont()">📤 رفع تخطيطك</button>
-                    <span style="font-size:11px;color:#888;margin-right:8px;">(ملفات .ttf / .otf)</span>
-                </div>
-                <div class="btn-row">
-                    <button class="secondary" onclick="restoreTextDialog()">🔙 رجوع</button>
-                </div>
-            `;
-        }
-
-        function selectFont(name) {
-            state.fontName = name;
-            showFontDialog();
-        }
-
-        function uploadFont() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.ttf,.otf';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const dataUrl = ev.target.result;
-                    // Store font as data URL for use
-                    state.fontDataUrl = dataUrl;
-                    state.fontName = file.name;
-                    showToast('✅ تم رفع التخطيط: ' + file.name);
-                    showFontDialog();
-                };
-                reader.readAsDataURL(file);
-            };
-            input.click();
-        }
-
-        function restoreTextDialog() {
-            showAddTextDialog();
-        }
-
-        function addTextConfirm() {
-            const input = document.getElementById('textInput');
-            if (!input) return;
-            const text = input.value.trim();
-            if (!text) { showToast('⚠️ الرجاء كتابة نص'); return; }
-            const layer = {
-                type: 'text',
-                text: text,
-                x: state.frameWidth / 2,
-                y: state.frameHeight / 2,
-                scale: 1,
-                rotation: 0,
-                skewX: 0,
-                skewY: 0,
-                color: state.textColor,
-                fontName: state.fontName,
-            };
-            addLayer(layer);
-            closeModal();
-            showToast('✅ تم إضافة النص');
-        }
-
-        function editSelectedText() {
-            if (state.isDrawingMode) { showToast('✏️ قم بإيقاف الرسم أولاً'); return; }
-            if (state.selectedIndex < 0) { showToast('⚠️ اختر نصاً أولاً'); return; }
-            const layer = state.layers[state.selectedIndex];
-            if (layer.type !== 'text') { showToast('⚠️ العنصر المحدد ليس نصاً'); return; }
-            state.textColor = layer.color || '#ffffff';
-            state.fontName = layer.fontName || 'الافتراضي';
-            document.getElementById('modalBody').innerHTML = `
-                <h3>✏️ تعديل النص</h3>
-                <textarea id="textInput" rows="4">${layer.text}</textarea>
-                <div class="text-color-row" id="textColorRow"></div>
-                <button class="font-btn" onclick="showFontDialog()">التخطيط: ${state.fontName}</button>
-                <div class="btn-row">
-                    <button class="primary" onclick="editTextConfirm()">✅ حفظ</button>
-                    <button class="secondary" onclick="closeModal()">إلغاء</button>
-                </div>
-            `;
-            document.getElementById('modalOverlay').classList.add('active');
-            buildTextColorPicker();
-            setTimeout(() => document.getElementById('textInput')?.focus(), 100);
-        }
-
-        function editTextConfirm() {
-            const input = document.getElementById('textInput');
-            if (!input) return;
-            const text = input.value.trim();
-            if (!text) { showToast('⚠️ الرجاء كتابة نص'); return; }
-            if (state.selectedIndex < 0) return;
-            saveLayersUndoState();
-            const layer = state.layers[state.selectedIndex];
-            layer.text = text;
-            layer.color = state.textColor;
-            layer.fontName = state.fontName;
-            if (state.fontDataUrl) {
-                // Store font data URL for rendering (simplified: just use name)
-                layer.fontDataUrl = state.fontDataUrl;
-            }
-            markUnsaved();
-            closeModal();
-            render();
-            updateUI();
-            showToast('✅ تم تحديث النص');
-        }
-
-        // ============================================================
-        //  LAYERS DIALOG
-        // ============================================================
-
-        function showLayersDialog() {
-            if (state.layers.length === 0) { showToast('⚠️ لا توجد عناصر'); return; }
-            let html = `<h3>👁️ قائمة العناصر (${state.layers.length})</h3>`;
-            for (let i = 0; i < state.layers.length; i++) {
-                const l = state.layers[i];
-                const sel = i === state.selectedIndex ? ' selected' : '';
-                const icon = l.type === 'image' ? '🖼️' : '📝';
-                const name = l.type === 'image' ? 'فريم' : 'نص';
-                const preview = l.type === 'text' ? (l.text.length > 30 ? l.text.substring(0,30)+'...' : l.text) : `الحجم: ${l.scale.toFixed(1)}x`;
-                html += `
-                    <div class="layer-list-item${sel}" onclick="selectLayer(${i})">
-                        <div class="row1">
-                            <span class="name">${icon} ${name} #${i+1}</span>
-                            <span class="type">${preview}</span>
-                        </div>
-                        <div class="row2">
-                            <button class="view" onclick="event.stopPropagation();selectLayer(${i})">🎯 عرض</button>
-                            ${l.type === 'text' ? `<button class="edit" onclick="event.stopPropagation();selectLayer(${i});setTimeout(editSelectedText,100)">✏️ تعديل</button>` : ''}
-                            <button class="del" onclick="event.stopPropagation();deleteLayerFromList(${i})">🗑️ حذف</button>
-                        </div>
-                    </div>
-                `;
-            }
-            html += `<div class="btn-row"><button class="secondary" onclick="closeModal()">إغلاق</button></div>`;
-            document.getElementById('modalBody').innerHTML = html;
-            document.getElementById('modalOverlay').classList.add('active');
-        }
-
-        function selectLayer(index) {
-            if (index >= 0 && index < state.layers.length) {
-                state.selectedIndex = index;
-                render();
-                updateUI();
-                // Scroll to layer (simplified)
-                showToast('✅ تم تحديد: ' + (state.layers[index].type === 'image' ? 'فريم' : 'نص') + ' #' + (index+1));
-            }
-            closeModal();
-        }
-
-        function deleteLayerFromList(index) {
-            if (index < 0 || index >= state.layers.length) return;
-            if (confirm('هل تريد حذف هذا العنصر؟')) {
-                saveLayersUndoState();
-                state.layers.splice(index, 1);
-                if (state.selectedIndex === index) state.selectedIndex = -1;
-                else if (state.selectedIndex > index) state.selectedIndex--;
-                markUnsaved();
-                render();
-                updateUI();
-                showLayersDialog();
-            }
-        }
-
-        // ============================================================
-        //  IMAGE / FRAME SELECTION
-        // ============================================================
-
-        function selectFrame() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        state.frameBitmap = img;
-                        markUnsaved();
-                        render();
-                        showToast('✅ تم تغيير الخلفية');
-                    };
-                    img.src = ev.target.result;
-                };
-                reader.readAsDataURL(file);
-            };
-            input.click();
-        }
-
-        function addImage() {
-            if (state.isDrawingMode) { showToast('✏️ قم بإيقاف الرسم أولاً'); return; }
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const layer = {
-                            type: 'image',
-                            image: img,
-                            x: state.frameWidth / 2,
-                            y: state.frameHeight / 2,
-                            scale: 0.5,
-                            rotation: 0,
-                            skewX: 0,
-                            skewY: 0,
-                        };
-                        clampLayerToBounds(layer);
-                        addLayer(layer);
-                        showToast('✅ تم إضافة فريم');
-                    };
-                    img.src = ev.target.result;
-                };
-                reader.readAsDataURL(file);
-            };
-            input.click();
-        }
-
-        // ============================================================
-        //  SAVE PROJECT
-        // ============================================================
-
-        function saveProject() {
-            showToast('⏳ جاري حفظ المشروع...');
-            setTimeout(() => {
-                state.isProjectSaved = true;
-                document.getElementById('projectName').textContent = state.projectName;
-                showToast('✅ تم حفظ المشروع بنجاح');
-            }, 500);
-            // In real app, would export to file. Here we simulate.
-        }
-
-        // ============================================================
-        //  MODAL HELPERS
-        // ============================================================
-
-        function closeModal() {
-            document.getElementById('modalOverlay').classList.remove('active');
-        }
-
-        // ============================================================
-        //  CANVAS EVENTS (Drag & Drawing)
-        // ============================================================
-
-        let isPointerDown = false;
-        let pointerX = 0, pointerY = 0;
-
-        canvas.addEventListener('pointerdown', (e) => {
+        canvas.addEventListener('mousemove', (e) => {
             const rect = canvas.getBoundingClientRect();
-            const scale = getCanvasScale();
-            const x = (e.clientX - rect.left) * scale.sx;
-            const y = (e.clientY - rect.top) * scale.sy;
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
 
-            if (state.isDrawingMode) {
-                isPointerDown = true;
-                pointerX = x;
-                pointerY = y;
-                saveDrawUndo();
+            if (drawingMode && isDrawing) {
+                drawingPaths.push({type: 'draw', x, y, color: selectedColor, size: penSize});
+                redraw();
                 return;
             }
 
-            if (state.isLocked || state.isCropMode) return;
+            if (selectedLayer && e.buttons === 1) {
+                let dx = x - startX;
+                let dy = y - startY;
+                selectedLayer.x += dx;
+                selectedLayer.y += dy;
+                startX = x;
+                startY = y;
+                redraw();
+            }
+        });
 
-            const idx = getLayerAt(x, y);
-            if (idx >= 0) {
-                state.selectedIndex = idx;
-                state.isDragging = true;
-                state.hasMoved = false;
-                state.dragStartX = x;
-                state.dragStartY = y;
-                const layer = state.layers[idx];
-                state.dragLayerStartX = layer.x;
-                state.dragLayerStartY = layer.y;
-                canvas.classList.add('dragging');
-                updateStatus('✅ تحريك: ' + (layer.type === 'image' ? 'فريم' : 'نص') + ' #' + (idx+1));
-                if (state.isTransformMode) updateTransformUI();
-                render();
-                updateUI();
+        window.addEventListener('mouseup', () => {
+            isDrawing = false;
+        });
+
+        // إعادة رسم الكانفاس بالكامل
+        function redraw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 1. رسم الخلفية
+            if (bgImage) {
+                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
             } else {
-                state.selectedIndex = -1;
-                render();
-                updateUI();
-                updateStatus('👆 اضغط على عنصر لتحريكه');
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             }
-        });
 
-        canvas.addEventListener('pointermove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const scale = getCanvasScale();
-            const x = (e.clientX - rect.left) * scale.sx;
-            const y = (e.clientY - rect.top) * scale.sy;
-
-            if (state.isDrawingMode && isPointerDown) {
-                if (state.drawingCanvas) {
-                    state.drawingCanvas.strokeStyle = state.drawColor;
-                    state.drawingCanvas.lineWidth = state.penSize;
-                    state.drawingCanvas.lineCap = 'round';
-                    state.drawingCanvas.lineJoin = 'round';
-                    state.drawingCanvas.beginPath();
-                    state.drawingCanvas.moveTo(pointerX, pointerY);
-                    state.drawingCanvas.lineTo(x, y);
-                    state.drawingCanvas.stroke();
-                    pointerX = x;
-                    pointerY = y;
-                    render();
+            // 2. رسم الصور والطبقات
+            layers.forEach(l => {
+                if (l.type === 'image') {
+                    ctx.drawImage(l.img, l.x, l.y, l.width, l.height);
+                    if (l === selectedLayer) {
+                        ctx.strokeStyle = '#00E676';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(l.x, l.y, l.width, l.height);
+                    }
+                } else if (l.type === 'text') {
+                    ctx.fillStyle = l.color;
+                    ctx.font = `${l.size}px Tahoma`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(l.text, l.x, l.y);
+                    if (l === selectedLayer) {
+                        let m = ctx.measureText(l.text);
+                        ctx.strokeStyle = '#00E676';
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(l.x - m.width/2 - 5, l.y - l.size - 5, m.width + 10, l.size + 10);
+                    }
                 }
-                return;
-            }
-
-            if (state.isDragging && state.selectedIndex >= 0 && !state.isLocked) {
-                const layer = state.layers[state.selectedIndex];
-                const dx = x - state.dragStartX;
-                const dy = y - state.dragStartY;
-                layer.x = state.dragLayerStartX + dx;
-                layer.y = state.dragLayerStartY + dy;
-                clampLayerToBounds(layer);
-                state.hasMoved = true;
-                render();
-                updateUI();
-            }
-        });
-
-        canvas.addEventListener('pointerup', (e) => {
-            if (state.isDrawingMode) {
-                isPointerDown = false;
-                markUnsaved();
-                updateUndoButtons();
-                return;
-            }
-
-            if (state.isDragging && state.hasMoved) {
-                saveLayersUndoState();
-                markUnsaved();
-                updateStatus('✅ تم التحريك');
-            }
-            state.isDragging = false;
-            canvas.classList.remove('dragging');
-            render();
-            updateUI();
-        });
-
-        canvas.addEventListener('pointerleave', () => {
-            if (state.isDrawingMode) {
-                isPointerDown = false;
-                return;
-            }
-            state.isDragging = false;
-            canvas.classList.remove('dragging');
-        });
-
-        // ---- Touch events for mobile ----
-        canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const scale = getCanvasScale();
-            const x = (touch.clientX - rect.left) * scale.sx;
-            const y = (touch.clientY - rect.top) * scale.sy;
-            const me = new MouseEvent('pointerdown', { clientX: touch.clientX, clientY: touch.clientY });
-            canvas.dispatchEvent(me);
-            // store touch coords for move
-            canvas._touchX = x;
-            canvas._touchY = y;
-        }, { passive: false });
-
-        canvas.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const scale = getCanvasScale();
-            const x = (touch.clientX - rect.left) * scale.sx;
-            const y = (touch.clientY - rect.top) * scale.sy;
-            const me = new MouseEvent('pointermove', { clientX: touch.clientX, clientY: touch.clientY });
-            canvas.dispatchEvent(me);
-        }, { passive: false });
-
-        canvas.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            const me = new MouseEvent('pointerup', {});
-            canvas.dispatchEvent(me);
-        }, { passive: false });
-
-        // ---- Scale slider ----
-        document.getElementById('scaleSlider').addEventListener('input', function() {
-            if (state.selectedIndex < 0) return;
-            if (state.isDrawingMode) return;
-            const layer = state.layers[state.selectedIndex];
-            const val = parseFloat(this.value);
-            const newScale = 0.1 + (val / 100) * 1.9;
-            layer.scale = clamp(newScale, 0.1, 2.0);
-            if (layer.type === 'image') {
-                // Max scale based on image size
-                if (layer.image) {
-                    const maxW = state.frameWidth / layer.image.width;
-                    const maxH = state.frameHeight / layer.image.height;
-                    const maxS = Math.min(maxW, maxH);
-                    if (layer.scale > maxS) layer.scale = maxS;
-                }
-            }
-            clampLayerToBounds(layer);
-            document.getElementById('scaleValue').textContent = layer.scale.toFixed(1) + 'x';
-            markUnsaved();
-            render();
-            updateUI();
-        });
-
-        // ---- Transform sliders ----
-        document.getElementById('rotSlider').addEventListener('input', function() {
-            if (state.selectedIndex < 0 || !state.isTransformMode) return;
-            const layer = state.layers[state.selectedIndex];
-            const rot = parseFloat(this.value) - 360;
-            layer.rotation = rot;
-            document.getElementById('rotInput').value = Math.round(rot) + '°';
-            markUnsaved();
-            render();
-            updateUI();
-        });
-
-        document.getElementById('rotInput').addEventListener('change', function() {
-            if (state.selectedIndex < 0 || !state.isTransformMode) return;
-            let val = parseFloat(this.value.replace('°', '').trim());
-            if (isNaN(val)) return;
-            const layer = state.layers[state.selectedIndex];
-            layer.rotation = val;
-            document.getElementById('rotSlider').value = val + 360;
-            markUnsaved();
-            render();
-            updateUI();
-        });
-
-        document.getElementById('skewXSlider').addEventListener('input', function() {
-            if (state.selectedIndex < 0 || !state.isTransformMode) return;
-            const layer = state.layers[state.selectedIndex];
-            const skX = (parseFloat(this.value) - 100) / 100;
-            layer.skewX = skX;
-            document.getElementById('skewXVal').textContent = skX.toFixed(2);
-            markUnsaved();
-            render();
-            updateUI();
-        });
-
-        document.getElementById('skewYSlider').addEventListener('input', function() {
-            if (state.selectedIndex < 0 || !state.isTransformMode) return;
-            const layer = state.layers[state.selectedIndex];
-            const skY = (parseFloat(this.value) - 100) / 100;
-            layer.skewY = skY;
-            document.getElementById('skewYVal').textContent = skY.toFixed(2);
-            markUnsaved();
-            render();
-            updateUI();
-        });
-
-        // ---- Crop slider ----
-        document.getElementById('cropSlider').addEventListener('input', function() {
-            if (!state.isCropMode) return;
-            const val = parseInt(this.value) + 300;
-            const minH = getMinFrameHeight();
-            const newH = Math.max(val, minH);
-            document.getElementById('cropValue').textContent = newH;
-        });
-
-        // ---- Pen size ----
-        document.getElementById('penSizeSlider').addEventListener('input', function() {
-            state.penSize = parseFloat(this.value);
-            document.getElementById('penSizeValue').textContent = Math.round(state.penSize);
-        });
-
-        // ---- Drawing colors ----
-        function buildDrawingColors() {
-            const colors = ['#ff0000', '#0000ff', '#00ff00', '#ffff00', '#ff00ff', '#00ffff', '#ffffff', '#000000'];
-            const container = document.getElementById('drawingColors');
-            container.innerHTML = '';
-            for (const c of colors) {
-                const div = document.createElement('div');
-                div.className = 'color-swatch' + (c === state.drawColor ? ' selected' : '');
-                div.style.background = c;
-                if (c === '#ffffff' || c === '#ffff00' || c === '#00ffff') div.style.borderColor = '#888';
-                div.onclick = () => {
-                    state.drawColor = c;
-                    buildDrawingColors();
-                };
-                container.appendChild(div);
-            }
-        }
-        buildDrawingColors();
-
-        // ============================================================
-        //  INIT
-        // ============================================================
-
-        function init() {
-            // Set initial frame height slider range
-            document.getElementById('cropSlider').max = 16000 - 300;
-            render();
-            updateUI();
-            updateStatus('👆 اضغط على عنصر لتحريكه | 📐 للتشكيل');
-            // Handle window resize
-            window.addEventListener('resize', () => { render(); });
-            // Keyboard shortcuts
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Delete' || e.key === 'Backspace') {
-                    if (!e.target.closest('input, textarea')) deleteSelected();
-                }
-                if (e.key === 'Escape') {
-                    if (state.isTransformMode) exitTransformMode();
-                    if (state.isCropMode) exitCropMode();
-                    if (state.isDrawingMode) exitDrawingMode();
-                    closeModal();
-                }
-                if (e.ctrlKey && e.key === 'z') { e.preventDefault(); undoLayer(); }
-                if (e.ctrlKey && e.key === 'y') { e.preventDefault(); redoLayer(); }
             });
+
+            // 3. رسم الخطوط الحرة
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            for (let i = 0; i < drawingPaths.length; i++) {
+                let p = drawingPaths[i];
+                if (p.type === 'begin') {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.strokeStyle = p.color;
+                    ctx.lineWidth = p.size;
+                } else if (p.type === 'draw') {
+                    ctx.lineTo(p.x, p.y);
+                    ctx.stroke();
+                }
+            }
         }
 
-        // Override closeModal to also clean up
-        const origClose = closeModal;
-        closeModal = function() {
-            origClose();
-        };
+        // حذف العنصر المحدد
+        function deleteSelected() {
+            if (selectedLayer) {
+                layers = layers.filter(l => l !== selectedLayer);
+                selectedLayer = null;
+                redraw();
+            }
+        }
 
-        // Start
-        init();
-        showToast('📘 مرحباً بك في محرر المانجا!');
+        // تراجع عن آخر رسمة
+        function undo() {
+            // إزالة آخر مسار رسم
+            let lastBeginIndex = drawingPaths.map(p => p.type).lastIndexOf('begin');
+            if (lastBeginIndex !== -1) {
+                drawingPaths.splice(lastBeginIndex);
+                redraw();
+            }
+        }
 
-        // Sample initial layers for demo
-        setTimeout(() => {
-            const sampleText = {
-                type: 'text',
-                text: 'مرحباً!\nهذا محرر المانجا',
-                x: state.frameWidth / 2,
-                y: state.frameHeight / 2 - 100,
-                scale: 1.2,
-                rotation: 0,
-                skewX: 0,
-                skewY: 0,
-                color: '#ff6b6b',
-                fontName: 'الافتراضي',
-            };
-            state.layers.push(sampleText);
-            state.selectedIndex = 0;
-            render();
-            updateUI();
-            updateStatus('👆 اضغط على عنصر لتحريكه | 📐 للتشكيل', `العناصر: ${state.layers.length} | المحدد: 1`);
-        }, 300);
+        // تصدير الصورة النهائية
+        function exportImage() {
+            let link = document.createElement('a');
+            link.download = 'manga_edit.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
     </script>
-
 </body>
 </html>
