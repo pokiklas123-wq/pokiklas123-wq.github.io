@@ -1,406 +1,2297 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>محرر المانجا الشامل</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: Tahoma, sans-serif;
-        }
-        body {
-            background-color: #121212;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
-        header {
-            background-color: #1f1f1f;
-            padding: 10px;
-            text-align: center;
-            border-bottom: 1px solid #333;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-        .sidebar {
-            width: 300px;
-            background-color: #1e1e1e;
-            border-left: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            padding: 10px;
-            gap: 10px;
-            overflow-y: auto;
-        }
-        .canvas-container {
-            flex: 1;
-            background-color: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: auto;
-            position: relative;
-        }
-        canvas {
-            background-color: #000;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-            cursor: crosshair;
-        }
-        button, label.btn {
-            background-color: #2b2b2b;
-            color: white;
-            border: 1px solid #444;
-            padding: 8px 12px;
-            border-radius: 5px;
-            cursor: pointer;
-            text-align: center;
-            font-size: 14px;
-            transition: background 0.2s;
-        }
-        button:hover, label.btn:hover {
-            background-color: #3b3b3b;
-        }
-        .btn-primary { background-color: #1976D2; border-color: #115293; }
-        .btn-success { background-color: #388E3C; border-color: #2E7D32; }
-        .btn-danger { background-color: #D32F2F; border-color: #C62828; }
-        .tools-row {
-            display: flex;
-            gap: 5px;
-            flex-wrap: wrap;
-        }
-        .tools-row button {
-            flex: 1;
-            min-width: 45px;
-        }
-        input[type="range"], input[type="text"] {
-            width: 100%;
-            padding: 6px;
-            background: #2b2b2b;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 4px;
-        }
-        .color-palette {
-            display: flex;
-            gap: 5px;
-            justify-content: center;
-            margin: 5px 0;
-        }
-        .color-box {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            cursor: pointer;
-            border: 2px solid #fff;
-        }
-        .info-panel {
-            font-size: 12px;
-            color: #aaa;
-            text-align: center;
-            margin-top: auto;
-            padding: 5px;
-            background: #111;
-            border-radius: 4px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>محرر مانجا ويب - HTML واحد</title>
+  <style>
+    :root{
+      --bg:#0f1115;
+      --panel:#171a21;
+      --panel2:#1f2430;
+      --line:#2d3443;
+      --text:#f5f7fb;
+      --muted:#a6b0c3;
+      --accent:#00c853;
+      --danger:#ff5252;
+      --warning:#ff9800;
+      --blue:#2196f3;
+      --purple:#9c27b0;
+      --cyan:#00bcd4;
+      --shadow:0 10px 30px rgba(0,0,0,.35);
+      --radius:16px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{
+      margin:0;
+      padding:0;
+      background:linear-gradient(180deg,#0b0d11,#11141c);
+      color:var(--text);
+      font-family:Tahoma, Arial, sans-serif;
+      height:100%;
+      overflow:hidden;
+    }
+
+    body{
+      display:flex;
+      flex-direction:column;
+    }
+
+    .app-header{
+      padding:14px 18px;
+      border-bottom:1px solid var(--line);
+      background:rgba(20,23,31,.95);
+      backdrop-filter: blur(8px);
+      position:sticky;
+      top:0;
+      z-index:50;
+    }
+
+    .app-header h1{
+      margin:0;
+      font-size:20px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .header-badges{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    }
+
+    .badge{
+      padding:6px 10px;
+      border-radius:999px;
+      font-size:12px;
+      background:#202633;
+      color:#dbe6ff;
+      border:1px solid #31394a;
+    }
+
+    .main{
+      display:grid;
+      grid-template-columns: 370px 1fr;
+      gap:14px;
+      padding:14px;
+      min-height:0;
+      flex:1;
+    }
+
+    .sidebar{
+      min-height:0;
+      overflow:auto;
+      background:rgba(23,26,33,.9);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:14px;
+    }
+
+    .workspace-panel{
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      background:rgba(23,26,33,.9);
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .section{
+      margin-bottom:16px;
+      padding:12px;
+      border:1px solid #2a3140;
+      border-radius:14px;
+      background:#141821;
+    }
+
+    .section h2{
+      margin:0 0 10px;
+      font-size:15px;
+      color:#dfe8ff;
+    }
+
+    .toolbar-grid{
+      display:grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap:8px;
+    }
+
+    .toolbar-grid.three{
+      grid-template-columns: repeat(3,minmax(0,1fr));
+    }
+
+    button, select, input, textarea{
+      font:inherit;
+    }
+
+    button{
+      border:none;
+      border-radius:12px;
+      padding:10px 12px;
+      cursor:pointer;
+      color:white;
+      background:#263042;
+      transition:.18s ease;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+
+    button:hover{ transform:translateY(-1px); filter:brightness(1.05); }
+    button:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+
+    .btn-green{ background:#176b3a; }
+    .btn-blue{ background:#165e94; }
+    .btn-orange{ background:#8a5608; }
+    .btn-red{ background:#8b1f1f; }
+    .btn-purple{ background:#58237f; }
+    .btn-cyan{ background:#156f78; }
+    .btn-gray{ background:#3a4355; }
+
+    .active{
+      outline:2px solid #7cffb0;
+      box-shadow:0 0 0 4px rgba(0,200,83,.18);
+    }
+
+    .field{
+      margin-bottom:12px;
+    }
+
+    .field label{
+      display:block;
+      margin-bottom:6px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    .field input[type="text"],
+    .field input[type="number"],
+    .field textarea,
+    .field select{
+      width:100%;
+      background:#0f141d;
+      border:1px solid #31394a;
+      color:white;
+      border-radius:12px;
+      padding:10px 12px;
+      outline:none;
+    }
+
+    .field textarea{
+      min-height:120px;
+      resize:vertical;
+    }
+
+    .range-row{
+      display:grid;
+      grid-template-columns:1fr auto;
+      gap:10px;
+      align-items:center;
+      margin-bottom:10px;
+    }
+
+    .range-row input[type="range"]{
+      width:100%;
+      accent-color:#4caf50;
+    }
+
+    .range-value{
+      min-width:72px;
+      text-align:center;
+      background:#101622;
+      border:1px solid #2d3443;
+      border-radius:10px;
+      padding:8px 10px;
+      color:#dbe6ff;
+      font-size:13px;
+    }
+
+    .workspace-toolbar{
+      padding:12px;
+      border-bottom:1px solid var(--line);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      background:#141922;
+    }
+
+    .status{
+      font-size:13px;
+      color:#dbe6ff;
+      background:#101622;
+      border:1px solid #2d3443;
+      padding:8px 12px;
+      border-radius:12px;
+      width:100%;
+    }
+
+    .canvas-scroll{
+      flex:1;
+      overflow:auto;
+      padding:18px;
+      background:
+        linear-gradient(45deg,#111722 25%,transparent 25%),
+        linear-gradient(-45deg,#111722 25%,transparent 25%),
+        linear-gradient(45deg,transparent 75%,#111722 75%),
+        linear-gradient(-45deg,transparent 75%,#111722 75%);
+      background-size:24px 24px;
+      background-position:0 0,0 12px,12px -12px,-12px 0px;
+    }
+
+    .canvas-wrap{
+      width:min(100%,1080px);
+      margin:auto;
+      position:relative;
+    }
+
+    #editorCanvas{
+      width:100%;
+      height:auto;
+      display:block;
+      background:#000;
+      border:2px solid #394357;
+      border-radius:14px;
+      box-shadow:0 20px 50px rgba(0,0,0,.45);
+      touch-action:none;
+      user-select:none;
+    }
+
+    .small-note{
+      font-size:12px;
+      color:#98a4bb;
+      line-height:1.7;
+    }
+
+    .inline-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .colors{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .color-btn{
+      width:34px;
+      height:34px;
+      border-radius:50%;
+      border:2px solid rgba(255,255,255,.2);
+      cursor:pointer;
+      display:grid;
+      place-items:center;
+      color:#000;
+      font-weight:bold;
+      padding:0;
+    }
+
+    .color-btn.active{
+      outline:2px solid white;
+      box-shadow:0 0 0 4px rgba(255,255,255,.15);
+    }
+
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(5,8,12,.72);
+      z-index:200;
+      padding:18px;
+    }
+
+    .modal.show{ display:flex; }
+
+    .modal-card{
+      width:min(760px,100%);
+      max-height:90vh;
+      overflow:auto;
+      background:#131924;
+      border:1px solid #2f3849;
+      border-radius:20px;
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+
+    .modal-card h3{
+      margin:0 0 12px;
+    }
+
+    .modal-footer{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .layers-list{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+
+    .layer-item{
+      border:1px solid #2f3849;
+      border-radius:14px;
+      padding:12px;
+      background:#101622;
+    }
+
+    .layer-item.selected{
+      border-color:#46d57d;
+      box-shadow:0 0 0 3px rgba(70,213,125,.16);
+    }
+
+    .layer-title{
+      margin-bottom:10px;
+      font-size:14px;
+      color:#eaf1ff;
+      white-space:pre-line;
+    }
+
+    .layer-actions{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .split-2{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:10px;
+    }
+
+    .warn{
+      color:#ffd089;
+    }
+
+    .ok{
+      color:#8ff0b2;
+    }
+
+    .danger{
+      color:#ff9898;
+    }
+
+    @media (max-width:1100px){
+      .main{
+        grid-template-columns:1fr;
+      }
+      .sidebar{
+        order:2;
+      }
+      .workspace-panel{
+        order:1;
+        min-height:55vh;
+      }
+    }
+
+    @media (max-width:640px){
+      .toolbar-grid,
+      .toolbar-grid.three,
+      .split-2{
+        grid-template-columns:1fr;
+      }
+    }
+  </style>
 </head>
 <body>
-
-    <header>محرر فريمات المانجا (نسخة الويب المتكاملة)</header>
-
-    <div class="main-container">
-        <!-- لوحة التحكم الجانبية -->
-        <div class="sidebar">
-            <div class="tools-row">
-                <label class="btn btn-primary" for="bgInput">📁 اختر خلفية</label>
-                <input type="file" id="bgInput" accept="image/*" style="display: none;">
-                
-                <label class="btn btn-primary" for="imgInput">🖼️ إضافة صورة</label>
-                <input type="file" id="imgInput" accept="image/*" style="display: none;">
-            </div>
-
-            <button class="btn-success" onclick="openTextDialog()">📝 إضافة نص</button>
-            <button id="drawToggleBtn" onclick="toggleDrawingMode()">✏️ تفعيل الرسم الحر</button>
-
-            <hr style="border-color: #333;">
-
-            <div>
-                <label>حجم القلم / الفرشاة: <span id="penSizeVal">10</span></label>
-                <input type="range" id="penSizeRange" min="2" max="50" value="10" oninput="penSize = this.value; document.getElementById('penSizeVal').innerText = penSize;">
-            </div>
-
-            <div class="color-palette" id="colorPalette">
-                <!-- ألوان الرسم -->
-                <div class="color-box" style="background: red;" onclick="selectedColor='red'"></div>
-                <div class="color-box" style="background: blue;" onclick="selectedColor='blue'"></div>
-                <div class="color-box" style="background: green;" onclick="selectedColor='green'"></div>
-                <div class="color-box" style="background: yellow;" onclick="selectedColor='yellow'"></div>
-                <div class="color-box" style="background: white;" onclick="selectedColor='white'"></div>
-                <div class="color-box" style="background: black;" onclick="selectedColor='black'"></div>
-            </div>
-
-            <hr style="border-color: #333;">
-
-            <div class="tools-row">
-                <button onclick="undo()" class="btn">↩️ تراجع</button>
-                <button onclick="deleteSelected()" class="btn btn-danger">🗑️ حذف المحدد</button>
-            </div>
-
-            <button class="btn btn-primary" onclick="exportImage()">💾 تصدير الصورة النهائية</button>
-
-            <div class="info-panel" id="infoText">👆 اضغط على أي عنصر لتحريكه وتحديده</div>
-        </div>
-
-        <!-- منطقة العمل ورسم الفريم -->
-        <div class="canvas-container" id="canvasContainer">
-            <canvas id="mangaCanvas" width="800" height="1200"></canvas>
-        </div>
+  <div class="app-header">
+    <h1>🎨 محرر مانجا ويب متكامل <span id="saveStateBadge" class="badge">غير محفوظ</span></h1>
+    <div class="header-badges">
+      <div class="badge">HTML واحد فقط</div>
+      <div class="badge">CSS + JS مدموج</div>
+      <div class="badge">يدعم الخطوط والصور والمشاريع</div>
+      <div class="badge">أفضل على Chrome / Edge</div>
     </div>
+  </div>
 
-    <script>
-        const canvas = document.getElementById('mangaCanvas');
-        const ctx = canvas.getContext('2d');
+  <div class="main">
+    <aside class="sidebar">
+      <div class="section">
+        <h2>📁 المشروع والملفات</h2>
+        <div class="field">
+          <label>اسم المشروع</label>
+          <input id="projectNameInput" type="text" value="مشروع مانجا" />
+        </div>
+        <div class="toolbar-grid">
+          <button id="btnSaveProject" class="btn-green">💾 حفظ المشروع</button>
+          <button id="btnOpenProject" class="btn-blue">📂 فتح مشروع</button>
+          <button id="btnExportImage" class="btn-orange">🖼️ تصدير صورة</button>
+          <button id="btnRequestFolder" class="btn-cyan">🗂️ اختيار مجلد مشروع</button>
+        </div>
+        <p class="small-note">
+          عند الحفظ، سيطلب المتصفح الوصول إلى مجلد ليتم حفظ ملفات المشروع والخلفيات والخطوط والصور داخله.
+          إذا كان المتصفح لا يدعم الحفظ المباشر، سيتم استخدام تنزيل ملف احتياطي.
+        </p>
+      </div>
 
-        let bgImage = null;
-        let layers = [];
-        let selectedLayer = null;
-        let isDrawing = false;
-        let drawingMode = false;
-        let selectedColor = 'red';
-        let penSize = 10;
-        let drawingPaths = [];
+      <div class="section">
+        <h2>🖼️ الخلفية والعناصر</h2>
+        <div class="toolbar-grid">
+          <button id="btnSelectBackground" class="btn-blue">🖼️ اختيار خلفية</button>
+          <button id="btnAddImage" class="btn-blue">➕ إضافة صورة</button>
+          <button id="btnAddText" class="btn-purple">📝 إضافة نص</button>
+          <button id="btnEditText" class="btn-purple">✏️ تعديل النص</button>
+          <button id="btnDeleteLayer" class="btn-red">🗑️ حذف المحدد</button>
+          <button id="btnViewLayers" class="btn-gray">👁️ قائمة العناصر</button>
+        </div>
+      </div>
 
-        let startX, startY;
+      <div class="section">
+        <h2>🎯 الأوضاع</h2>
+        <div class="toolbar-grid">
+          <button id="btnTransform" class="btn-orange">📐 وضع التشكيل</button>
+          <button id="btnToggleDrawing" class="btn-green">✏️ وضع الرسم</button>
+          <button id="btnCrop" class="btn-cyan">✂️ وضع القص</button>
+          <button id="btnLock" class="btn-red">🔓 فتح العناصر</button>
+        </div>
+      </div>
 
-        // تحميل الخلفية
-        document.getElementById('bgInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        bgImage = img;
-                        redraw();
-                    }
-                    img.src = event.target.result;
-                }
-                reader.readAsDataURL(file);
-            }
+      <div class="section">
+        <h2>↩️ التراجع والإعادة</h2>
+        <div class="toolbar-grid">
+          <button id="btnUndoDrawing" class="btn-gray">↩️ تراجع رسم</button>
+          <button id="btnRedoDrawing" class="btn-gray">↪️ إعادة رسم</button>
+          <button id="btnUndoLayers" class="btn-gray">↩️ تراجع عناصر</button>
+          <button id="btnRedoLayers" class="btn-gray">↪️ إعادة عناصر</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>📏 التحكم بالعناصر</h2>
+
+        <div class="range-row">
+          <input id="scaleRange" type="range" min="10" max="300" value="100" />
+          <div id="scaleValue" class="range-value">1.0x</div>
+        </div>
+
+        <div class="range-row">
+          <input id="rotationRange" type="range" min="-360" max="360" value="0" />
+          <div id="rotationValue" class="range-value">0°</div>
+        </div>
+
+        <div class="split-2">
+          <div class="field">
+            <label>Skew X</label>
+            <input id="skewXRange" type="range" min="-100" max="100" value="0" />
+          </div>
+          <div class="field">
+            <label>Skew Y</label>
+            <input id="skewYRange" type="range" min="-100" max="100" value="0" />
+          </div>
+        </div>
+
+        <div class="split-2">
+          <div id="skewXValue" class="range-value">0.00</div>
+          <div id="skewYValue" class="range-value">0.00</div>
+        </div>
+
+        <div class="toolbar-grid three" style="margin-top:10px">
+          <button data-rot="-180" class="quick-rot btn-orange">-180°</button>
+          <button data-rot="0" class="quick-rot btn-orange">0°</button>
+          <button data-rot="180" class="quick-rot btn-orange">180°</button>
+        </div>
+        <div class="toolbar-grid" style="margin-top:8px">
+          <button id="btnRotate360" class="btn-orange">360°</button>
+          <button id="btnResetTransform" class="btn-red">🔄 تصفير</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>✏️ أدوات الرسم</h2>
+        <div class="range-row">
+          <input id="penSizeRange" type="range" min="2" max="80" value="10" />
+          <div id="penSizeValue" class="range-value">10</div>
+        </div>
+        <div id="drawingColors" class="colors"></div>
+      </div>
+
+      <div class="section">
+        <h2>✂️ القص والطول</h2>
+        <div class="range-row">
+          <input id="cropHeightRange" type="range" min="300" max="16000" value="4000" />
+          <div id="cropHeightValue" class="range-value">4000</div>
+        </div>
+        <div class="inline-actions">
+          <button id="btnApplyCrop" class="btn-green">✅ تطبيق القص</button>
+          <button id="btnCancelCrop" class="btn-red">❌ إلغاء القص</button>
+        </div>
+        <p class="small-note">لن يسمح بقص الارتفاع أقل من آخر عنصر موجود في الأسفل.</p>
+      </div>
+    </aside>
+
+    <section class="workspace-panel">
+      <div class="workspace-toolbar">
+        <div class="status" id="statusText">جاهز. اضغط على عنصر لتحريكه أو ابدأ بإضافة صورة/نص.</div>
+      </div>
+      <div class="canvas-scroll" id="canvasScroll">
+        <div class="canvas-wrap">
+          <canvas id="editorCanvas" width="1080" height="4000"></canvas>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <input id="inputBackground" type="file" accept="image/*" hidden />
+  <input id="inputImage" type="file" accept="image/*" hidden />
+  <input id="inputFont" type="file" accept=".ttf,.otf,.woff,.woff2" hidden />
+
+  <div id="textModal" class="modal">
+    <div class="modal-card">
+      <h3 id="textModalTitle">📝 إضافة نص</h3>
+      <div class="field">
+        <label>النص</label>
+        <textarea id="textInput" placeholder="اكتب النص هنا..."></textarea>
+      </div>
+
+      <div class="field">
+        <label>اللون</label>
+        <div id="textColors" class="colors"></div>
+      </div>
+
+      <div class="field">
+        <label>الخط</label>
+        <select id="fontSelect"></select>
+      </div>
+
+      <div class="inline-actions">
+        <button id="btnUploadFont" class="btn-blue">⬆️ رفع خط</button>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btnCloseTextModal" class="btn-gray">إلغاء</button>
+        <button id="btnSaveTextModal" class="btn-green">حفظ</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="layersModal" class="modal">
+    <div class="modal-card">
+      <h3>👁️ قائمة العناصر</h3>
+      <div id="layersList" class="layers-list"></div>
+      <div class="modal-footer">
+        <button id="btnCloseLayersModal" class="btn-gray">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="exportModal" class="modal">
+    <div class="modal-card">
+      <h3>🖼️ تصدير الصورة</h3>
+      <div class="toolbar-grid">
+        <button data-format="png" class="export-btn btn-green">PNG</button>
+        <button data-format="jpg" class="export-btn btn-orange">JPG</button>
+        <button data-format="webp" class="export-btn btn-blue">WEBP</button>
+      </div>
+      <div class="modal-footer">
+        <button id="btnCloseExportModal" class="btn-gray">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const editorCanvas = document.getElementById('editorCanvas');
+      const ctx = editorCanvas.getContext('2d');
+      const canvasScroll = document.getElementById('canvasScroll');
+      const statusText = document.getElementById('statusText');
+      const saveStateBadge = document.getElementById('saveStateBadge');
+      const projectNameInput = document.getElementById('projectNameInput');
+
+      const inputBackground = document.getElementById('inputBackground');
+      const inputImage = document.getElementById('inputImage');
+      const inputFont = document.getElementById('inputFont');
+
+      const textModal = document.getElementById('textModal');
+      const textModalTitle = document.getElementById('textModalTitle');
+      const textInput = document.getElementById('textInput');
+      const textColors = document.getElementById('textColors');
+      const fontSelect = document.getElementById('fontSelect');
+      const layersModal = document.getElementById('layersModal');
+      const layersList = document.getElementById('layersList');
+      const exportModal = document.getElementById('exportModal');
+
+      const drawingColorsContainer = document.getElementById('drawingColors');
+
+      const scaleRange = document.getElementById('scaleRange');
+      const scaleValue = document.getElementById('scaleValue');
+      const rotationRange = document.getElementById('rotationRange');
+      const rotationValue = document.getElementById('rotationValue');
+      const skewXRange = document.getElementById('skewXRange');
+      const skewYRange = document.getElementById('skewYRange');
+      const skewXValue = document.getElementById('skewXValue');
+      const skewYValue = document.getElementById('skewYValue');
+
+      const penSizeRange = document.getElementById('penSizeRange');
+      const penSizeValue = document.getElementById('penSizeValue');
+
+      const cropHeightRange = document.getElementById('cropHeightRange');
+      const cropHeightValue = document.getElementById('cropHeightValue');
+
+      const state = {
+        projectName: 'مشروع مانجا',
+        frameWidth: 1080,
+        frameHeight: 4000,
+        originalFrameHeightBeforeCrop: 4000,
+
+        frameCanvas: document.createElement('canvas'),
+        drawingCanvas: document.createElement('canvas'),
+        frameCtx: null,
+        drawingCtx: null,
+
+        layers: [],
+        selectedId: null,
+        selectedTextColor: '#ffffff',
+        selectedDrawingColor: '#ff0000',
+        penSize: 10,
+
+        isDragging: false,
+        isDrawingMode: false,
+        isTransformMode: false,
+        isCropMode: false,
+        isLocked: false,
+
+        lastX: 0,
+        lastY: 0,
+        movedInGesture: false,
+
+        textEditingId: null,
+
+        customFonts: {}, // key:name -> { family, dataUrl, fileName }
+        systemFonts: [
+          { name:'الافتراضي', family:'Tahoma, Arial, sans-serif' },
+          { name:'عريض', family:'Arial Black, Tahoma, sans-serif' },
+          { name:'أحادي', family:'monospace' },
+          { name:'Sans', family:'sans-serif' },
+          { name:'Serif', family:'serif' }
+        ],
+
+        drawingUndo: [],
+        drawingRedo: [],
+        layersUndo: [],
+        layersRedo: [],
+        maxUndo: 100,
+
+        projectRootHandle: null,
+        projectDirHandle: null,
+        projectFolderName: '',
+
+        unsaved: true
+      };
+
+      const TEXT_COLORS = [
+        '#ffffff','#000000','#ff0000','#00c853',
+        '#2962ff','#ffeb3b','#e040fb','#00e5ff'
+      ];
+
+      const DRAW_COLORS = [
+        '#ff0000','#2962ff','#00c853','#ffeb3b',
+        '#e040fb','#00e5ff','#ffffff','#000000'
+      ];
+
+      function setStatus(msg){ statusText.textContent = msg; }
+      function markUnsaved(){
+        state.unsaved = true;
+        saveStateBadge.textContent = 'غير محفوظ';
+        saveStateBadge.style.background = '#512126';
+        saveStateBadge.style.borderColor = '#7a313b';
+      }
+      function markSaved(){
+        state.unsaved = false;
+        saveStateBadge.textContent = 'محفوظ';
+        saveStateBadge.style.background = '#153924';
+        saveStateBadge.style.borderColor = '#2d7a49';
+      }
+
+      function sanitizeName(name){
+        return (name || 'project')
+          .replace(/[\\/:*?"<>|]/g,'_')
+          .replace(/\s+/g,' ')
+          .trim() || 'project';
+      }
+
+      function uid(){
+        return 'id_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      }
+
+      function setupCanvases(){
+        state.frameCanvas.width = state.frameWidth;
+        state.frameCanvas.height = state.frameHeight;
+        state.drawingCanvas.width = state.frameWidth;
+        state.drawingCanvas.height = state.frameHeight;
+        state.frameCtx = state.frameCanvas.getContext('2d');
+        state.drawingCtx = state.drawingCanvas.getContext('2d');
+        editorCanvas.width = state.frameWidth;
+        editorCanvas.height = state.frameHeight;
+      }
+
+      function fillDefaultBackground(){
+        state.frameCtx.save();
+        state.frameCtx.fillStyle = '#000000';
+        state.frameCtx.fillRect(0,0,state.frameWidth,state.frameHeight);
+        state.frameCtx.restore();
+      }
+
+      function clearDrawingLayer(){
+        state.drawingCtx.clearRect(0,0,state.frameWidth,state.frameHeight);
+      }
+
+      function deepCloneLayers(list){
+        return list.map(layer => {
+          if(layer.type === 'image'){
+            return {
+              ...layer,
+              image: layer.image
+            };
+          }
+          return { ...layer };
         });
+      }
 
-        // إضافة صورة كطبقة
-        document.getElementById('imgInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        let layer = {
-                            type: 'image',
-                            img: img,
-                            x: canvas.width / 2 - 100,
-                            y: canvas.height / 2 - 150,
-                            width: 200,
-                            height: 300,
-                            scale: 1
-                        };
-                        layers.push(layer);
-                        selectedLayer = layer;
-                        redraw();
-                    }
-                    img.src = event.target.result;
-                }
-                reader.readAsDataURL(file);
-            }
+      function pushLayersUndo(){
+        if(state.layersUndo.length >= state.maxUndo) state.layersUndo.shift();
+        state.layersUndo.push(deepCloneLayers(state.layers));
+        state.layersRedo = [];
+        updateUndoRedoButtons();
+      }
+
+      function pushDrawingUndo(){
+        if(state.drawingUndo.length >= state.maxUndo) state.drawingUndo.shift();
+        state.drawingUndo.push(state.drawingCanvas.toDataURL('image/png'));
+        state.drawingRedo = [];
+        updateUndoRedoButtons();
+      }
+
+      function restoreDrawingFromDataUrl(dataUrl){
+        return new Promise(resolve => {
+          const img = new Image();
+          img.onload = () => {
+            clearDrawingLayer();
+            state.drawingCtx.drawImage(img,0,0,state.frameWidth,state.frameHeight);
+            resolve();
+          };
+          img.src = dataUrl;
         });
+      }
 
-        // إضافة نص
-        function openTextDialog() {
-            let txt = prompt("أدخل النص المطلوب:");
-            if (txt) {
-                let layer = {
-                    type: 'text',
-                    text: txt,
-                    x: canvas.width / 2,
-                    y: canvas.height / 2,
-                    color: 'white',
-                    size: 30,
-                    font: 'Arial'
+      function updateUndoRedoButtons(){
+        document.getElementById('btnUndoDrawing').disabled = state.drawingUndo.length === 0;
+        document.getElementById('btnRedoDrawing').disabled = state.drawingRedo.length === 0;
+        document.getElementById('btnUndoLayers').disabled = state.layersUndo.length === 0;
+        document.getElementById('btnRedoLayers').disabled = state.layersRedo.length === 0;
+      }
+
+      function updateModeButtons(){
+        document.getElementById('btnToggleDrawing').classList.toggle('active', state.isDrawingMode);
+        document.getElementById('btnTransform').classList.toggle('active', state.isTransformMode);
+        document.getElementById('btnCrop').classList.toggle('active', state.isCropMode);
+
+        const lockBtn = document.getElementById('btnLock');
+        lockBtn.textContent = state.isLocked ? '🔒 العناصر مقفلة' : '🔓 فتح العناصر';
+      }
+
+      function setSelected(id){
+        state.selectedId = id;
+        syncSelectedControls();
+        render();
+      }
+
+      function getSelectedLayer(){
+        return state.layers.find(l => l.id === state.selectedId) || null;
+      }
+
+      function getVisibleCenter(){
+        const rect = editorCanvas.getBoundingClientRect();
+        const scrollTop = canvasScroll.scrollTop;
+        const visibleCenterYOnCanvasCss = scrollTop + canvasScroll.clientHeight / 2;
+        const scaleY = state.frameHeight / rect.height;
+        const y = visibleCenterYOnCanvasCss * scaleY;
+        const x = state.frameWidth / 2;
+        return { x, y };
+      }
+
+      function createImageLayer({image, dataUrl, name, x, y, scale = 0.5, rotation = 0, skewX = 0, skewY = 0}){
+        return {
+          id: uid(),
+          type: 'image',
+          image,
+          dataUrl,
+          name: name || 'image',
+          x,
+          y,
+          scale,
+          rotation,
+          skewX,
+          skewY
+        };
+      }
+
+      function createTextLayer({text, x, y, scale = 1, rotation = 0, skewX = 0, skewY = 0, color = '#ffffff', fontName = 'الافتراضي', fontFamily = 'Tahoma, Arial, sans-serif'}){
+        return {
+          id: uid(),
+          type: 'text',
+          text,
+          x,
+          y,
+          scale,
+          rotation,
+          skewX,
+          skewY,
+          color,
+          fontName,
+          fontFamily
+        };
+      }
+
+      function loadImageFromFile(file){
+        return new Promise((resolve,reject) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const img = new Image();
+            img.onload = () => resolve({ img, dataUrl: reader.result });
+            img.onerror = reject;
+            img.src = reader.result;
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function loadImageFromDataUrl(dataUrl){
+        return new Promise((resolve,reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = dataUrl;
+        });
+      }
+
+      function degToRad(deg){ return deg * Math.PI / 180; }
+
+      function matMul(m1,m2){
+        return {
+          a: m1.a*m2.a + m1.c*m2.b,
+          b: m1.b*m2.a + m1.d*m2.b,
+          c: m1.a*m2.c + m1.c*m2.d,
+          d: m1.b*m2.c + m1.d*m2.d,
+          e: m1.a*m2.e + m1.c*m2.f + m1.e,
+          f: m1.b*m2.e + m1.d*m2.f + m1.f
+        };
+      }
+
+      function matApply(m,x,y){
+        return { x: m.a*x + m.c*y + m.e, y: m.b*x + m.d*y + m.f };
+      }
+
+      function matInvert(m){
+        const det = m.a*m.d - m.b*m.c;
+        if(Math.abs(det) < 1e-9) return null;
+        return {
+          a: m.d/det,
+          b: -m.b/det,
+          c: -m.c/det,
+          d: m.a/det,
+          e: (m.c*m.f - m.d*m.e)/det,
+          f: (m.b*m.e - m.a*m.f)/det
+        };
+      }
+
+      function imageMatrix(layer){
+        const s = { a:layer.scale, b:0, c:0, d:layer.scale, e:0, f:0 };
+        const k = { a:1, b:layer.skewY, c:layer.skewX, d:1, e:0, f:0 };
+        const r = {
+          a: Math.cos(degToRad(layer.rotation)),
+          b: Math.sin(degToRad(layer.rotation)),
+          c: -Math.sin(degToRad(layer.rotation)),
+          d: Math.cos(degToRad(layer.rotation)),
+          e:0, f:0
+        };
+        const t = { a:1,b:0,c:0,d:1,e:layer.x,f:layer.y };
+        return matMul(t, matMul(r, matMul(k, s)));
+      }
+
+      function textMatrix(layer){
+        const k = { a:1, b:layer.skewY, c:layer.skewX, d:1, e:0, f:0 };
+        const r = {
+          a: Math.cos(degToRad(layer.rotation)),
+          b: Math.sin(degToRad(layer.rotation)),
+          c: -Math.sin(degToRad(layer.rotation)),
+          d: Math.cos(degToRad(layer.rotation)),
+          e:0, f:0
+        };
+        const t = { a:1,b:0,c:0,d:1,e:layer.x,f:layer.y };
+        return matMul(t, matMul(r, k));
+      }
+
+      function getTextMetrics(layer){
+        const temp = document.createElement('canvas').getContext('2d');
+        const fontPx = 80 * layer.scale;
+        temp.font = `${fontPx}px ${layer.fontFamily}`;
+        const lines = (layer.text || '').split('\n');
+        let maxWidth = 0;
+        for(const line of lines){
+          const w = temp.measureText(line).width;
+          if(w > maxWidth) maxWidth = w;
+        }
+        const lineHeight = fontPx * 1.15;
+        return {
+          width: maxWidth || 1,
+          height: Math.max(lineHeight, lines.length * lineHeight),
+          lineHeight,
+          fontPx,
+          lines
+        };
+      }
+
+      function getLayerBounds(layer){
+        if(layer.type === 'image'){
+          const w = layer.image.width;
+          const h = layer.image.height;
+          const m = imageMatrix(layer);
+          const pts = [
+            matApply(m,-w/2,-h/2),
+            matApply(m, w/2,-h/2),
+            matApply(m, w/2, h/2),
+            matApply(m,-w/2, h/2),
+          ];
+          const xs = pts.map(p=>p.x);
+          const ys = pts.map(p=>p.y);
+          return {
+            minX: Math.min(...xs),
+            minY: Math.min(...ys),
+            maxX: Math.max(...xs),
+            maxY: Math.max(...ys),
+            corners: pts
+          };
+        } else {
+          const t = getTextMetrics(layer);
+          const hw = t.width / 2;
+          const hh = t.height / 2;
+          const m = textMatrix(layer);
+          const pts = [
+            matApply(m,-hw,-hh),
+            matApply(m, hw,-hh),
+            matApply(m, hw, hh),
+            matApply(m,-hw, hh),
+          ];
+          const xs = pts.map(p=>p.x);
+          const ys = pts.map(p=>p.y);
+          return {
+            minX: Math.min(...xs),
+            minY: Math.min(...ys),
+            maxX: Math.max(...xs),
+            maxY: Math.max(...ys),
+            corners: pts
+          };
+        }
+      }
+
+      function clampLayerToBounds(layer){
+        const b = getLayerBounds(layer);
+        if((b.maxX - b.minX) > state.frameWidth){
+          layer.x += (state.frameWidth - (b.maxX + b.minX)) / 2;
+        } else {
+          if(b.minX < 0) layer.x += -b.minX;
+          if(b.maxX > state.frameWidth) layer.x -= (b.maxX - state.frameWidth);
+        }
+
+        const b2 = getLayerBounds(layer);
+        if((b2.maxY - b2.minY) > state.frameHeight){
+          layer.y += (state.frameHeight - (b2.maxY + b2.minY)) / 2;
+        } else {
+          if(b2.minY < 0) layer.y += -b2.minY;
+          if(b2.maxY > state.frameHeight) layer.y -= (b2.maxY - state.frameHeight);
+        }
+      }
+
+      function clampScaleToBounds(layer, newScale){
+        if(layer.type === 'image'){
+          const maxScaleW = state.frameWidth / layer.image.width;
+          const maxScaleH = state.frameHeight / layer.image.height;
+          const maxScale = Math.max(0.1, Math.min(maxScaleW, maxScaleH, 3));
+          layer.scale = Math.max(0.1, Math.min(newScale, maxScale));
+        } else {
+          layer.scale = Math.max(0.2, Math.min(newScale, 3));
+        }
+        clampLayerToBounds(layer);
+      }
+
+      function pointToCanvas(event){
+        const rect = editorCanvas.getBoundingClientRect();
+        const x = (event.clientX - rect.left) * (state.frameWidth / rect.width);
+        const y = (event.clientY - rect.top) * (state.frameHeight / rect.height);
+        return { x, y };
+      }
+
+      function containsLayer(layer, px, py, padding = 0){
+        if(layer.type === 'image'){
+          const inv = matInvert(imageMatrix(layer));
+          if(!inv) return false;
+          const p = matApply(inv, px, py);
+          const halfW = layer.image.width / 2 + padding;
+          const halfH = layer.image.height / 2 + padding;
+          return p.x >= -halfW && p.x <= halfW && p.y >= -halfH && p.y <= halfH;
+        } else {
+          const inv = matInvert(textMatrix(layer));
+          if(!inv) return false;
+          const p = matApply(inv, px, py);
+          const t = getTextMetrics(layer);
+          const halfW = t.width / 2 + padding;
+          const halfH = t.height / 2 + padding;
+          return p.x >= -halfW && p.x <= halfW && p.y >= -halfH && p.y <= halfH;
+        }
+      }
+
+      function findTopLayerAt(x,y,padding=20){
+        for(let i = state.layers.length - 1; i >= 0; i--){
+          if(containsLayer(state.layers[i], x, y, padding)) return state.layers[i];
+        }
+        return null;
+      }
+
+      function drawImageLayer(layer){
+        ctx.save();
+        ctx.translate(layer.x, layer.y);
+        ctx.rotate(degToRad(layer.rotation));
+        ctx.transform(1, layer.skewY, layer.skewX, 1, 0, 0);
+        ctx.scale(layer.scale, layer.scale);
+        ctx.drawImage(layer.image, -layer.image.width/2, -layer.image.height/2);
+        ctx.restore();
+      }
+
+      function drawTextLayer(layer){
+        const m = getTextMetrics(layer);
+        ctx.save();
+        ctx.translate(layer.x, layer.y);
+        ctx.rotate(degToRad(layer.rotation));
+        ctx.transform(1, layer.skewY, layer.skewX, 1, 0, 0);
+        ctx.fillStyle = layer.color;
+        ctx.font = `${m.fontPx}px ${layer.fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+
+        const totalHeight = m.lines.length * m.lineHeight;
+        let y = -totalHeight / 2 + m.lineHeight * 0.9;
+        for(const line of m.lines){
+          ctx.fillText(line, 0, y);
+          y += m.lineHeight;
+        }
+        ctx.restore();
+      }
+
+      function drawSelection(layer){
+        const b = getLayerBounds(layer);
+        const pts = b.corners;
+
+        ctx.save();
+        ctx.strokeStyle = '#00e676';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([15,10]);
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for(let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#ff5722';
+        for(const p of pts){
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 10, 0, Math.PI*2);
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+
+      function render(){
+        ctx.clearRect(0,0,state.frameWidth,state.frameHeight);
+
+        ctx.drawImage(state.frameCanvas, 0, 0);
+
+        for(const layer of state.layers){
+          if(layer.type === 'image') drawImageLayer(layer);
+        }
+
+        ctx.drawImage(state.drawingCanvas, 0, 0);
+
+        for(const layer of state.layers){
+          if(layer.type === 'text') drawTextLayer(layer);
+        }
+
+        if(state.selectedId && !state.isDrawingMode && !state.isLocked){
+          const layer = getSelectedLayer();
+          if(layer) drawSelection(layer);
+        }
+      }
+
+      function updateTextColorsUI(){
+        textColors.innerHTML = '';
+        TEXT_COLORS.forEach(color => {
+          const btn = document.createElement('button');
+          btn.className = 'color-btn' + (state.selectedTextColor === color ? ' active' : '');
+          btn.style.background = color;
+          btn.textContent = state.selectedTextColor === color ? '✓' : '';
+          btn.onclick = () => {
+            state.selectedTextColor = color;
+            updateTextColorsUI();
+          };
+          textColors.appendChild(btn);
+        });
+      }
+
+      function updateDrawingColorsUI(){
+        drawingColorsContainer.innerHTML = '';
+        DRAW_COLORS.forEach(color => {
+          const btn = document.createElement('button');
+          btn.className = 'color-btn' + (state.selectedDrawingColor === color ? ' active' : '');
+          btn.style.background = color;
+          btn.textContent = state.selectedDrawingColor === color ? '✓' : '';
+          btn.onclick = () => {
+            state.selectedDrawingColor = color;
+            updateDrawingColorsUI();
+          };
+          drawingColorsContainer.appendChild(btn);
+        });
+      }
+
+      function refreshFontSelect(){
+        fontSelect.innerHTML = '';
+        for(const f of state.systemFonts){
+          const opt = document.createElement('option');
+          opt.value = JSON.stringify({ name:f.name, family:f.family, custom:false });
+          opt.textContent = `نظام: ${f.name}`;
+          fontSelect.appendChild(opt);
+        }
+
+        Object.values(state.customFonts).forEach(f => {
+          const opt = document.createElement('option');
+          opt.value = JSON.stringify({ name:f.name, family:f.family, custom:true });
+          opt.textContent = `مخصص: ${f.name}`;
+          fontSelect.appendChild(opt);
+        });
+      }
+
+      async function registerFontFile(file){
+        const dataUrl = await fileToDataURL(file);
+        const family = 'custom_' + sanitizeName(file.name).replace(/\W+/g,'_') + '_' + Date.now();
+        const font = new FontFace(family, `url(${dataUrl})`);
+        await font.load();
+        document.fonts.add(font);
+
+        state.customFonts[file.name] = {
+          name: file.name,
+          family,
+          dataUrl,
+          fileName: file.name
+        };
+        refreshFontSelect();
+        setStatus(`✅ تم رفع الخط: ${file.name}`);
+        markUnsaved();
+      }
+
+      function fileToDataURL(file){
+        return new Promise((resolve,reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function openTextModal(editLayer = null){
+        state.textEditingId = editLayer ? editLayer.id : null;
+        textModalTitle.textContent = editLayer ? '✏️ تعديل النص' : '📝 إضافة نص';
+        textInput.value = editLayer ? editLayer.text : '';
+        state.selectedTextColor = editLayer ? editLayer.color : '#ffffff';
+        updateTextColorsUI();
+        refreshFontSelect();
+
+        if(editLayer){
+          const values = [...fontSelect.options].map(o => o.value);
+          const target = values.find(v => {
+            const parsed = JSON.parse(v);
+            return parsed.name === editLayer.fontName && parsed.family === editLayer.fontFamily;
+          });
+          if(target) fontSelect.value = target;
+        } else if(fontSelect.options.length){
+          fontSelect.selectedIndex = 0;
+        }
+
+        textModal.classList.add('show');
+      }
+
+      function closeTextModal(){
+        textModal.classList.remove('show');
+      }
+
+      function saveTextModal(){
+        const text = textInput.value.trim();
+        if(!text){
+          alert('الرجاء إدخال نص');
+          return;
+        }
+
+        let fontInfo = { name:'الافتراضي', family:'Tahoma, Arial, sans-serif' };
+        try{
+          fontInfo = JSON.parse(fontSelect.value);
+        }catch(e){}
+
+        if(state.textEditingId){
+          const layer = getSelectedLayer();
+          if(!layer || layer.type !== 'text') return;
+          pushLayersUndo();
+          layer.text = text;
+          layer.color = state.selectedTextColor;
+          layer.fontName = fontInfo.name;
+          layer.fontFamily = fontInfo.family;
+          clampLayerToBounds(layer);
+          setStatus('✅ تم تحديث النص');
+        } else {
+          pushLayersUndo();
+          const center = getVisibleCenter();
+          const layer = createTextLayer({
+            text,
+            x: center.x,
+            y: center.y,
+            color: state.selectedTextColor,
+            fontName: fontInfo.name,
+            fontFamily: fontInfo.family
+          });
+          clampLayerToBounds(layer);
+          state.layers.push(layer);
+          setSelected(layer.id);
+          setStatus('✅ تم إضافة النص');
+        }
+
+        closeTextModal();
+        markUnsaved();
+        syncSelectedControls();
+        render();
+      }
+
+      function rebuildLayersModal(){
+        layersList.innerHTML = '';
+        if(state.layers.length === 0){
+          const div = document.createElement('div');
+          div.className = 'small-note';
+          div.textContent = 'لا توجد عناصر حالياً.';
+          layersList.appendChild(div);
+          return;
+        }
+
+        state.layers.forEach((layer,index) => {
+          const item = document.createElement('div');
+          item.className = 'layer-item' + (state.selectedId === layer.id ? ' selected' : '');
+
+          const title = document.createElement('div');
+          title.className = 'layer-title';
+          if(layer.type === 'text'){
+            const short = layer.text.length > 50 ? layer.text.slice(0,50) + '...' : layer.text;
+            title.textContent = `📝 نص #${index+1}\n${short}`;
+          }else{
+            title.textContent = `🖼️ صورة #${index+1}\nالتحجيم: ${layer.scale.toFixed(2)}x | تدوير: ${Math.round(layer.rotation)}°`;
+          }
+
+          const actions = document.createElement('div');
+          actions.className = 'layer-actions';
+
+          const viewBtn = document.createElement('button');
+          viewBtn.className = 'btn-blue';
+          viewBtn.textContent = '🎯 تحديد';
+          viewBtn.onclick = () => {
+            setSelected(layer.id);
+            scrollToLayer(layer);
+            layersModal.classList.remove('show');
+            setStatus(`✅ تم تحديد العنصر ${index+1}`);
+          };
+
+          const delBtn = document.createElement('button');
+          delBtn.className = 'btn-red';
+          delBtn.textContent = '🗑️ حذف';
+          delBtn.onclick = () => {
+            if(confirm('هل تريد حذف هذا العنصر؟')){
+              pushLayersUndo();
+              state.layers = state.layers.filter(l => l.id !== layer.id);
+              if(state.selectedId === layer.id) state.selectedId = null;
+              rebuildLayersModal();
+              syncSelectedControls();
+              render();
+              markUnsaved();
+            }
+          };
+
+          actions.appendChild(viewBtn);
+
+          if(layer.type === 'text'){
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn-purple';
+            editBtn.textContent = '✏️ تعديل';
+            editBtn.onclick = () => {
+              setSelected(layer.id);
+              layersModal.classList.remove('show');
+              openTextModal(layer);
+            };
+            actions.appendChild(editBtn);
+          }
+
+          actions.appendChild(delBtn);
+          item.appendChild(title);
+          item.appendChild(actions);
+          layersList.appendChild(item);
+        });
+      }
+
+      function scrollToLayer(layer){
+        const y = Math.max(0, layer.y - state.frameHeight * 0.05);
+        const cssScale = editorCanvas.getBoundingClientRect().height / state.frameHeight;
+        canvasScroll.scrollTo({
+          top: Math.max(0, y * cssScale - canvasScroll.clientHeight / 2),
+          behavior:'smooth'
+        });
+      }
+
+      function syncSelectedControls(){
+        const layer = getSelectedLayer();
+        if(!layer){
+          scaleRange.value = 100;
+          scaleValue.textContent = '1.0x';
+          rotationRange.value = 0;
+          rotationValue.textContent = '0°';
+          skewXRange.value = 0;
+          skewYRange.value = 0;
+          skewXValue.textContent = '0.00';
+          skewYValue.textContent = '0.00';
+          return;
+        }
+
+        scaleRange.value = Math.round(layer.scale * 100);
+        scaleValue.textContent = layer.scale.toFixed(1) + 'x';
+        rotationRange.value = Math.round(layer.rotation);
+        rotationValue.textContent = Math.round(layer.rotation) + '°';
+        skewXRange.value = Math.round(layer.skewX * 100);
+        skewYRange.value = Math.round(layer.skewY * 100);
+        skewXValue.textContent = layer.skewX.toFixed(2);
+        skewYValue.textContent = layer.skewY.toFixed(2);
+      }
+
+      function getMinFrameHeight(){
+        let minY = 300;
+        for(const layer of state.layers){
+          const b = getLayerBounds(layer);
+          if(b.maxY + 50 > minY) minY = b.maxY + 50;
+        }
+        return Math.max(300, Math.ceil(minY));
+      }
+
+      function resizeProjectHeight(newHeight){
+        newHeight = Math.max(300, Math.min(16000, Math.round(newHeight)));
+        const minHeight = getMinFrameHeight();
+        if(newHeight < minHeight) newHeight = minHeight;
+
+        const oldFrame = document.createElement('canvas');
+        oldFrame.width = state.frameWidth;
+        oldFrame.height = state.frameHeight;
+        oldFrame.getContext('2d').drawImage(state.frameCanvas,0,0);
+
+        const oldDrawing = document.createElement('canvas');
+        oldDrawing.width = state.frameWidth;
+        oldDrawing.height = state.frameHeight;
+        oldDrawing.getContext('2d').drawImage(state.drawingCanvas,0,0);
+
+        state.frameHeight = newHeight;
+        setupCanvases();
+        fillDefaultBackground();
+        state.frameCtx.drawImage(oldFrame,0,0);
+        state.drawingCtx.drawImage(oldDrawing,0,0);
+
+        for(const layer of state.layers) clampLayerToBounds(layer);
+
+        cropHeightRange.value = state.frameHeight;
+        cropHeightValue.textContent = String(state.frameHeight);
+        render();
+      }
+
+      async function exportImage(format){
+        const out = document.createElement('canvas');
+        out.width = state.frameWidth;
+        out.height = state.frameHeight;
+        const octx = out.getContext('2d');
+
+        octx.drawImage(state.frameCanvas,0,0);
+        for(const layer of state.layers){
+          if(layer.type === 'image'){
+            octx.save();
+            octx.translate(layer.x, layer.y);
+            octx.rotate(degToRad(layer.rotation));
+            octx.transform(1, layer.skewY, layer.skewX, 1, 0, 0);
+            octx.scale(layer.scale, layer.scale);
+            octx.drawImage(layer.image, -layer.image.width/2, -layer.image.height/2);
+            octx.restore();
+          }
+        }
+
+        octx.drawImage(state.drawingCanvas,0,0);
+
+        for(const layer of state.layers){
+          if(layer.type === 'text'){
+            const m = getTextMetrics(layer);
+            octx.save();
+            octx.translate(layer.x, layer.y);
+            octx.rotate(degToRad(layer.rotation));
+            octx.transform(1, layer.skewY, layer.skewX, 1, 0, 0);
+            octx.fillStyle = layer.color;
+            octx.font = `${m.fontPx}px ${layer.fontFamily}`;
+            octx.textAlign = 'center';
+            const totalHeight = m.lines.length * m.lineHeight;
+            let y = -totalHeight / 2 + m.lineHeight * 0.9;
+            for(const line of m.lines){
+              octx.fillText(line, 0, y);
+              y += m.lineHeight;
+            }
+            octx.restore();
+          }
+        }
+
+        let mime = 'image/png';
+        let ext = 'png';
+        if(format === 'jpg'){
+          mime = 'image/jpeg';
+          ext = 'jpg';
+        } else if(format === 'webp'){
+          mime = 'image/webp';
+          ext = 'webp';
+        }
+
+        const blob = await new Promise(resolve => out.toBlob(resolve, mime, 0.95));
+        downloadBlob(blob, `manga_${Date.now()}.${ext}`);
+        exportModal.classList.remove('show');
+        setStatus(`✅ تم تصدير الصورة بصيغة ${ext.toUpperCase()}`);
+      }
+
+      function downloadBlob(blob, fileName){
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+      }
+
+      function dataURLToBlob(dataUrl){
+        const [meta, base64] = dataUrl.split(',');
+        const mime = meta.match(/:(.*?);/)[1];
+        const binary = atob(base64);
+        const len = binary.length;
+        const bytes = new Uint8Array(len);
+        for(let i=0;i<len;i++) bytes[i] = binary.charCodeAt(i);
+        return new Blob([bytes], { type:mime });
+      }
+
+      async function ensureProjectDirectory(){
+        if(!window.showDirectoryPicker){
+          return false;
+        }
+
+        state.projectName = sanitizeName(projectNameInput.value);
+        projectNameInput.value = state.projectName;
+
+        if(!state.projectRootHandle){
+          state.projectRootHandle = await window.showDirectoryPicker();
+        }
+
+        const folderName = sanitizeName(state.projectName);
+        state.projectFolderName = folderName;
+        state.projectDirHandle = await state.projectRootHandle.getDirectoryHandle(folderName, { create:true });
+        return true;
+      }
+
+      async function writeFileToDir(dirHandle, fileName, blob){
+        const handle = await dirHandle.getFileHandle(fileName, { create:true });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+      }
+
+      async function saveProjectToFolder(){
+        state.projectName = sanitizeName(projectNameInput.value);
+        projectNameInput.value = state.projectName;
+
+        try{
+          const supported = await ensureProjectDirectory();
+          const bundle = await buildProjectBundle();
+
+          if(!supported){
+            const blob = new Blob([JSON.stringify(bundle, null, 2)], { type:'application/json' });
+            downloadBlob(blob, `${sanitizeName(state.projectName)}_project_bundle.json`);
+            markSaved();
+            setStatus('✅ المتصفح لا يدعم الحفظ المباشر، تم تنزيل ملف JSON احتياطي.');
+            return;
+          }
+
+          const dir = state.projectDirHandle;
+
+          const bgBlob = await new Promise(resolve => state.frameCanvas.toBlob(resolve, 'image/png'));
+          const drawingBlob = await new Promise(resolve => state.drawingCanvas.toBlob(resolve, 'image/png'));
+          await writeFileToDir(dir, 'background.png', bgBlob);
+          await writeFileToDir(dir, 'drawing.png', drawingBlob);
+
+          const fontsDir = await dir.getDirectoryHandle('fonts', { create:true });
+
+          const layerFiles = [];
+          for(let i=0;i<state.layers.length;i++){
+            const layer = state.layers[i];
+            if(layer.type === 'image'){
+              const fileName = `layer_${i}.png`;
+              layerFiles.push(fileName);
+              await writeFileToDir(dir, fileName, dataURLToBlob(layer.dataUrl));
+            }
+          }
+
+          for(const font of Object.values(state.customFonts)){
+            await writeFileToDir(fontsDir, font.fileName, dataURLToBlob(font.dataUrl));
+          }
+
+          const projectJson = {
+            projectName: state.projectName,
+            frameWidth: state.frameWidth,
+            frameHeight: state.frameHeight,
+            lastModified: Date.now(),
+            layers: state.layers.map((layer, index) => {
+              if(layer.type === 'image'){
+                return {
+                  type:'image',
+                  x:layer.x,
+                  y:layer.y,
+                  scale:layer.scale,
+                  rotation:layer.rotation,
+                  skewX:layer.skewX,
+                  skewY:layer.skewY,
+                  file:`layer_${index}.png`,
+                  name:layer.name || `layer_${index}.png`
                 };
-                layers.push(layer);
-                selectedLayer = layer;
-                redraw();
-            }
+              }
+              return {
+                type:'text',
+                text:layer.text,
+                x:layer.x,
+                y:layer.y,
+                scale:layer.scale,
+                rotation:layer.rotation,
+                skewX:layer.skewX,
+                skewY:layer.skewY,
+                color:layer.color,
+                fontName:layer.fontName,
+                fontFamily:layer.fontFamily
+              };
+            }),
+            customFonts: Object.values(state.customFonts).map(f => ({
+              name:f.name,
+              fileName:f.fileName,
+              family:f.family
+            }))
+          };
+
+          await writeFileToDir(dir, 'project.json', new Blob([JSON.stringify(projectJson, null, 2)], { type:'application/json' }));
+
+          const thumbCanvas = document.createElement('canvas');
+          thumbCanvas.width = 270;
+          thumbCanvas.height = Math.max(400, Math.round(state.frameHeight * (270 / state.frameWidth)));
+          const tctx = thumbCanvas.getContext('2d');
+          tctx.drawImage(editorCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+          const thumbBlob = await new Promise(resolve => thumbCanvas.toBlob(resolve, 'image/webp', 0.9));
+          await writeFileToDir(dir, 'thumbnail.webp', thumbBlob);
+
+          markSaved();
+          setStatus(`✅ تم حفظ المشروع داخل المجلد: ${state.projectFolderName}`);
+        }catch(err){
+          console.error(err);
+          alert('فشل حفظ المشروع: ' + err.message);
         }
+      }
 
-        // تبديل وضع الرسم
-        function toggleDrawingMode() {
-            drawingMode = !drawingMode;
-            let btn = document.getElementById('drawToggleBtn');
-            if (drawingMode) {
-                btn.style.background = '#388E3C';
-                btn.innerText = "✏️ وضع الرسم مُفعّل";
-                selectedLayer = null;
-            } else {
-                btn.style.background = '#2b2b2b';
-                btn.innerText = "✏️ تفعيل الرسم الحر";
+      async function buildProjectBundle(){
+        return {
+          projectName: state.projectName,
+          frameWidth: state.frameWidth,
+          frameHeight: state.frameHeight,
+          backgroundDataUrl: state.frameCanvas.toDataURL('image/png'),
+          drawingDataUrl: state.drawingCanvas.toDataURL('image/png'),
+          layers: state.layers.map(layer => {
+            if(layer.type === 'image'){
+              return {
+                type:'image',
+                x:layer.x,
+                y:layer.y,
+                scale:layer.scale,
+                rotation:layer.rotation,
+                skewX:layer.skewX,
+                skewY:layer.skewY,
+                dataUrl:layer.dataUrl,
+                name:layer.name
+              };
             }
-            redraw();
+            return {
+              ...layer
+            };
+          }),
+          customFonts: state.customFonts
+        };
+      }
+
+      async function openProjectFromFolder(){
+        try{
+          if(!window.showDirectoryPicker){
+            alert('هذا المتصفح لا يدعم فتح المشاريع من المجلدات مباشرة.');
+            return;
+          }
+
+          const dir = await window.showDirectoryPicker();
+          state.projectRootHandle = null;
+          state.projectDirHandle = dir;
+          state.projectFolderName = dir.name;
+
+          const projectHandle = await dir.getFileHandle('project.json');
+          const projectFile = await projectHandle.getFile();
+          const projectText = await projectFile.text();
+          const project = JSON.parse(projectText);
+
+          state.projectName = project.projectName || 'مشروع';
+          projectNameInput.value = state.projectName;
+          state.frameWidth = project.frameWidth || 1080;
+          state.frameHeight = project.frameHeight || 4000;
+          setupCanvases();
+          fillDefaultBackground();
+          clearDrawingLayer();
+
+          try{
+            const bgHandle = await dir.getFileHandle('background.png');
+            const bgFile = await bgHandle.getFile();
+            const { img } = await loadImageFromFile(bgFile);
+            state.frameCtx.clearRect(0,0,state.frameWidth,state.frameHeight);
+            state.frameCtx.drawImage(img,0,0,state.frameWidth,state.frameHeight);
+          }catch(e){
+            fillDefaultBackground();
+          }
+
+          try{
+            const drawHandle = await dir.getFileHandle('drawing.png');
+            const drawFile = await drawHandle.getFile();
+            const { img } = await loadImageFromFile(drawFile);
+            state.drawingCtx.clearRect(0,0,state.frameWidth,state.frameHeight);
+            state.drawingCtx.drawImage(img,0,0,state.frameWidth,state.frameHeight);
+          }catch(e){
+            clearDrawingLayer();
+          }
+
+          state.customFonts = {};
+          if(Array.isArray(project.customFonts)){
+            try{
+              const fontsDir = await dir.getDirectoryHandle('fonts');
+              for(const f of project.customFonts){
+                try{
+                  const fh = await fontsDir.getFileHandle(f.fileName);
+                  const ff = await fh.getFile();
+                  await registerFontFileSilently(ff, f.fileName);
+                }catch(e){}
+              }
+            }catch(e){}
+          }
+
+          state.layers = [];
+          if(Array.isArray(project.layers)){
+            for(const item of project.layers){
+              if(item.type === 'image'){
+                try{
+                  const lh = await dir.getFileHandle(item.file);
+                  const lf = await lh.getFile();
+                  const { img, dataUrl } = await loadImageFromFile(lf);
+                  const layer = createImageLayer({
+                    image: img,
+                    dataUrl,
+                    name: item.name || item.file,
+                    x: item.x,
+                    y: item.y,
+                    scale: item.scale,
+                    rotation: item.rotation,
+                    skewX: item.skewX,
+                    skewY: item.skewY
+                  });
+                  state.layers.push(layer);
+                }catch(e){
+                  console.warn('تعذر تحميل طبقة صورة', item.file, e);
+                }
+              } else if(item.type === 'text'){
+                const layer = createTextLayer({
+                  text: item.text,
+                  x: item.x,
+                  y: item.y,
+                  scale: item.scale,
+                  rotation: item.rotation,
+                  skewX: item.skewX,
+                  skewY: item.skewY,
+                  color: item.color,
+                  fontName: item.fontName || 'الافتراضي',
+                  fontFamily: item.fontFamily || 'Tahoma, Arial, sans-serif'
+                });
+                state.layers.push(layer);
+              }
+            }
+          }
+
+          state.selectedId = null;
+          state.layersUndo = [];
+          state.layersRedo = [];
+          state.drawingUndo = [];
+          state.drawingRedo = [];
+          cropHeightRange.value = state.frameHeight;
+          cropHeightValue.textContent = String(state.frameHeight);
+
+          render();
+          refreshFontSelect();
+          updateUndoRedoButtons();
+          syncSelectedControls();
+          updateModeButtons();
+          markSaved();
+          setStatus(`✅ تم فتح المشروع: ${state.projectName}`);
+        }catch(err){
+          console.error(err);
+          alert('فشل فتح المشروع: ' + err.message);
         }
+      }
 
-        // إدارة الفأرة واللمس على الكانفاس
-        canvas.addEventListener('mousedown', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+      async function registerFontFileSilently(file, forcedName = ''){
+        const dataUrl = await fileToDataURL(file);
+        const fileName = forcedName || file.name;
+        const family = 'custom_' + sanitizeName(fileName).replace(/\W+/g,'_') + '_' + Date.now() + '_' + Math.floor(Math.random()*9999);
+        const font = new FontFace(family, `url(${dataUrl})`);
+        await font.load();
+        document.fonts.add(font);
 
-            if (drawingMode) {
-                isDrawing = true;
-                startX = x;
-                startY = y;
-                drawingPaths.push({type: 'begin', x, y, color: selectedColor, size: penSize});
-                return;
-            }
+        state.customFonts[fileName] = {
+          name: fileName,
+          family,
+          dataUrl,
+          fileName
+        };
+      }
 
-            // البحث عن الطبقات المحددة (من الأعلى للأدنى)
-            selectedLayer = null;
-            for (let i = layers.length - 1; i >= 0; i--) {
-                let l = layers[i];
-                if (l.type === 'image') {
-                    if (x >= l.x && x <= l.x + l.width && y >= l.y && y <= l.y + l.height) {
-                        selectedLayer = l;
-                        break;
-                    }
-                } else if (l.type === 'text') {
-                    ctx.font = `${l.size}px ${l.font}`;
-                    let metrics = ctx.measureText(l.text);
-                    if (x >= l.x - metrics.width/2 && x <= l.x + metrics.width/2 && y >= l.y - l.size && y <= l.y) {
-                        selectedLayer = l;
-                        break;
-                    }
-                }
-            }
-            startX = x;
-            startY = y;
-            redraw();
+      function undoLayers(){
+        if(!state.layersUndo.length) return;
+        state.layersRedo.push(deepCloneLayers(state.layers));
+        state.layers = deepCloneLayers(state.layersUndo.pop());
+        if(state.selectedId && !state.layers.some(l => l.id === state.selectedId)){
+          state.selectedId = null;
+        }
+        syncSelectedControls();
+        updateUndoRedoButtons();
+        render();
+        markUnsaved();
+        setStatus('↩️ تم التراجع عن العناصر');
+      }
+
+      function redoLayers(){
+        if(!state.layersRedo.length) return;
+        state.layersUndo.push(deepCloneLayers(state.layers));
+        state.layers = deepCloneLayers(state.layersRedo.pop());
+        if(state.selectedId && !state.layers.some(l => l.id === state.selectedId)){
+          state.selectedId = null;
+        }
+        syncSelectedControls();
+        updateUndoRedoButtons();
+        render();
+        markUnsaved();
+        setStatus('↪️ تم إعادة العناصر');
+      }
+
+      async function undoDrawing(){
+        if(!state.drawingUndo.length) return;
+        state.drawingRedo.push(state.drawingCanvas.toDataURL('image/png'));
+        const previous = state.drawingUndo.pop();
+        await restoreDrawingFromDataUrl(previous);
+        updateUndoRedoButtons();
+        render();
+        markUnsaved();
+        setStatus('↩️ تم التراجع عن الرسم');
+      }
+
+      async function redoDrawing(){
+        if(!state.drawingRedo.length) return;
+        state.drawingUndo.push(state.drawingCanvas.toDataURL('image/png'));
+        const next = state.drawingRedo.pop();
+        await restoreDrawingFromDataUrl(next);
+        updateUndoRedoButtons();
+        render();
+        markUnsaved();
+        setStatus('↪️ تم إعادة الرسم');
+      }
+
+      function beginCropMode(){
+        state.isCropMode = true;
+        state.originalFrameHeightBeforeCrop = state.frameHeight;
+        cropHeightRange.min = getMinFrameHeight();
+        cropHeightRange.value = state.frameHeight;
+        cropHeightValue.textContent = String(state.frameHeight);
+        setStatus('✂️ وضع القص مفعل. غيّر الارتفاع ثم اضغط تطبيق.');
+        updateModeButtons();
+      }
+
+      function cancelCropMode(){
+        if(state.isCropMode){
+          resizeProjectHeight(state.originalFrameHeightBeforeCrop);
+        }
+        state.isCropMode = false;
+        updateModeButtons();
+        setStatus('❌ تم إلغاء القص');
+      }
+
+      function applyCropMode(){
+        state.isCropMode = false;
+        updateModeButtons();
+        markUnsaved();
+        setStatus(`✅ تم تطبيق القص. الارتفاع الحالي: ${state.frameHeight}`);
+      }
+
+      function initEvents(){
+        projectNameInput.addEventListener('change', () => {
+          state.projectName = sanitizeName(projectNameInput.value);
+          projectNameInput.value = state.projectName;
+          markUnsaved();
         });
 
-        canvas.addEventListener('mousemove', (e) => {
-            const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+        document.getElementById('btnSelectBackground').onclick = () => inputBackground.click();
+        document.getElementById('btnAddImage').onclick = () => inputImage.click();
+        document.getElementById('btnUploadFont').onclick = () => inputFont.click();
+        document.getElementById('btnAddText').onclick = () => openTextModal();
+        document.getElementById('btnCloseTextModal').onclick = closeTextModal;
+        document.getElementById('btnSaveTextModal').onclick = saveTextModal;
 
-            if (drawingMode && isDrawing) {
-                drawingPaths.push({type: 'draw', x, y, color: selectedColor, size: penSize});
-                redraw();
-                return;
-            }
+        document.getElementById('btnEditText').onclick = () => {
+          const layer = getSelectedLayer();
+          if(!layer){
+            alert('اختر نصاً أولاً');
+            return;
+          }
+          if(layer.type !== 'text'){
+            alert('العنصر المحدد ليس نصاً');
+            return;
+          }
+          openTextModal(layer);
+        };
 
-            if (selectedLayer && e.buttons === 1) {
-                let dx = x - startX;
-                let dy = y - startY;
-                selectedLayer.x += dx;
-                selectedLayer.y += dy;
-                startX = x;
-                startY = y;
-                redraw();
-            }
+        document.getElementById('btnViewLayers').onclick = () => {
+          rebuildLayersModal();
+          layersModal.classList.add('show');
+        };
+        document.getElementById('btnCloseLayersModal').onclick = () => layersModal.classList.remove('show');
+
+        document.getElementById('btnExportImage').onclick = () => exportModal.classList.add('show');
+        document.getElementById('btnCloseExportModal').onclick = () => exportModal.classList.remove('show');
+        document.querySelectorAll('.export-btn').forEach(btn => {
+          btn.onclick = () => exportImage(btn.dataset.format);
         });
 
-        window.addEventListener('mouseup', () => {
-            isDrawing = false;
+        document.getElementById('btnSaveProject').onclick = saveProjectToFolder;
+        document.getElementById('btnOpenProject').onclick = openProjectFromFolder;
+        document.getElementById('btnRequestFolder').onclick = async () => {
+          if(!window.showDirectoryPicker){
+            alert('هذا المتصفح لا يدعم اختيار المجلدات مباشرة. استخدم Chrome أو Edge.');
+            return;
+          }
+          try{
+            state.projectRootHandle = await window.showDirectoryPicker();
+            setStatus(`✅ تم اختيار مجلد الجذر بنجاح`);
+          }catch(e){}
+        };
+
+        document.getElementById('btnDeleteLayer').onclick = () => {
+          const layer = getSelectedLayer();
+          if(!layer){
+            alert('اختر عنصراً أولاً');
+            return;
+          }
+          if(state.isLocked){
+            alert('العناصر مقفلة');
+            return;
+          }
+          if(confirm('هل تريد حذف العنصر المحدد؟')){
+            pushLayersUndo();
+            state.layers = state.layers.filter(l => l.id !== layer.id);
+            state.selectedId = null;
+            syncSelectedControls();
+            render();
+            markUnsaved();
+            setStatus('🗑️ تم حذف العنصر');
+          }
+        };
+
+        document.getElementById('btnLock').onclick = () => {
+          state.isLocked = !state.isLocked;
+          if(state.isLocked){
+            state.selectedId = null;
+            setStatus('🔒 العناصر أصبحت مقفلة');
+          } else {
+            setStatus('🔓 العناصر أصبحت قابلة للتحريك');
+          }
+          updateModeButtons();
+          syncSelectedControls();
+          render();
+        };
+
+        document.getElementById('btnTransform').onclick = () => {
+          if(state.isDrawingMode){
+            alert('أوقف وضع الرسم أولاً');
+            return;
+          }
+          const layer = getSelectedLayer();
+          if(!layer){
+            alert('اختر عنصراً أولاً');
+            return;
+          }
+          state.isTransformMode = !state.isTransformMode;
+          updateModeButtons();
+          setStatus(state.isTransformMode ? '📐 وضع التشكيل مفعل' : '📐 تم إيقاف وضع التشكيل');
+        };
+
+        document.getElementById('btnToggleDrawing').onclick = () => {
+          state.isDrawingMode = !state.isDrawingMode;
+          if(state.isDrawingMode){
+            state.selectedId = null;
+            state.isTransformMode = false;
+            setStatus('✏️ وضع الرسم مفعل');
+          } else {
+            setStatus('✏️ تم إيقاف وضع الرسم');
+          }
+          updateModeButtons();
+          syncSelectedControls();
+          render();
+        };
+
+        document.getElementById('btnCrop').onclick = () => {
+          if(state.isDrawingMode){
+            alert('أوقف وضع الرسم أولاً');
+            return;
+          }
+          if(!state.isCropMode){
+            beginCropMode();
+          }else{
+            cancelCropMode();
+          }
+        };
+
+        document.getElementById('btnApplyCrop').onclick = applyCropMode;
+        document.getElementById('btnCancelCrop').onclick = cancelCropMode;
+
+        document.getElementById('btnUndoDrawing').onclick = undoDrawing;
+        document.getElementById('btnRedoDrawing').onclick = redoDrawing;
+        document.getElementById('btnUndoLayers').onclick = undoLayers;
+        document.getElementById('btnRedoLayers').onclick = redoLayers;
+
+        scaleRange.oninput = () => {
+          const layer = getSelectedLayer();
+          const s = scaleRange.value / 100;
+          scaleValue.textContent = s.toFixed(1) + 'x';
+          if(!layer) return;
+          clampScaleToBounds(layer, s);
+          syncSelectedControls();
+          render();
+          markUnsaved();
+        };
+        scaleRange.onchange = () => {
+          const layer = getSelectedLayer();
+          if(layer) pushLayersUndo();
+        };
+
+        rotationRange.oninput = () => {
+          const layer = getSelectedLayer();
+          const r = Number(rotationRange.value);
+          rotationValue.textContent = r + '°';
+          if(!layer) return;
+          layer.rotation = r;
+          clampLayerToBounds(layer);
+          render();
+          markUnsaved();
+        };
+        rotationRange.onchange = () => {
+          const layer = getSelectedLayer();
+          if(layer) pushLayersUndo();
+        };
+
+        skewXRange.oninput = () => {
+          const layer = getSelectedLayer();
+          const v = Number(skewXRange.value) / 100;
+          skewXValue.textContent = v.toFixed(2);
+          if(!layer) return;
+          layer.skewX = v;
+          clampLayerToBounds(layer);
+          render();
+          markUnsaved();
+        };
+        skewXRange.onchange = () => {
+          const layer = getSelectedLayer();
+          if(layer) pushLayersUndo();
+        };
+
+        skewYRange.oninput = () => {
+          const layer = getSelectedLayer();
+          const v = Number(skewYRange.value) / 100;
+          skewYValue.textContent = v.toFixed(2);
+          if(!layer) return;
+          layer.skewY = v;
+          clampLayerToBounds(layer);
+          render();
+          markUnsaved();
+        };
+        skewYRange.onchange = () => {
+          const layer = getSelectedLayer();
+          if(layer) pushLayersUndo();
+        };
+
+        penSizeRange.oninput = () => {
+          state.penSize = Number(penSizeRange.value);
+          penSizeValue.textContent = String(state.penSize);
+        };
+
+        cropHeightRange.oninput = () => {
+          const val = Number(cropHeightRange.value);
+          cropHeightValue.textContent = String(val);
+          if(state.isCropMode){
+            resizeProjectHeight(val);
+          }
+        };
+
+        document.querySelectorAll('.quick-rot').forEach(btn => {
+          btn.onclick = () => {
+            const layer = getSelectedLayer();
+            if(!layer) return;
+            pushLayersUndo();
+            layer.rotation = Number(btn.dataset.rot);
+            clampLayerToBounds(layer);
+            syncSelectedControls();
+            render();
+            markUnsaved();
+          };
         });
 
-        // إعادة رسم الكانفاس بالكامل
-        function redraw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        document.getElementById('btnRotate360').onclick = () => {
+          const layer = getSelectedLayer();
+          if(!layer) return;
+          pushLayersUndo();
+          layer.rotation = 360;
+          clampLayerToBounds(layer);
+          syncSelectedControls();
+          render();
+          markUnsaved();
+        };
 
-            // 1. رسم الخلفية
-            if (bgImage) {
-                ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-            } else {
-                ctx.fillStyle = '#000';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-            }
+        document.getElementById('btnResetTransform').onclick = () => {
+          const layer = getSelectedLayer();
+          if(!layer) return;
+          pushLayersUndo();
+          layer.rotation = 0;
+          layer.skewX = 0;
+          layer.skewY = 0;
+          if(layer.type === 'image') layer.scale = Math.max(0.1, Math.min(layer.scale, 1));
+          else layer.scale = Math.max(0.2, Math.min(layer.scale, 1));
+          clampLayerToBounds(layer);
+          syncSelectedControls();
+          render();
+          markUnsaved();
+          setStatus('🔄 تم إعادة ضبط التشكيل');
+        };
 
-            // 2. رسم الصور والطبقات
-            layers.forEach(l => {
-                if (l.type === 'image') {
-                    ctx.drawImage(l.img, l.x, l.y, l.width, l.height);
-                    if (l === selectedLayer) {
-                        ctx.strokeStyle = '#00E676';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(l.x, l.y, l.width, l.height);
-                    }
-                } else if (l.type === 'text') {
-                    ctx.fillStyle = l.color;
-                    ctx.font = `${l.size}px Tahoma`;
-                    ctx.textAlign = 'center';
-                    ctx.fillText(l.text, l.x, l.y);
-                    if (l === selectedLayer) {
-                        let m = ctx.measureText(l.text);
-                        ctx.strokeStyle = '#00E676';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(l.x - m.width/2 - 5, l.y - l.size - 5, m.width + 10, l.size + 10);
-                    }
-                }
+        inputBackground.addEventListener('change', async e => {
+          const file = e.target.files[0];
+          if(!file) return;
+          try{
+            const { img } = await loadImageFromFile(file);
+            state.frameCtx.clearRect(0,0,state.frameWidth,state.frameHeight);
+            state.frameCtx.drawImage(img,0,0,state.frameWidth,state.frameHeight);
+            render();
+            markUnsaved();
+            setStatus('✅ تم تغيير الخلفية');
+          }catch(err){
+            alert('فشل تحميل الخلفية');
+          }
+          inputBackground.value = '';
+        });
+
+        inputImage.addEventListener('change', async e => {
+          const file = e.target.files[0];
+          if(!file) return;
+          try{
+            const { img, dataUrl } = await loadImageFromFile(file);
+            pushLayersUndo();
+            const center = getVisibleCenter();
+            const layer = createImageLayer({
+              image: img,
+              dataUrl,
+              name: file.name,
+              x: center.x,
+              y: center.y
             });
+            clampLayerToBounds(layer);
+            state.layers.push(layer);
+            setSelected(layer.id);
+            render();
+            markUnsaved();
+            setStatus('✅ تم إضافة صورة جديدة');
+          }catch(err){
+            alert('فشل تحميل الصورة');
+          }
+          inputImage.value = '';
+        });
 
-            // 3. رسم الخطوط الحرة
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            for (let i = 0; i < drawingPaths.length; i++) {
-                let p = drawingPaths[i];
-                if (p.type === 'begin') {
-                    ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.strokeStyle = p.color;
-                    ctx.lineWidth = p.size;
-                } else if (p.type === 'draw') {
-                    ctx.lineTo(p.x, p.y);
-                    ctx.stroke();
-                }
+        inputFont.addEventListener('change', async e => {
+          const file = e.target.files[0];
+          if(!file) return;
+          try{
+            await registerFontFile(file);
+          }catch(err){
+            console.error(err);
+            alert('فشل رفع الخط');
+          }
+          inputFont.value = '';
+        });
+
+        editorCanvas.addEventListener('pointerdown', e => {
+          const p = pointToCanvas(e);
+
+          if(state.isDrawingMode){
+            pushDrawingUndo();
+            state.isDragging = false;
+            state.lastX = p.x;
+            state.lastY = p.y;
+            editorCanvas.setPointerCapture(e.pointerId);
+            return;
+          }
+
+          if(state.isLocked) return;
+
+          const hit = findTopLayerAt(p.x, p.y, 40);
+          if(hit){
+            pushLayersUndo();
+            setSelected(hit.id);
+            state.isDragging = true;
+            state.lastX = p.x;
+            state.lastY = p.y;
+            state.movedInGesture = false;
+            editorCanvas.setPointerCapture(e.pointerId);
+            setStatus(`✅ تم تحديد ${hit.type === 'image' ? 'صورة' : 'نص'} للتحريك`);
+          } else {
+            state.isDragging = false;
+            setSelected(null);
+            setStatus('👆 اضغط على عنصر لتحديده');
+          }
+        });
+
+        editorCanvas.addEventListener('pointermove', e => {
+          const p = pointToCanvas(e);
+
+          if(state.isDrawingMode){
+            const paint = state.drawingCtx;
+            paint.save();
+            paint.strokeStyle = state.selectedDrawingColor;
+            paint.lineWidth = state.penSize;
+            paint.lineJoin = 'round';
+            paint.lineCap = 'round';
+            paint.beginPath();
+            paint.moveTo(state.lastX, state.lastY);
+            paint.lineTo(p.x, p.y);
+            paint.stroke();
+            paint.restore();
+            state.lastX = p.x;
+            state.lastY = p.y;
+            render();
+            return;
+          }
+
+          if(state.isDragging){
+            const layer = getSelectedLayer();
+            if(!layer) return;
+            layer.x += (p.x - state.lastX);
+            layer.y += (p.y - state.lastY);
+            clampLayerToBounds(layer);
+            state.lastX = p.x;
+            state.lastY = p.y;
+            state.movedInGesture = true;
+            render();
+          }
+        });
+
+        editorCanvas.addEventListener('pointerup', () => {
+          if(state.isDrawingMode){
+            markUnsaved();
+            setStatus('✏️ تم تحديث الرسم');
+            return;
+          }
+
+          if(state.isDragging){
+            state.isDragging = false;
+            if(state.movedInGesture){
+              markUnsaved();
+              setStatus('✅ تم تحريك العنصر');
+            } else {
+              if(state.layersUndo.length) state.layersUndo.pop();
             }
-        }
+            state.movedInGesture = false;
+            updateUndoRedoButtons();
+          }
+        });
 
-        // حذف العنصر المحدد
-        function deleteSelected() {
-            if (selectedLayer) {
-                layers = layers.filter(l => l !== selectedLayer);
-                selectedLayer = null;
-                redraw();
-            }
-        }
+        editorCanvas.addEventListener('pointercancel', () => {
+          state.isDragging = false;
+        });
 
-        // تراجع عن آخر رسمة
-        function undo() {
-            // إزالة آخر مسار رسم
-            let lastBeginIndex = drawingPaths.map(p => p.type).lastIndexOf('begin');
-            if (lastBeginIndex !== -1) {
-                drawingPaths.splice(lastBeginIndex);
-                redraw();
-            }
-        }
+        window.addEventListener('beforeunload', e => {
+          if(state.unsaved){
+            e.preventDefault();
+            e.returnValue = '';
+          }
+        });
 
-        // تصدير الصورة النهائية
-        function exportImage() {
-            let link = document.createElement('a');
-            link.download = 'manga_edit.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }
-    </script>
+        [textModal, layersModal, exportModal].forEach(modal => {
+          modal.addEventListener('click', e => {
+            if(e.target === modal) modal.classList.remove('show');
+          });
+        });
+      }
+
+      function init(){
+        state.projectName = sanitizeName(projectNameInput.value);
+        projectNameInput.value = state.projectName;
+        setupCanvases();
+        fillDefaultBackground();
+        clearDrawingLayer();
+        render();
+        updateTextColorsUI();
+        updateDrawingColorsUI();
+        refreshFontSelect();
+        updateUndoRedoButtons();
+        updateModeButtons();
+        syncSelectedControls();
+        penSizeValue.textContent = String(state.penSize);
+        cropHeightRange.value = state.frameHeight;
+        cropHeightValue.textContent = String(state.frameHeight);
+        initEvents();
+        setStatus('جاهز. يمكنك الآن إضافة خلفية أو صور أو نصوص أو البدء بالرسم.');
+      }
+
+      init();
+    })();
+  </script>
 </body>
 </html>
