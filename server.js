@@ -5,6 +5,7 @@ const PORT = process.env.PORT || 3000;
 // ================= قراءة المتغيرات =================
 const textKey = process.env.TEXT_KEY || "";
 const password = process.env.PASS || "";
+const pks = process.env.PKS || "";
 
 app.use(express.json());
 
@@ -12,7 +13,8 @@ app.use(express.json());
 app.get('/api/keys', (req, res) => {
     res.json({
         text: textKey,
-        pass: password
+        pass: password,
+        pks: pks
     });
 });
 
@@ -29,4 +31,5 @@ app.listen(PORT, () => {
     console.log(`✅ Server running on port ${PORT}`);
     console.log(`📦 TEXT_KEY: ${textKey.substring(0, 30)}...`);
     console.log(`🔑 PASS: ${password.substring(0, 10)}...`);
+    console.log(`🔑 PKS: ${pks.substring(0, 10)}...`);
 });
